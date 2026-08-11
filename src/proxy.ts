@@ -1,0 +1,54 @@
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+
+export async function proxy(request: NextRequest) {
+  let response = NextResponse.next({ request });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  // La pagina de login del admin no requiere sesion previa
+  if (request.nextUrl.pathname === "/admin/login") {
+    return response;
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.redirect(new URL("/admin/login", request.url));
+  }
+
+  const { data: perfil } = await supabase
+    .from("perfiles")
+    .select("rol")
+    .eq("id", user.id)
+    .single();
+
+  if (perfil?.rol !== "admin") {
+    return NextResponse.redirect(new URL("/admin/login", request.url));
+  }
+
+  return response;
+}
+
+export const config = {
+  matcher: ["/admin/:path*"],
+};
