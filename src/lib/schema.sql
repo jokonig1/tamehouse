@@ -61,6 +61,18 @@ create table pedido_items (
   precio_unitario integer not null
 );
 
+-- Tabla de perfiles (datos de usuario que no son de auth)
+-- 1 a 1 con auth.users. rol distingue clientes de admins;
+-- tambien sirve a futuro para historial de pedidos, datos
+-- de contacto, etc. del lado cliente.
+create table perfiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  rol text not null default 'cliente', -- 'cliente' | 'admin'
+  nombre text,
+  telefono text,
+  created_at timestamp with time zone default now()
+);
+
 -- Tabla de shows
 create table shows (
   id uuid primary key default gen_random_uuid(),
@@ -74,6 +86,12 @@ create table shows (
 -- ============================================
 -- PERMISOS (ROW LEVEL SECURITY)
 -- ============================================
+
+alter table productos enable row level security;
+alter table variantes enable row level security;
+alter table pedidos enable row level security;
+alter table pedido_items enable row level security;
+alter table shows enable row level security;
 
 -- Productos: lectura pública
 create policy "Productos visibles para todos"
@@ -106,7 +124,7 @@ using (
   exists (
     select 1 from pedidos
     where pedidos.id = pedido_items.pedido_id
-    and pedidos.cliente_id = auth.uid()
+  dddddddd  and pedidos.cliente_id = auth.uid()
   )
 );
 
@@ -119,3 +137,116 @@ with check (
     and pedidos.cliente_id = auth.uid()
   )
 );
+
+-- Perfiles: cada usuario ve y actualiza el suyo.
+-- El rol queda protegido por el grant de columnas de abajo,
+-- para que un cliente no pueda autoasignarse admin.
+alter table perfiles enable row level security;
+
+create policy "Usuarios ven su propio perfil"
+on perfiles for select
+using (auth.uid() = id);
+
+create policy "Usuarios actualizan su propio perfil"
+on perfiles for update
+using (auth.uid() = id)
+with check (auth.uid() = id);
+
+revoke update on perfiles from authenticated;
+grant update (nombre, telefono) on perfiles to authenticated;
+
+-- ============================================
+-- FUNCIONES Y TRIGGERS
+-- ============================================
+
+-- Chequea si el usuario autenticado es admin. security definer
+-- para que pueda leer perfiles saltandose RLS (evita recursion
+-- cuando otras tablas usan esta funcion en sus propias policies).
+create function public.is_admin()
+returns boolean
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select exists (
+    select 1 from perfiles where id = auth.uid() and rol = 'admin'
+  );
+$$;
+
+-- Crea automaticamente la fila de perfil (rol 'cliente') cuando
+-- alguien se registra. El cliente nunca inserta su propio perfil
+-- ni elige su rol.
+create function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.perfiles (id, rol)
+  values (new.id, 'cliente');
+  return new;
+end;
+$$;
+
+create trigger on_auth_user_created
+after insert on auth.users
+for each row execute function public.handle_new_user();
+
+-- ============================================
+-- PERMISOS ADMIN (panel de administracion)
+-- ============================================
+
+-- Productos: solo admin crea/edita/elimina
+create policy "Admins escriben productos"
+on productos for insert
+with check (public.is_admin());
+
+create policy "Admins editan productos"
+on productos for update
+using (public.is_admin());
+
+create policy "Admins eliminan productos"
+on productos for delete
+using (public.is_admin());
+
+-- Variantes: solo admin escribe (lectura ya es publica)
+create policy "Admins escriben variantes"
+on variantes for insert
+with check (public.is_admin());
+
+create policy "Admins editan variantes"
+on variantes for update
+using (public.is_admin());
+
+create policy "Admins eliminan variantes"
+on variantes for delete
+using (public.is_admin());
+
+-- Pedidos: admin ve todos y actualiza estado/seguimiento
+create policy "Admins ven todos los pedidos"
+on pedidos for select
+using (public.is_admin());
+
+create policy "Admins actualizan pedidos"
+on pedidos for update
+using (public.is_admin());
+
+-- Pedido items: admin ve todos
+create policy "Admins ven todos los items"
+on pedido_items for select
+using (public.is_admin());
+
+-- Shows: solo admin crea/edita/elimina (lectura ya es publica)
+create policy "Admins escriben shows"
+on shows for insert
+with check (public.is_admin());
+
+create policy "Admins editan shows"
+on shows for update
+using (public.is_admin());
+
+create policy "Admins eliminan shows"
+on shows for delete
+using (public.is_admin());
