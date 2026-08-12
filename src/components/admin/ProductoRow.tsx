@@ -15,6 +15,7 @@ export default function ProductoRow({ producto, onEliminar }: ProductoRowProps) 
   const [expandido, setExpandido] = useState(false);
   const [activo, setActivo] = useState(producto.activo);
   const [guardandoActivo, setGuardandoActivo] = useState(false);
+  const [precio, setPrecio] = useState(producto.precio);
 
   async function alternarActivo() {
     const nuevoValor = !activo;
@@ -34,45 +35,54 @@ export default function ProductoRow({ producto, onEliminar }: ProductoRowProps) 
   }
 
   return (
-    <div className="border-t border-neutral-200">
-      <div className="grid grid-cols-[auto_2fr_1fr_1fr_1fr_auto] items-center gap-2 p-2 text-sm">
-        <button
-          onClick={() => setExpandido((v) => !v)}
-          aria-label={expandido ? "Contraer" : "Expandir"}
-          className="w-6 text-neutral-500"
-        >
+    <div className="border-t border-black/8 dark:border-white/[.145]">
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => setExpandido((v) => !v)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setExpandido((v) => !v);
+          }
+        }}
+        className="grid cursor-pointer grid-cols-[1.5rem_2fr_1fr_1fr_1fr_7rem_10rem] items-center gap-2 p-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-900"
+      >
+        <span aria-hidden="true" className="w-6 text-zinc-500">
           {expandido ? "▾" : "▸"}
-        </button>
+        </span>
 
-        <div>
-          <p className="font-medium">{producto.nombre}</p>
-          {producto.descripcion && (
-            <p className="text-xs text-neutral-500">{producto.descripcion}</p>
-          )}
-        </div>
+        <p className="font-medium">{producto.nombre}</p>
 
-        <span>{producto.categoria ?? "-"}</span>
-        <span>${producto.precio.toLocaleString("es-CL")}</span>
+        <span className="text-zinc-600 dark:text-zinc-400">{producto.categoria ?? "-"}</span>
+        <span>${precio.toLocaleString("es-CL")}</span>
 
         <span className="flex items-center gap-1.5">
           <span
             className={`h-2 w-2 rounded-full ${
-              producto.stockTotal > 0 ? "bg-green-600" : "bg-neutral-400"
+              producto.stockTotal > 0 ? "bg-green-600" : "bg-zinc-400"
             }`}
           />
           {producto.stockTotal} unidades
         </span>
 
-        <div className="flex items-center gap-3">
-          <Link
-            href={`/admin/productos/${producto.id}`}
-            className="text-neutral-900 hover:underline"
-          >
+        <span className="flex items-center gap-1.5">
+          <span
+            className={`h-2 w-2 rounded-full ${activo ? "bg-green-600" : "bg-zinc-400"}`}
+          />
+          {activo ? "Sí" : "No"}
+        </span>
+
+        <div
+          className="flex items-center justify-end gap-4 text-xs font-medium uppercase tracking-widest"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Link href={`/admin/productos/${producto.id}`} className="hover:opacity-70">
             Editar
           </Link>
           <button
             onClick={() => onEliminar(producto.id)}
-            className="text-red-600 hover:underline"
+            className="text-red-600 hover:opacity-70 dark:text-red-400"
           >
             Eliminar
           </button>
@@ -80,8 +90,8 @@ export default function ProductoRow({ producto, onEliminar }: ProductoRowProps) 
       </div>
 
       {expandido && (
-        <div className="space-y-4 border-t border-neutral-100 bg-neutral-50 p-4">
-          <label className="flex items-center gap-2 text-sm font-medium">
+        <div className="space-y-6 border-t border-black/8 bg-zinc-50 p-4 dark:border-white/[.145] dark:bg-zinc-900">
+          <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest">
             <input
               type="checkbox"
               checked={activo}
@@ -91,7 +101,11 @@ export default function ProductoRow({ producto, onEliminar }: ProductoRowProps) 
             Visible en la tienda
           </label>
 
-          <VariantesEditor productoId={producto.id} />
+          <VariantesEditor
+            productoId={producto.id}
+            precioInicial={precio}
+            onPrecioGuardado={setPrecio}
+          />
         </div>
       )}
     </div>
