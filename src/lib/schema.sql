@@ -73,6 +73,17 @@ create table perfiles (
   created_at timestamp with time zone default now()
 );
 
+-- Tabla de imagenes de producto (una o mas por producto)
+-- Los archivos en si viven en Supabase Storage, bucket "productos";
+-- aqui solo se guarda la URL publica y el orden de despliegue.
+create table producto_imagenes (
+  id uuid primary key default gen_random_uuid(),
+  producto_id uuid references productos(id) on delete cascade,
+  url text not null,
+  orden integer not null default 0,
+  created_at timestamp with time zone default now()
+);
+
 -- Tabla de shows
 create table shows (
   id uuid primary key default gen_random_uuid(),
@@ -89,6 +100,7 @@ create table shows (
 
 alter table productos enable row level security;
 alter table variantes enable row level security;
+alter table producto_imagenes enable row level security;
 alter table pedidos enable row level security;
 alter table pedido_items enable row level security;
 alter table shows enable row level security;
@@ -101,6 +113,11 @@ using (true);
 -- Variantes: lectura pública
 create policy "Variantes visibles para todos"
 on variantes for select
+using (true);
+
+-- Imagenes de producto: lectura pública
+create policy "Imagenes de productos visibles para todos"
+on producto_imagenes for select
 using (true);
 
 -- Shows: lectura pública
@@ -124,7 +141,7 @@ using (
   exists (
     select 1 from pedidos
     where pedidos.id = pedido_items.pedido_id
-  dddddddd  and pedidos.cliente_id = auth.uid()
+    and pedidos.cliente_id = auth.uid()
   )
 );
 
@@ -224,6 +241,15 @@ create policy "Admins eliminan variantes"
 on variantes for delete
 using (public.is_admin());
 
+-- Imagenes de producto: solo admin escribe (lectura ya es publica)
+create policy "Admins escriben imagenes de productos"
+on producto_imagenes for insert
+with check (public.is_admin());
+
+create policy "Admins eliminan imagenes de productos"
+on producto_imagenes for delete
+using (public.is_admin());
+
 -- Pedidos: admin ve todos y actualiza estado/seguimiento
 create policy "Admins ven todos los pedidos"
 on pedidos for select
@@ -250,3 +276,25 @@ using (public.is_admin());
 create policy "Admins eliminan shows"
 on shows for delete
 using (public.is_admin());
+
+-- ============================================
+-- STORAGE (Supabase Storage)
+-- ============================================
+
+-- Bucket publico para fotos de producto. La URL publica de cada
+-- archivo queda registrada en producto_imagenes.url
+insert into storage.buckets (id, name, public)
+values ('productos', 'productos', true)
+on conflict (id) do nothing;
+
+create policy "Imagenes de productos visibles para todos (storage)"
+on storage.objects for select
+using (bucket_id = 'productos');
+
+create policy "Admins suben imagenes de productos (storage)"
+on storage.objects for insert
+with check (bucket_id = 'productos' and public.is_admin());
+
+create policy "Admins eliminan imagenes de productos (storage)"
+on storage.objects for delete
+using (bucket_id = 'productos' and public.is_admin());

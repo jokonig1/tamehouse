@@ -2,25 +2,30 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import type { Variante } from "@/lib/types";
+import PrecioInput from "@/components/admin/PrecioInput";
+import TallaGrid from "@/components/admin/TallaGrid";
+import type { FilaTalla, Variante } from "@/lib/types";
 
-interface FilaVariante {
-  id: string | null;
-  talla: string;
-  color: string;
-  stock: string;
-}
+const FILA_VACIA: FilaTalla = { id: null, talla: "", stock: "0" };
 
-function aFila(v: Variante): FilaVariante {
-  return { id: v.id, talla: v.talla ?? "", color: v.color ?? "", stock: String(v.stock) };
+function aFilas(variantes: Variante[]): FilaTalla[] {
+  return variantes.map((v) => ({ id: v.id, talla: v.talla ?? "", stock: String(v.stock) }));
 }
 
 interface VariantesEditorProps {
   productoId: string;
+  precioInicial: number;
+  onPrecioGuardado: (nuevoPrecio: number) => void;
 }
 
-export default function VariantesEditor({ productoId }: VariantesEditorProps) {
-  const [filas, setFilas] = useState<FilaVariante[]>([]);
+export default function VariantesEditor({
+  productoId,
+  precioInicial,
+  onPrecioGuardado,
+}: VariantesEditorProps) {
+  const [filas, setFilas] = useState<FilaTalla[]>([]);
+  const [modoAvanzado, setModoAvanzado] = useState(false);
+  const [precio, setPrecio] = useState(String(precioInicial));
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,8 +38,17 @@ export default function VariantesEditor({ productoId }: VariantesEditorProps) {
       .eq("producto_id", productoId)
       .order("talla", { ascending: true });
 
-    if (error) setError(error.message);
-    else setFilas((data ?? []).map(aFila));
+    if (error) {
+      setError(error.message);
+      setCargando(false);
+      return;
+    }
+
+    const filasCargadas = aFilas(data ?? []);
+    const yaUsaTalla = filasCargadas.some((f) => f.talla !== "");
+
+    setFilas(filasCargadas.length > 0 ? filasCargadas : [FILA_VACIA]);
+    setModoAvanzado(yaUsaTalla);
     setCargando(false);
   }, [productoId]);
 
@@ -43,12 +57,12 @@ export default function VariantesEditor({ productoId }: VariantesEditorProps) {
     cargarVariantes();
   }, [cargarVariantes]);
 
-  function actualizarFila(index: number, cambios: Partial<FilaVariante>) {
+  function actualizarFila(index: number, cambios: Partial<FilaTalla>) {
     setFilas((prev) => prev.map((f, i) => (i === index ? { ...f, ...cambios } : f)));
   }
 
-  function agregarFila() {
-    setFilas((prev) => [...prev, { id: null, talla: "", color: "", stock: "0" }]);
+  function agregarTalla() {
+    setFilas((prev) => [...prev, { id: null, talla: "", stock: "0" }]);
   }
 
   async function eliminarFila(index: number) {
@@ -61,34 +75,61 @@ export default function VariantesEditor({ productoId }: VariantesEditorProps) {
         return;
       }
     }
-    setFilas((prev) => prev.filter((_, i) => i !== index));
+    setFilas((prev) => {
+      const restante = prev.filter((_, i) => i !== index);
+      return restante.length > 0 ? restante : [FILA_VACIA];
+    });
+  }
+
+  function cancelar() {
+    setError(null);
+    setPrecio(String(precioInicial));
+    cargarVariantes();
   }
 
   async function guardarCambios() {
     setError(null);
 
+    const precioNumero = Number(precio);
+    if (!precio || Number.isNaN(precioNumero) || precioNumero <= 0) {
+      setError("El precio debe ser un número mayor a 0.");
+      return;
+    }
+
     for (const fila of filas) {
       const stockNumero = Number(fila.stock);
-      if (!fila.talla.trim() || Number.isNaN(stockNumero) || stockNumero < 0) {
-        setError("Cada talla necesita un nombre y un stock válido (0 o más).");
+      if (fila.stock.trim() === "" || Number.isNaN(stockNumero) || stockNumero < 0) {
+        setError("El stock debe ser un número válido (0 o más).");
         return;
       }
     }
 
     setGuardando(true);
 
-    const nuevas = filas.filter((f) => f.id === null);
-    const existentes = filas.filter((f) => f.id !== null);
+    if (precioNumero !== precioInicial) {
+      const { error: errorPrecio } = await supabase
+        .from("productos")
+        .update({ precio: precioNumero })
+        .eq("id", productoId);
+
+      if (errorPrecio) {
+        setError(errorPrecio.message);
+        setGuardando(false);
+        return;
+      }
+    }
+
+    const nuevas = filas
+      .filter((f) => f.id === null)
+      .map((f) => ({
+        producto_id: productoId,
+        talla: f.talla.trim() || null,
+        color: null,
+        stock: Number(f.stock),
+      }));
 
     if (nuevas.length) {
-      const { error: errorInsert } = await supabase.from("variantes").insert(
-        nuevas.map((f) => ({
-          producto_id: productoId,
-          talla: f.talla.trim(),
-          color: f.color.trim() || null,
-          stock: Number(f.stock),
-        }))
-      );
+      const { error: errorInsert } = await supabase.from("variantes").insert(nuevas);
       if (errorInsert) {
         setError(errorInsert.message);
         setGuardando(false);
@@ -96,10 +137,12 @@ export default function VariantesEditor({ productoId }: VariantesEditorProps) {
       }
     }
 
+    const existentes = filas.filter((f) => f.id !== null);
+
     for (const f of existentes) {
       const { error: errorUpdate } = await supabase
         .from("variantes")
-        .update({ talla: f.talla.trim(), color: f.color.trim() || null, stock: Number(f.stock) })
+        .update({ talla: f.talla.trim() || null, stock: Number(f.stock) })
         .eq("id", f.id as string);
 
       if (errorUpdate) {
@@ -109,68 +152,81 @@ export default function VariantesEditor({ productoId }: VariantesEditorProps) {
       }
     }
 
+    onPrecioGuardado(precioNumero);
     await cargarVariantes();
     setGuardando(false);
   }
 
-  if (cargando) return <p className="text-sm text-neutral-500">Cargando variantes...</p>;
+  if (cargando)
+    return <p className="text-sm text-zinc-600 dark:text-zinc-400">Cargando variantes...</p>;
+
+  const modoSimple = !modoAvanzado && filas.length === 1 && filas[0].talla === "";
 
   return (
-    <div>
-      <h3 className="mb-2 text-sm font-semibold">Stock por talla</h3>
+    <div className="space-y-6">
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
-      {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
-
-      <div className="mb-3 flex flex-wrap items-start gap-3">
-        {filas.map((fila, index) => (
-          <div key={fila.id ?? `nueva-${index}`} className="flex flex-col items-center gap-1">
-            <div className="flex items-center gap-1">
-              <input
-                value={fila.talla}
-                onChange={(e) => actualizarFila(index, { talla: e.target.value })}
-                placeholder="Talla"
-                className="w-16 rounded border border-neutral-300 px-2 py-1 text-center text-sm uppercase"
-              />
-              <button
-                onClick={() => eliminarFila(index)}
-                aria-label="Eliminar talla"
-                className="text-neutral-400 hover:text-red-600"
-              >
-                ×
-              </button>
-            </div>
-            <input
-              value={fila.color}
-              onChange={(e) => actualizarFila(index, { color: e.target.value })}
-              placeholder="Color"
-              className="w-16 rounded border border-neutral-300 px-2 py-1 text-center text-xs"
-            />
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-[2fr_1fr]">
+        {modoSimple ? (
+          <div>
+            <h3 className="mb-2 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+              Stock
+            </h3>
             <input
               type="number"
               min={0}
-              value={fila.stock}
-              onChange={(e) => actualizarFila(index, { stock: e.target.value })}
-              className="w-16 rounded border border-neutral-300 px-2 py-1 text-center text-sm"
+              value={filas[0].stock}
+              onChange={(e) => actualizarFila(0, { stock: e.target.value })}
+              className="w-24 border border-zinc-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-black dark:border-zinc-700 dark:focus:border-white"
             />
+            <button
+              type="button"
+              onClick={() => setModoAvanzado(true)}
+              className="mt-3 block text-xs font-medium uppercase tracking-widest hover:opacity-70"
+            >
+              + Vender por talla
+            </button>
           </div>
-        ))}
+        ) : (
+          <TallaGrid
+            filas={filas}
+            onActualizarFila={actualizarFila}
+            onAgregarTalla={agregarTalla}
+            onEliminarFila={eliminarFila}
+          />
+        )}
 
-        <button
-          onClick={agregarFila}
-          aria-label="Agregar talla"
-          className="flex h-9 w-9 items-center justify-center rounded border border-dashed border-neutral-400 text-lg leading-none text-neutral-500 hover:border-neutral-600 hover:text-neutral-700"
-        >
-          +
-        </button>
+        <div>
+          <h3 className="mb-2 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+            Precio
+          </h3>
+          <label className="mb-1 block text-xs uppercase tracking-widest text-zinc-500">
+            Precio (CLP)
+          </label>
+          <PrecioInput
+            value={precio}
+            onChange={setPrecio}
+            className="w-32 border border-zinc-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-black dark:border-zinc-700 dark:focus:border-white"
+          />
+        </div>
       </div>
 
-      <button
-        onClick={guardarCambios}
-        disabled={guardando}
-        className="rounded bg-neutral-900 px-4 py-2 text-sm text-white disabled:opacity-50"
-      >
-        {guardando ? "Guardando..." : "Guardar cambios"}
-      </button>
+      <div className="flex gap-3">
+        <button
+          onClick={guardarCambios}
+          disabled={guardando}
+          className="bg-black px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:opacity-70 disabled:opacity-50 dark:bg-white dark:text-black"
+        >
+          {guardando ? "Guardando..." : "Guardar cambios"}
+        </button>
+        <button
+          onClick={cancelar}
+          disabled={guardando}
+          className="border border-black/8 px-4 py-2 text-xs font-semibold uppercase tracking-widest hover:opacity-70 disabled:opacity-50 dark:border-white/[.145]"
+        >
+          Cancelar
+        </button>
+      </div>
     </div>
   );
 }
