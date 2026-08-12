@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import CategoriaSelect from "@/components/admin/CategoriaSelect";
+import PrecioInput from "@/components/admin/PrecioInput";
 
 export interface ProductoFormValues {
   nombre: string;
@@ -19,6 +21,13 @@ interface ProductoFormProps {
   onGuardar: (valores: ProductoFormValues) => Promise<void>;
   textoBoton: string;
 }
+
+export const campoClase =
+  "w-full border border-zinc-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-black dark:border-zinc-700 dark:focus:border-white";
+export const etiquetaClase =
+  "mb-1 block text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400";
+export const sinFlechasClase =
+  "[appearance:textfield] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none";
 
 export default function ProductoForm({
   valoresIniciales,
@@ -73,52 +82,41 @@ export default function ProductoForm({
   }
 
   return (
-    <form onSubmit={manejarSubmit} className="max-w-xl space-y-4">
-      {error && <p className="text-sm text-red-600">{error}</p>}
+    <form onSubmit={manejarSubmit} className="max-w-xl space-y-6">
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       <div>
-        <label className="mb-1 block text-sm font-medium">Nombre</label>
+        <label className={etiquetaClase}>Nombre</label>
         <input
           type="text"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          className="w-full rounded border border-neutral-300 px-3 py-2"
+          className={campoClase}
         />
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium">Descripción</label>
+        <label className={etiquetaClase}>Descripción</label>
         <textarea
           value={descripcion ?? ""}
           onChange={(e) => setDescripcion(e.target.value)}
           rows={3}
-          className="w-full rounded border border-neutral-300 px-3 py-2"
+          className={campoClase}
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="mb-1 block text-sm font-medium">Precio (CLP)</label>
-          <input
-            type="number"
-            min={0}
-            value={precio}
-            onChange={(e) => setPrecio(e.target.value)}
-            className="w-full rounded border border-neutral-300 px-3 py-2"
-          />
+          <label className={etiquetaClase}>Precio (CLP)</label>
+          <PrecioInput value={precio} onChange={setPrecio} className={campoClase} />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium">Categoría</label>
-          <input
-            type="text"
-            value={categoria ?? ""}
-            onChange={(e) => setCategoria(e.target.value)}
-            className="w-full rounded border border-neutral-300 px-3 py-2"
-          />
+          <label className={etiquetaClase}>Categoría</label>
+          <CategoriaSelect value={categoria ?? ""} onChange={setCategoria} className={campoClase} />
         </div>
       </div>
 
-      <label className="flex items-center gap-2 text-sm font-medium">
+      <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest">
         <input
           type="checkbox"
           checked={activo}
@@ -127,50 +125,57 @@ export default function ProductoForm({
         Visible en la tienda
       </label>
 
-      <fieldset className="rounded border border-neutral-200 p-4">
-        <legend className="px-1 text-sm font-medium">
+      <fieldset className="border border-black/8 p-4 dark:border-white/[.145]">
+        <legend className="px-1 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
           Datos de envío (uso interno, no se muestran al público)
         </legend>
         <div className="mt-2 grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-sm">Alto (cm)</label>
+            <label className={etiquetaClase}>Alto (cm)</label>
             <input
               type="number"
               min={0}
+              step="0.1"
+              placeholder="0.0"
               value={altoCm}
               onChange={(e) => setAltoCm(e.target.value)}
-              className="w-full rounded border border-neutral-300 px-3 py-2"
+              className={`${campoClase} ${sinFlechasClase}`}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm">Ancho (cm)</label>
+            <label className={etiquetaClase}>Ancho (cm)</label>
             <input
               type="number"
               min={0}
+              step="0.1"
+              placeholder="0.0"
               value={anchoCm}
               onChange={(e) => setAnchoCm(e.target.value)}
-              className="w-full rounded border border-neutral-300 px-3 py-2"
+              className={`${campoClase} ${sinFlechasClase}`}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm">Largo (cm)</label>
+            <label className={etiquetaClase}>Largo (cm)</label>
             <input
               type="number"
               min={0}
+              step="0.1"
+              placeholder="0.0"
               value={largoCm}
               onChange={(e) => setLargoCm(e.target.value)}
-              className="w-full rounded border border-neutral-300 px-3 py-2"
+              className={`${campoClase} ${sinFlechasClase}`}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm">Peso (kg)</label>
+            <label className={etiquetaClase}>Peso (kg)</label>
             <input
               type="number"
               min={0}
               step="0.01"
+              placeholder="0.00"
               value={pesoKg}
               onChange={(e) => setPesoKg(e.target.value)}
-              className="w-full rounded border border-neutral-300 px-3 py-2"
+              className={`${campoClase} ${sinFlechasClase}`}
             />
           </div>
         </div>
@@ -179,7 +184,7 @@ export default function ProductoForm({
       <button
         type="submit"
         disabled={guardando}
-        className="rounded bg-neutral-900 px-4 py-2 text-sm text-white disabled:opacity-50"
+        className="bg-black px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:opacity-70 disabled:opacity-50 dark:bg-white dark:text-black"
       >
         {guardando ? "Guardando..." : textoBoton}
       </button>
