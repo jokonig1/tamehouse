@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import PedidoRow from "@/components/admin/PedidoRow";
 import type { EstadoPedido, PedidoListado } from "@/lib/types";
@@ -8,6 +9,7 @@ import type { EstadoPedido, PedidoListado } from "@/lib/types";
 type FiltroEstado = "todos" | EstadoPedido;
 
 const formatoPrecio = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" });
+const POR_PAGINA = 10;
 
 const PESTANAS: { valor: FiltroEstado; label: string }[] = [
   { valor: "todos", label: "Todos" },
@@ -40,6 +42,8 @@ export default function PedidosPage() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>("todos");
+  const [busqueda, setBusqueda] = useState("");
+  const [pagina, setPagina] = useState(1);
 
   const cargarPedidos = useCallback(async () => {
     setCargando(true);
@@ -117,14 +121,43 @@ export default function PedidosPage() {
     return conteos;
   }, [pedidos]);
 
-  const pedidosFiltrados = useMemo(
-    () => (filtroEstado === "todos" ? pedidos : pedidos.filter((p) => p.estado === filtroEstado)),
-    [pedidos, filtroEstado]
+  const pedidosFiltrados = useMemo(() => {
+    const busquedaNormalizada = busqueda.trim().toLowerCase();
+    return pedidos.filter((p) => {
+      if (filtroEstado !== "todos" && p.estado !== filtroEstado) return false;
+      if (
+        busquedaNormalizada &&
+        !p.id.toLowerCase().includes(busquedaNormalizada) &&
+        !(p.clienteNombre ?? "").toLowerCase().includes(busquedaNormalizada)
+      )
+        return false;
+      return true;
+    });
+  }, [pedidos, filtroEstado, busqueda]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- vuelve a la pagina 1 cuando cambian los filtros
+    setPagina(1);
+  }, [filtroEstado, busqueda]);
+
+  const totalPaginas = Math.max(1, Math.ceil(pedidosFiltrados.length / POR_PAGINA));
+  const paginaSegura = Math.min(pagina, totalPaginas);
+  const pedidosPagina = pedidosFiltrados.slice(
+    (paginaSegura - 1) * POR_PAGINA,
+    paginaSegura * POR_PAGINA
   );
 
   return (
     <div>
-      <h1 className="mb-6 font-serif text-3xl font-semibold tracking-tight">Pedidos</h1>
+      <nav className="mb-2 text-xs text-zinc-500 dark:text-zinc-400">
+        <Link href="/admin/productos" className="hover:text-black dark:hover:text-white">
+          Panel admin
+        </Link>
+        <span className="mx-1.5">/</span>
+        <span className="text-zinc-900 dark:text-zinc-100">Pedidos</span>
+      </nav>
+
+      <h1 className="mb-6 text-3xl font-bold tracking-tight">Pedidos</h1>
 
       <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
@@ -161,33 +194,56 @@ export default function PedidosPage() {
             <p className={`text-xs font-medium uppercase tracking-widest ${tarjeta.etiqueta}`}>
               {tarjeta.label}
             </p>
-            <p
-              className={`mt-2 text-center font-serif text-3xl font-semibold tracking-tight ${tarjeta.numero}`}
-            >
+            <p className={`mt-2 text-center text-3xl font-bold tracking-tight ${tarjeta.numero}`}>
               {tarjeta.valor}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-2">
-        {PESTANAS.map((pestana) => {
-          const activa = filtroEstado === pestana.valor;
-          return (
-            <button
-              key={pestana.valor}
-              type="button"
-              onClick={() => setFiltroEstado(pestana.valor)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium uppercase tracking-widest ${
-                activa
-                  ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
-                  : "border-black/8 hover:opacity-70 dark:border-white/[.145]"
-              }`}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap gap-2">
+          {PESTANAS.map((pestana) => {
+            const activa = filtroEstado === pestana.valor;
+            return (
+              <button
+                key={pestana.valor}
+                type="button"
+                onClick={() => setFiltroEstado(pestana.valor)}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium uppercase tracking-widest ${
+                  activa
+                    ? "border-blue-600 bg-blue-600 text-white"
+                    : "border-black/8 hover:opacity-70 dark:border-white/[.145]"
+                }`}
+              >
+                {pestana.label} {conteosPorEstado[pestana.valor]}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="w-64">
+          <div className="relative">
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400"
             >
-              {pestana.label} {conteosPorEstado[pestana.valor]}
-            </button>
-          );
-        })}
+              <circle cx="11" cy="11" r="7" />
+              <path strokeLinecap="round" d="m20 20-3.5-3.5" />
+            </svg>
+            <input
+              type="text"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              placeholder="Buscar por cliente o ID de pedido..."
+              className="w-full rounded-full border border-zinc-300 bg-transparent py-2 pr-3 pl-9 text-sm text-zinc-900 outline-none focus:border-blue-600 dark:border-zinc-700 dark:text-zinc-100 dark:focus:border-blue-400"
+            />
+          </div>
+        </div>
       </div>
 
       {cargando && <p className="text-sm text-zinc-600 dark:text-zinc-400">Cargando...</p>}
@@ -217,9 +273,40 @@ export default function PedidosPage() {
             </p>
           )}
 
-          {pedidosFiltrados.map((p) => (
+          {pedidosPagina.map((p) => (
             <PedidoRow key={p.id} pedido={p} />
           ))}
+
+          {pedidosFiltrados.length > 0 && (
+            <div className="flex items-center justify-between border-t border-black/8 px-4 py-3 text-xs text-zinc-600 dark:border-white/[.145] dark:text-zinc-400">
+              <span>
+                {(paginaSegura - 1) * POR_PAGINA + 1}-
+                {Math.min(paginaSegura * POR_PAGINA, pedidosFiltrados.length)} de{" "}
+                {pedidosFiltrados.length}
+              </span>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                  disabled={paginaSegura === 1}
+                  className="font-semibold uppercase tracking-widest hover:opacity-70 disabled:opacity-30"
+                >
+                  ← Anterior
+                </button>
+                <span>
+                  Página {paginaSegura} de {totalPaginas}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                  disabled={paginaSegura === totalPaginas}
+                  className="font-semibold uppercase tracking-widest hover:opacity-70 disabled:opacity-30"
+                >
+                  Siguiente →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
