@@ -16,12 +16,18 @@ interface VariantesEditorProps {
   productoId: string;
   precioInicial: number;
   onPrecioGuardado: (nuevoPrecio: number) => void;
+  activo: boolean;
+  guardandoActivo: boolean;
+  onAlternarActivo: () => void;
 }
 
 export default function VariantesEditor({
   productoId,
   precioInicial,
   onPrecioGuardado,
+  activo,
+  guardandoActivo,
+  onAlternarActivo,
 }: VariantesEditorProps) {
   const [filas, setFilas] = useState<FilaTalla[]>([]);
   const [modoAvanzado, setModoAvanzado] = useState(false);
@@ -200,14 +206,34 @@ export default function VariantesEditor({
           <h3 className="mb-2 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
             Precio
           </h3>
-          <label className="mb-1 block text-xs uppercase tracking-widest text-zinc-500">
-            Precio (CLP)
-          </label>
           <PrecioInput
             value={precio}
             onChange={setPrecio}
             className="w-32 border border-zinc-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-black dark:border-zinc-700 dark:focus:border-white"
           />
+
+          <div className="mt-4 flex items-center gap-3">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={activo}
+              aria-label={activo ? "Ocultar de la tienda" : "Mostrar en la tienda"}
+              disabled={guardandoActivo}
+              onClick={onAlternarActivo}
+              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-wait disabled:opacity-50 ${
+                activo ? "bg-green-500" : "bg-zinc-300 dark:bg-zinc-700"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                  activo ? "translate-x-5" : "translate-x-0"
+                }`}
+              />
+            </button>
+            <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+              {activo ? "Visible en la tienda" : "Oculto de la tienda"}
+            </span>
+          </div>
         </div>
       </div>
 
