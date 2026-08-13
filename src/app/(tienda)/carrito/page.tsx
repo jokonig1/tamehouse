@@ -13,8 +13,8 @@ export default function Page() {
 
   if (items.length === 0) {
     return (
-      <div className="flex min-h-[calc(100vh-6rem)] flex-col items-center justify-center gap-4 bg-black text-white">
-        <p className="text-white/60">Tu carrito está vacío.</p>
+      <div className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center gap-4 bg-white text-black">
+        <p className="text-zinc-500">Tu carrito está vacío.</p>
         <Link href="/" className="text-sm font-medium underline hover:opacity-70">
           Ir a la tienda
         </Link>
@@ -23,7 +23,7 @@ export default function Page() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-6rem)] bg-black text-white">
+    <div className="min-h-[calc(100vh-5rem)] bg-white text-black">
       <div className="mx-auto w-full max-w-6xl px-6 py-16">
         <span className="text-xs font-medium uppercase tracking-[0.3em] text-red-500">
           Tu selección
@@ -33,21 +33,21 @@ export default function Page() {
         </h1>
 
         <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-[1fr_360px]">
-          <ul className="divide-y divide-white/10">
+          <ul className="divide-y divide-black/10">
             {items.map((item) => (
               <li key={item.id} className="flex items-center gap-6 py-6">
-                <div className="h-24 w-20 shrink-0 rounded-md bg-white/5" />
+                <div className="h-24 w-20 shrink-0 rounded-md bg-zinc-100" />
 
                 <div className="flex-1">
                   <p className="font-semibold">{item.nombre}</p>
                   {(item.talla || item.color) && (
-                    <p className="mt-1 text-sm text-white/50">
+                    <p className="mt-1 text-sm text-zinc-500">
                       {[item.talla ? `Talla ${item.talla}` : null, item.color]
                         .filter(Boolean)
                         .join(" · ")}
                     </p>
                   )}
-                  <div className="mt-3 flex h-9 w-fit items-center rounded-md border border-white/20">
+                  <div className="mt-3 flex h-9 w-fit items-center rounded-md border border-black/20">
                     <button
                       type="button"
                       onClick={() => updateCantidad(item.id, item.cantidad - 1)}
@@ -69,13 +69,13 @@ export default function Page() {
                 </div>
 
                 <div className="flex flex-col items-end gap-2">
-                  <span className="font-medium text-amber-400">
+                  <span className="font-medium text-amber-600">
                     {formatoPrecio.format(item.precio * item.cantidad)}
                   </span>
                   <button
                     type="button"
                     onClick={() => removeItem(item.id)}
-                    className="text-sm text-white/50 underline hover:text-white"
+                    className="text-sm text-zinc-500 underline hover:text-black"
                   >
                     Eliminar
                   </button>
@@ -84,14 +84,14 @@ export default function Page() {
             ))}
           </ul>
 
-          <div className="h-fit rounded-lg bg-white/5 p-6">
-            <div className="flex items-center justify-between text-sm text-white/70">
+          <div className="h-fit rounded-lg bg-zinc-50 p-6">
+            <div className="flex items-center justify-between text-sm text-zinc-600">
               <span>Subtotal</span>
               <span>{formatoPrecio.format(subtotal)}</span>
             </div>
-            <p className="mt-2 text-xs text-white/40">El envío se calcula en el checkout.</p>
+            <p className="mt-2 text-xs text-zinc-400">El envío se calcula en el checkout.</p>
 
-            <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4 text-lg font-semibold">
+            <div className="mt-4 flex items-center justify-between border-t border-black/10 pt-4 text-lg font-semibold">
               <span>Total</span>
               <span>{formatoPrecio.format(subtotal)}</span>
             </div>
@@ -104,7 +104,7 @@ export default function Page() {
             </Link>
             <Link
               href="/"
-              className="mt-3 flex items-center justify-center text-sm font-medium uppercase tracking-widest text-white/60 hover:text-white"
+              className="mt-3 flex items-center justify-center text-sm font-medium uppercase tracking-widest text-zinc-500 hover:text-black"
             >
               Seguir comprando
             </Link>
