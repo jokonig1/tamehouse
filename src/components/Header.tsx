@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 const NAV_LINKS = [
   { href: "/", label: "Tienda" },
@@ -11,9 +12,47 @@ const NAV_LINKS = [
   { href: "/biografia", label: "Biografía" },
 ];
 
+const LIMITE_NOMBRE = 14;
+
+function truncarNombre(texto: string) {
+  const primerNombre = texto.trim().split(/\s+/)[0] ?? texto;
+  return primerNombre.length > LIMITE_NOMBRE
+    ? `${primerNombre.slice(0, LIMITE_NOMBRE)}…`
+    : primerNombre;
+}
+
 export default function Header() {
   const pathname = usePathname();
   const [transparente, setTransparente] = useState(false);
+  const [conSesion, setConSesion] = useState(false);
+  const [nombre, setNombre] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function cargarSesion(userId: string | undefined) {
+      if (!userId) {
+        setConSesion(false);
+        setNombre(null);
+        return;
+      }
+      setConSesion(true);
+      const { data } = await supabase
+        .from("perfiles")
+        .select("nombre")
+        .eq("id", userId)
+        .single();
+      setNombre(data?.nombre ?? null);
+    }
+
+    supabase.auth.getUser().then(({ data }) => cargarSesion(data.user?.id));
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_evento, sesion) => {
+      cargarSesion(sesion?.user.id);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   function irAlInicio(e: React.MouseEvent<HTMLAnchorElement>) {
     if (pathname === "/") {
@@ -83,10 +122,10 @@ export default function Header() {
 
         <div className="flex items-center justify-end gap-8">
           <Link
-            href="/login"
+            href={conSesion ? "/mi-cuenta" : "/login"}
             className="hidden text-sm font-medium uppercase tracking-widest hover:opacity-70 sm:block"
           >
-            Ingresa
+            {conSesion ? truncarNombre(nombre || "Mi cuenta") : "Ingresa"}
           </Link>
           <Link href="/carrito" aria-label="Carrito" className="hover:opacity-70">
             <svg
