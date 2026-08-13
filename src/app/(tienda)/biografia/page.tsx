@@ -35,7 +35,7 @@ const FASES = [
 
 export default function Page() {
   return (
-    <div className="h-[calc(100vh-6rem)] snap-y snap-mandatory overflow-y-scroll bg-black text-white">
+    <div className="h-[calc(100vh-5rem)] snap-y snap-mandatory overflow-y-scroll bg-black text-white">
       {FASES.map((fase) => (
         <section
           key={fase.year}

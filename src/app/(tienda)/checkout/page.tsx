@@ -31,7 +31,7 @@ export default function Page() {
 
   if (items.length === 0) {
     return (
-      <div className="flex min-h-[calc(100vh-6rem)] flex-col items-center justify-center gap-4 bg-white text-black">
+      <div className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center gap-4 bg-white text-black">
         <p className="text-black/60">Tu carrito está vacío.</p>
         <Link href="/" className="text-sm font-medium underline hover:opacity-70">
           Ir a la tienda
@@ -41,7 +41,7 @@ export default function Page() {
   }
 
   return (
-    <div className="grid min-h-[calc(100vh-6rem)] w-full bg-white text-black lg:grid-cols-2">
+    <div className="grid min-h-[calc(100vh-5rem)] w-full bg-white text-black lg:grid-cols-2">
       <div className="border-b border-black/10 px-6 py-10 sm:px-12 lg:border-b-0 lg:border-r">
         <div className="mx-auto flex max-w-md flex-col gap-8">
           <div>

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { Producto, Variante } from "@/lib/types";
@@ -68,44 +67,53 @@ export default function ProductoDetalle({
     return (variante?.stock ?? 0) > 0;
   }
 
+  function itemParaCarrito() {
+    return {
+      id: varianteActual?.id ?? producto.id,
+      productoId: producto.id,
+      nombre: producto.nombre,
+      precio: producto.precio,
+      talla,
+      color,
+    };
+  }
+
   function agregarAlCarrito() {
-    addItem(
-      {
-        id: varianteActual?.id ?? producto.id,
-        productoId: producto.id,
-        nombre: producto.nombre,
-        precio: producto.precio,
-        talla,
-        color,
-      },
-      cantidad
-    );
+    addItem(itemParaCarrito(), cantidad);
     router.push("/carrito");
   }
+
+  function comprarAhora() {
+    addItem(itemParaCarrito(), cantidad);
+    router.push("/checkout");
+  }
+
+  const claseBoton =
+    "flex h-11 items-center justify-center rounded-md border border-black bg-white text-sm font-semibold uppercase tracking-widest text-black transition-colors hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:border-black/20 disabled:text-black/30 disabled:hover:bg-white";
 
   return (
     <div className="flex flex-col gap-5">
       <div>
         {producto.categoria && (
-          <span className="text-xs font-medium uppercase tracking-[0.3em] text-red-500">
+          <span className="text-xs font-medium uppercase tracking-[0.3em] text-black">
             {producto.categoria}
           </span>
         )}
-        <h1 className="mt-2 text-3xl font-extrabold uppercase tracking-tight sm:text-4xl">
+        <h1 className="mt-2 text-3xl font-extrabold uppercase tracking-tight text-black sm:text-4xl">
           {producto.nombre}
         </h1>
-        <p className="mt-2 text-xl font-semibold text-amber-400">
+        <p className="mt-2 text-xl font-semibold text-black">
           {formatoPrecio.format(producto.precio)}
         </p>
       </div>
 
       {producto.descripcion && (
-        <p className="max-w-md text-sm text-white/70">{producto.descripcion}</p>
+        <p className="max-w-md text-sm text-black">{producto.descripcion}</p>
       )}
 
       {colores.length > 0 && (
         <div>
-          <h2 className="text-xs font-medium uppercase tracking-widest text-white/70">Color</h2>
+          <h2 className="text-xs font-medium uppercase tracking-widest text-black">Color</h2>
           <div className="mt-2 flex gap-3">
             {colores.map((c) => (
               <button
@@ -115,12 +123,12 @@ export default function ProductoDetalle({
                 aria-label={c}
                 title={c}
                 className={`h-8 w-8 rounded-full border-2 transition-colors ${
-                  color === c ? "border-amber-400" : "border-transparent"
+                  color === c ? "border-black" : "border-transparent"
                 }`}
               >
                 <span
-                  className="block h-full w-full rounded-full border border-white/20"
-                  style={{ backgroundColor: COLORES[c.toLowerCase()] ?? "#52525b" }}
+                  className="block h-full w-full rounded-full border border-black/10"
+                  style={{ backgroundColor: COLORES[c.toLowerCase()] ?? "#a1a1aa" }}
                 />
               </button>
             ))}
@@ -130,7 +138,7 @@ export default function ProductoDetalle({
 
       {tallas.length > 0 && (
         <div>
-          <h2 className="text-xs font-medium uppercase tracking-widest text-white/70">Talla</h2>
+          <h2 className="text-xs font-medium uppercase tracking-widest text-black">Talla</h2>
           <div className="mt-2 flex flex-wrap gap-2">
             {tallas.map((t) => {
               const disponible = tallaDisponible(t);
@@ -142,10 +150,10 @@ export default function ProductoDetalle({
                   onClick={() => setTalla(t)}
                   className={`flex h-10 w-10 items-center justify-center rounded-md border text-sm font-medium transition-colors ${
                     !disponible
-                      ? "cursor-not-allowed border-white/10 text-white/30 line-through"
+                      ? "cursor-not-allowed border-black/10 text-black/30 line-through"
                       : talla === t
-                        ? "border-white bg-white text-black"
-                        : "border-white/20 text-white hover:border-white/50"
+                        ? "border-black bg-black text-white"
+                        : "border-black/20 text-black hover:border-black/50"
                   }`}
                 >
                   {t}
@@ -157,23 +165,23 @@ export default function ProductoDetalle({
       )}
 
       <div>
-        <h2 className="text-xs font-medium uppercase tracking-widest text-white/70">Cantidad</h2>
-        <div className="mt-2 flex h-10 w-fit items-center rounded-md border border-white/20">
+        <h2 className="text-xs font-medium uppercase tracking-widest text-black">Cantidad</h2>
+        <div className="mt-2 flex h-10 w-fit items-center rounded-md border border-black/20">
           <button
             type="button"
             onClick={() => setCantidad((n) => Math.max(1, n - 1))}
-            className="flex h-full w-10 items-center justify-center text-lg hover:opacity-70"
+            className="flex h-full w-10 items-center justify-center text-lg text-black hover:opacity-70"
             aria-label="Restar"
           >
             −
           </button>
-          <span className="w-8 text-center text-sm font-medium">{cantidad}</span>
+          <span className="w-8 text-center text-sm font-medium text-black">{cantidad}</span>
           <button
             type="button"
             onClick={() =>
               setCantidad((n) => (stockDisponible !== null ? Math.min(stockDisponible || n, n + 1) : n + 1))
             }
-            className="flex h-full w-10 items-center justify-center text-lg hover:opacity-70"
+            className="flex h-full w-10 items-center justify-center text-lg text-black hover:opacity-70"
             aria-label="Sumar"
           >
             +
@@ -182,20 +190,12 @@ export default function ProductoDetalle({
       </div>
 
       <div className="flex flex-col gap-2">
-        <button
-          type="button"
-          disabled={!disponible}
-          onClick={agregarAlCarrito}
-          className="flex h-11 items-center justify-center rounded-md bg-red-600 text-sm font-semibold uppercase tracking-widest text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/40"
-        >
+        <button type="button" disabled={!disponible} onClick={agregarAlCarrito} className={claseBoton}>
           Añadir al carrito
         </button>
-        <Link
-          href="/carrito"
-          className="flex h-11 items-center justify-center rounded-md border border-white/30 text-sm font-semibold uppercase tracking-widest text-white transition-colors hover:border-white"
-        >
-          Ver carrito
-        </Link>
+        <button type="button" disabled={!disponible} onClick={comprarAhora} className={claseBoton}>
+          Comprar ahora
+        </button>
       </div>
     </div>
   );

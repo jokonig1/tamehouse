@@ -2,15 +2,14 @@
 
 import { usePathname } from "next/navigation";
 
-const RUTAS_OSCURAS = ["/musica", "/biografia", "/carrito"];
-const RUTAS_CLARAS = ["/checkout"];
+const RUTAS_OSCURAS = ["/musica", "/biografia"];
+const RUTAS_CLARAS = ["/checkout", "/carrito"];
 
 export default function Footer() {
   const pathname = usePathname();
 
-  const esOscura =
-    RUTAS_OSCURAS.includes(pathname) || pathname.startsWith("/producto/");
-  const esClara = RUTAS_CLARAS.includes(pathname);
+  const esOscura = RUTAS_OSCURAS.includes(pathname);
+  const esClara = RUTAS_CLARAS.includes(pathname) || pathname.startsWith("/producto/");
 
   const clases = esOscura
     ? "border-white/10 bg-black text-white/50"

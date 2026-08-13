@@ -6,21 +6,18 @@ export default async function Page() {
 
   return (
     <div className="bg-black text-white">
-      <div className="mx-auto w-full max-w-6xl px-6 py-16">
-        <span className="text-xs font-medium uppercase tracking-[0.3em] text-white/70">
-          Escucha y vive en vivo
-        </span>
-        <h1 className="mt-4 text-5xl font-extrabold uppercase tracking-tight sm:text-6xl">
+      <div className="mx-auto w-full max-w-6xl px-6 py-10">
+        <h1 className="text-4xl font-extrabold uppercase tracking-tight sm:text-5xl">
           Música
         </h1>
 
-        <div className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-2">
-          <div className="flex flex-col gap-12">
+        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <div className="flex flex-col gap-8">
             <div>
               <h2 className="text-xs font-medium uppercase tracking-widest text-white/70">
                 Escuchar en Spotify
               </h2>
-              <div className="mt-4 flex items-center justify-center rounded-lg border border-white/10 bg-white/5 py-16">
+              <div className="mt-3 flex items-center justify-center rounded-lg border border-white/10 bg-white/5 py-10">
                 <p className="text-sm text-white/50">Próximamente</p>
               </div>
             </div>
