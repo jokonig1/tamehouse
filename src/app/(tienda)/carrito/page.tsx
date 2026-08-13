@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useCart } from "@/lib/cart";
 
 const formatoPrecio = new Intl.NumberFormat("es-CL", {
@@ -10,6 +11,16 @@ const formatoPrecio = new Intl.NumberFormat("es-CL", {
 
 export default function Page() {
   const { items, removeItem, updateCantidad, subtotal } = useCart();
+  const [avisoStockId, setAvisoStockId] = useState<string | null>(null);
+
+  function sumar(id: string, cantidad: number, stockMaximo: number | null) {
+    if (stockMaximo !== null && cantidad >= stockMaximo) {
+      setAvisoStockId(id);
+      setTimeout(() => setAvisoStockId(null), 2500);
+      return;
+    }
+    updateCantidad(id, cantidad + 1);
+  }
 
   if (items.length === 0) {
     return (
@@ -59,13 +70,16 @@ export default function Page() {
                     <span className="w-8 text-center text-sm">{item.cantidad}</span>
                     <button
                       type="button"
-                      onClick={() => updateCantidad(item.id, item.cantidad + 1)}
+                      onClick={() => sumar(item.id, item.cantidad, item.stockMaximo)}
                       className="flex h-full w-9 items-center justify-center hover:opacity-70"
                       aria-label="Sumar"
                     >
                       +
                     </button>
                   </div>
+                  {avisoStockId === item.id && (
+                    <p className="mt-2 text-xs text-red-600">No queda más stock disponible.</p>
+                  )}
                 </div>
 
                 <div className="flex flex-col items-end gap-2">

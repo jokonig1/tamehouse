@@ -9,6 +9,7 @@ export type CartItem = {
   precio: number;
   talla: string | null;
   color: string | null;
+  stockMaximo: number | null;
   cantidad: number;
 };
 
@@ -49,11 +50,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => {
       const existente = prev.find((i) => i.id === item.id);
       if (existente) {
+        const tope = existente.stockMaximo ?? Infinity;
         return prev.map((i) =>
-          i.id === item.id ? { ...i, cantidad: i.cantidad + cantidad } : i
+          i.id === item.id ? { ...i, cantidad: Math.min(tope, i.cantidad + cantidad) } : i
         );
       }
-      return [...prev, { ...item, cantidad }];
+      const tope = item.stockMaximo ?? Infinity;
+      return [...prev, { ...item, cantidad: Math.min(tope, cantidad) }];
     });
   }
 
@@ -63,7 +66,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   function updateCantidad(id: string, cantidad: number) {
     setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, cantidad: Math.max(1, cantidad) } : i))
+      prev.map((i) => {
+        if (i.id !== id) return i;
+        const tope = i.stockMaximo ?? Infinity;
+        return { ...i, cantidad: Math.min(tope, Math.max(1, cantidad)) };
+      })
     );
   }
 
