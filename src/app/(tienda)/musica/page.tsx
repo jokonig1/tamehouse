@@ -1,14 +1,12 @@
 import EmbedBox from "@/components/EmbedBox";
 import ShowList from "@/components/ShowList";
+import { getConfiguracionMusica } from "@/lib/musica";
 import { getProximosShows } from "@/lib/shows";
 
-// TODO: traer desde Supabase cuando el panel de admin permita cargar
-// el link de Spotify y el video oficial (todavia no existe ese campo).
-const spotifyUrl: string | null = null;
-const videoUrl: string | null = null;
-
 export default async function Page() {
-  const shows = await getProximosShows();
+  const [shows, configuracion] = await Promise.all([getProximosShows(), getConfiguracionMusica()]);
+  const spotifyUrl = configuracion.spotify_url;
+  const videoUrl = configuracion.youtube_url;
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-black text-white">
