@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -53,7 +54,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black px-6 text-white scheme-dark">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-black px-6 text-white scheme-dark">
       <form onSubmit={manejarSubmit} className="w-full max-w-sm space-y-8">
         <div className="flex flex-col items-center text-center">
           <Image
@@ -107,6 +108,13 @@ export default function AdminLoginPage() {
           {cargando ? "Ingresando..." : "Ingresar"}
         </button>
       </form>
+
+      <Link
+        href="/"
+        className="text-xs font-medium uppercase tracking-widest text-white/60 hover:text-white"
+      >
+        ← Volver a la tienda
+      </Link>
     </div>
   );
 }
