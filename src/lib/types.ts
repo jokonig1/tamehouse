@@ -43,3 +43,29 @@ export interface ProductoImagen {
   orden: number;
   created_at: string;
 }
+
+export type EstadoPedido = "pagado" | "preparando" | "despachado" | "entregado";
+
+export interface Pedido {
+  id: string;
+  cliente_id: string | null;
+  estado: EstadoPedido;
+  total: number;
+  direccion: string | null;
+  comuna: string | null;
+  numero_seguimiento: string | null;
+  created_at: string;
+}
+
+export interface PedidoItem {
+  id: string;
+  pedido_id: string;
+  variante_id: string | null;
+  cantidad: number;
+  precio_unitario: number;
+}
+
+export interface PedidoListado extends Pedido {
+  itemsCount: number;
+  clienteNombre: string | null;
+}

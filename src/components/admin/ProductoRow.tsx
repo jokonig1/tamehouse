@@ -46,7 +46,7 @@ export default function ProductoRow({ producto, onEliminar }: ProductoRowProps) 
             setExpandido((v) => !v);
           }
         }}
-        className="grid cursor-pointer grid-cols-[1.5rem_2fr_1fr_1fr_1fr_7rem_10rem] items-center gap-2 p-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-900"
+        className="grid cursor-pointer grid-cols-[1.5rem_2fr_1fr_1fr_1fr_7rem_10rem] items-center gap-6 px-4 py-4 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-900"
       >
         <span aria-hidden="true" className="w-6 text-zinc-500">
           {expandido ? "▾" : "▸"}
@@ -57,21 +57,23 @@ export default function ProductoRow({ producto, onEliminar }: ProductoRowProps) 
         <span className="text-zinc-600 dark:text-zinc-400">{producto.categoria ?? "-"}</span>
         <span>${precio.toLocaleString("es-CL")}</span>
 
-        <span className="flex items-center gap-1.5">
-          <span
-            className={`h-2 w-2 rounded-full ${
-              producto.stockTotal > 0 ? "bg-green-600" : "bg-zinc-400"
-            }`}
-          />
-          {producto.stockTotal} unidades
-        </span>
+        <span>{producto.stockTotal} unidades</span>
 
-        <span className="flex items-center gap-1.5">
-          <span
-            className={`h-2 w-2 rounded-full ${activo ? "bg-green-600" : "bg-zinc-400"}`}
-          />
-          {activo ? "Sí" : "No"}
-        </span>
+        <button
+          type="button"
+          disabled={guardandoActivo}
+          onClick={(e) => {
+            e.stopPropagation();
+            alternarActivo();
+          }}
+          className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-widest disabled:cursor-wait ${
+            activo
+              ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+              : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+          }`}
+        >
+          {activo ? "Activo" : "Inactivo"}
+        </button>
 
         <div
           className="flex items-center justify-end gap-4 text-xs font-medium uppercase tracking-widest"
@@ -91,16 +93,6 @@ export default function ProductoRow({ producto, onEliminar }: ProductoRowProps) 
 
       {expandido && (
         <div className="space-y-6 border-t border-black/8 bg-zinc-50 p-4 dark:border-white/[.145] dark:bg-zinc-900">
-          <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest">
-            <input
-              type="checkbox"
-              checked={activo}
-              disabled={guardandoActivo}
-              onChange={alternarActivo}
-            />
-            Visible en la tienda
-          </label>
-
           <VariantesEditor
             productoId={producto.id}
             precioInicial={precio}

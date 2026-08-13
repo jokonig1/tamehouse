@@ -9,6 +9,12 @@ import type { ProductoListado } from "@/lib/types";
 
 type FiltroActivo = "todos" | "activos" | "inactivos";
 
+const PESTANAS_ACTIVO: { valor: FiltroActivo; label: string }[] = [
+  { valor: "todos", label: "Todos" },
+  { valor: "activos", label: "Activos" },
+  { valor: "inactivos", label: "Inactivos" },
+];
+
 interface VarianteStock {
   stock: number;
 }
@@ -28,6 +34,7 @@ export default function ProductosPage() {
   const [error, setError] = useState<string | null>(null);
   const [filtroCategoria, setFiltroCategoria] = useState("");
   const [filtroActivo, setFiltroActivo] = useState<FiltroActivo>("todos");
+  const [busqueda, setBusqueda] = useState("");
 
   const cargarProductos = useCallback(async () => {
     setCargando(true);
@@ -85,23 +92,25 @@ export default function ProductosPage() {
         if (filtroCategoria && p.categoria !== filtroCategoria) return false;
         if (filtroActivo === "activos" && !p.activo) return false;
         if (filtroActivo === "inactivos" && p.activo) return false;
+        if (busqueda.trim() && !p.nombre.toLowerCase().includes(busqueda.trim().toLowerCase()))
+          return false;
         return true;
       }),
-    [productos, filtroCategoria, filtroActivo]
+    [productos, filtroCategoria, filtroActivo, busqueda]
   );
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-semibold tracking-tight">Productos</h1>
+      <h1 className="mb-6 font-serif text-3xl font-semibold tracking-tight">Productos</h1>
 
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap items-end gap-4">
           <div className="w-48">
             <label className={etiquetaClase}>Categoría</label>
             <select
               value={filtroCategoria}
               onChange={(e) => setFiltroCategoria(e.target.value)}
-              className={`${campoClase} text-zinc-900 dark:text-zinc-100`}
+              className={`${campoClase} rounded-full text-zinc-900 dark:text-zinc-100`}
             >
               <option value="">Todas las categorías</option>
               {categoriasDisponibles.map((c) => (
@@ -117,12 +126,38 @@ export default function ProductosPage() {
             <select
               value={filtroActivo}
               onChange={(e) => setFiltroActivo(e.target.value as FiltroActivo)}
-              className={`${campoClase} text-zinc-900 dark:text-zinc-100`}
+              className={`${campoClase} rounded-full text-zinc-900 dark:text-zinc-100`}
             >
-              <option value="todos">Todos</option>
-              <option value="activos">Activos</option>
-              <option value="inactivos">Inactivos</option>
+              {PESTANAS_ACTIVO.map((pestana) => (
+                <option key={pestana.valor} value={pestana.valor}>
+                  {pestana.label}
+                </option>
+              ))}
             </select>
+          </div>
+
+          <div className="w-64">
+            <label className={etiquetaClase}>Buscar</label>
+            <div className="relative">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path strokeLinecap="round" d="m20 20-3.5-3.5" />
+              </svg>
+              <input
+                type="text"
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                placeholder="Buscar producto..."
+                className="w-full rounded-full border border-zinc-300 bg-transparent py-2 pr-3 pl-9 text-sm text-zinc-900 outline-none focus:border-black dark:border-zinc-700 dark:text-zinc-100 dark:focus:border-white"
+              />
+            </div>
           </div>
         </div>
 
@@ -138,8 +173,8 @@ export default function ProductosPage() {
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       {!cargando && !error && (
-        <div className="border border-black/8 dark:border-white/[.145]">
-          <div className="grid grid-cols-[1.5rem_2fr_1fr_1fr_1fr_7rem_10rem] gap-2 bg-zinc-50 p-2 text-left text-xs font-medium uppercase tracking-widest text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
+        <div className="overflow-hidden rounded-xl border border-black/8 dark:border-white/[.145]">
+          <div className="grid grid-cols-[1.5rem_2fr_1fr_1fr_1fr_7rem_10rem] gap-6 bg-zinc-50 px-4 py-3 text-left text-xs font-medium uppercase tracking-widest text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
             <span></span>
             <span>Producto</span>
             <span>Categoría</span>
