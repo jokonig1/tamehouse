@@ -29,6 +29,13 @@ export const etiquetaClase =
 export const sinFlechasClase =
   "[appearance:textfield] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none";
 
+export const tarjetaClase =
+  "rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/[.145] dark:bg-zinc-900";
+export const campoClaseRedondeado =
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-blue-600 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-blue-400";
+export const etiquetaClaseFuerte =
+  "mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300";
+
 export default function ProductoForm({
   valoresIniciales,
   onGuardar,
