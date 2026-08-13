@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Producto } from "@/lib/productos";
 
@@ -23,7 +24,17 @@ export default function ProductGrid({
     <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
       {productos.map((producto) => (
         <Link key={producto.id} href={`/producto/${producto.id}`} className="group">
-          <div className="aspect-[3/4] rounded-lg bg-zinc-100 dark:bg-zinc-900" />
+          <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900">
+            {producto.imagenUrl && (
+              <Image
+                src={producto.imagenUrl}
+                alt={producto.nombre}
+                fill
+                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                className="object-cover"
+              />
+            )}
+          </div>
           <p className="mt-3 text-sm font-medium group-hover:opacity-70">
             {producto.nombre}
           </p>
