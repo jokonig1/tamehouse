@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const NAV_LINKS = [
   { href: "/", label: "Tienda" },
@@ -12,6 +13,7 @@ const NAV_LINKS = [
 
 export default function Header() {
   const pathname = usePathname();
+  const [transparente, setTransparente] = useState(false);
 
   function irAlInicio(e: React.MouseEvent<HTMLAnchorElement>) {
     if (pathname === "/") {
@@ -20,21 +22,35 @@ export default function Header() {
     }
   }
 
-  return (
-    <header className="sticky top-0 z-20 bg-black text-white">
-      <div className="grid h-24 w-full grid-cols-3 items-center px-6 sm:px-10">
-        <Link href="/" aria-label="Tamehouse" className="flex items-center" onClick={irAlInicio}>
-          <Image
-            src="/images/logolobo1.png"
-            alt="Tamehouse"
-            width={80}
-            height={80}
-            className="h-20 w-20 object-contain"
-            priority
-          />
-        </Link>
+  useEffect(() => {
+    if (pathname !== "/") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza el fondo del header con la ruta actual
+      setTransparente(false);
+      return;
+    }
 
-        <nav className="hidden justify-center gap-10 text-sm font-medium uppercase tracking-widest sm:flex">
+    const sentinela = document.getElementById("fin-hero");
+    if (!sentinela) {
+      setTransparente(false);
+      return;
+    }
+
+    setTransparente(true);
+    const observer = new IntersectionObserver(([entry]) => {
+      setTransparente(entry.boundingClientRect.top > 0);
+    });
+    observer.observe(sentinela);
+    return () => observer.disconnect();
+  }, [pathname]);
+
+  return (
+    <header
+      className={`sticky top-0 z-20 text-white transition-colors ${
+        transparente ? "bg-transparent" : "bg-black"
+      }`}
+    >
+      <div className="grid h-20 w-full grid-cols-3 items-center px-6 sm:px-10">
+        <nav className="hidden justify-start gap-10 text-sm font-medium uppercase tracking-widest sm:flex">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -46,6 +62,24 @@ export default function Header() {
             </Link>
           ))}
         </nav>
+
+        <Link
+          href="/"
+          aria-label="Tamehouse"
+          className="flex items-center justify-self-center"
+          onClick={irAlInicio}
+        >
+          <Image
+            src="/images/tamehouse.png"
+            alt="Tamehouse"
+            width={1536}
+            height={1024}
+            className={`object-contain transition-all ${
+              transparente ? "h-32 w-auto" : "h-20 w-auto"
+            }`}
+            priority
+          />
+        </Link>
 
         <div className="flex items-center justify-end gap-8">
           <Link
