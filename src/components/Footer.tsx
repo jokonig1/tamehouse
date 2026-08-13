@@ -3,7 +3,14 @@
 import { usePathname } from "next/navigation";
 
 const RUTAS_OSCURAS = ["/musica", "/biografia"];
-const RUTAS_CLARAS = ["/checkout", "/carrito"];
+const RUTAS_CLARAS = [
+  "/checkout",
+  "/carrito",
+  "/login",
+  "/registro",
+  "/mi-cuenta",
+  "/restablecer-password",
+];
 
 export default function Footer() {
   const pathname = usePathname();
