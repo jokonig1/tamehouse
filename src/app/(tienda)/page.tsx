@@ -13,7 +13,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col">
-      <section className="relative flex min-h-[calc(100vh-6rem)] w-full flex-col justify-end overflow-hidden bg-zinc-950">
+      <section className="relative -mt-20 flex min-h-screen w-full flex-col justify-end overflow-hidden bg-zinc-950">
         <Image
           src="/images/fotoinicio1.png"
           alt="Tamehouse"
@@ -26,13 +26,15 @@ export default async function Home() {
 
         <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 pb-12">
           <span className="text-xs font-medium uppercase tracking-[0.3em] text-white/70">
-            Espíritu Champion
+            Merchandising oficial
           </span>
           <h1 className="whitespace-nowrap text-[clamp(3rem,12vw,9rem)] font-extrabold uppercase leading-[0.85] tracking-tight text-white">
-            Tamehouse
+            Aerstame
           </h1>
         </div>
       </section>
+
+      <div id="fin-hero" className="h-px w-full" />
 
       <section className="mx-auto w-full max-w-6xl px-6 py-12">
         <RevealOnScroll>
