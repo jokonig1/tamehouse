@@ -28,6 +28,8 @@ export interface ProductoListado {
   categoria: string | null;
   activo: boolean;
   stockTotal: number;
+  tieneTallaSinStock: boolean;
+  imagenUrl: string | null;
 }
 
 export interface FilaTalla {
