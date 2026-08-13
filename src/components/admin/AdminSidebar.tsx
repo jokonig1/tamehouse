@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 const enlaces = [
   { href: "/admin/productos", label: "Productos" },
   { href: "/admin/pedidos", label: "Pedidos" },
-  { href: "/admin/shows", label: "Shows" },
+  { href: "/admin/musica", label: "Música" },
 ];
 
 export default function AdminSidebar() {

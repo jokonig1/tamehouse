@@ -94,6 +94,18 @@ create table shows (
   created_at timestamp with time zone default now()
 );
 
+-- Configuración de música (enlaces de Spotify/YouTube que se
+-- muestran en la página pública de música). Fila única, id siempre 1.
+create table configuracion_musica (
+  id integer primary key default 1,
+  spotify_url text,
+  youtube_url text,
+  updated_at timestamp with time zone default now(),
+  constraint configuracion_musica_fila_unica check (id = 1)
+);
+
+insert into configuracion_musica (id) values (1);
+
 -- ============================================
 -- PERMISOS (ROW LEVEL SECURITY)
 -- ============================================
@@ -104,6 +116,7 @@ alter table producto_imagenes enable row level security;
 alter table pedidos enable row level security;
 alter table pedido_items enable row level security;
 alter table shows enable row level security;
+alter table configuracion_musica enable row level security;
 
 -- Productos: lectura pública
 create policy "Productos visibles para todos"
@@ -123,6 +136,11 @@ using (true);
 -- Shows: lectura pública
 create policy "Shows visibles para todos"
 on shows for select
+using (true);
+
+-- Configuracion musica: lectura pública
+create policy "Configuracion musica visible para todos"
+on configuracion_musica for select
 using (true);
 
 -- Pedidos: cada cliente solo ve y crea los suyos
@@ -275,6 +293,11 @@ using (public.is_admin());
 
 create policy "Admins eliminan shows"
 on shows for delete
+using (public.is_admin());
+
+-- Configuracion musica: solo admin actualiza (fila unica, ya sembrada)
+create policy "Admins actualizan configuracion musica"
+on configuracion_musica for update
 using (public.is_admin());
 
 -- ============================================
