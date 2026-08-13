@@ -193,7 +193,10 @@ $$;
 
 -- Crea automaticamente la fila de perfil (rol 'cliente') cuando
 -- alguien se registra. El cliente nunca inserta su propio perfil
--- ni elige su rol.
+-- ni elige su rol. Nombre y telefono se copian desde la metadata
+-- que manda signUp (options.data), porque en ese momento el
+-- usuario todavia puede no tener sesion activa (si el proyecto
+-- pide confirmar el correo) y no podria hacer un update via RLS.
 create function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -201,8 +204,13 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.perfiles (id, rol)
-  values (new.id, 'cliente');
+  insert into public.perfiles (id, rol, nombre, telefono)
+  values (
+    new.id,
+    'cliente',
+    new.raw_user_meta_data ->> 'nombre',
+    new.raw_user_meta_data ->> 'telefono'
+  );
   return new;
 end;
 $$;
