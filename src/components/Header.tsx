@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useHero } from "@/lib/hero";
 
 const NAV_LINKS = [
   { href: "/", label: "Tienda" },
@@ -26,6 +27,8 @@ export default function Header() {
   const [transparente, setTransparente] = useState(false);
   const [conSesion, setConSesion] = useState(false);
   const [nombre, setNombre] = useState<string | null>(null);
+  const { logoOscuro } = useHero();
+  const modoOscuro = transparente && logoOscuro;
 
   useEffect(() => {
     async function cargarSesion(userId: string | undefined) {
@@ -84,11 +87,15 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-20 text-white transition-colors ${
+      className={`sticky top-0 z-20 transition-colors ${
         transparente ? "bg-transparent" : "bg-black"
-      }`}
+      } ${modoOscuro ? "text-black" : "text-white"}`}
     >
-      <div className="grid h-20 w-full grid-cols-3 items-center px-6 sm:px-10">
+      <div
+        className={`grid h-20 w-full grid-cols-3 items-center px-6 transition-all sm:px-10 ${
+          transparente ? "pt-3" : ""
+        }`}
+      >
         <nav className="hidden justify-start gap-10 text-sm font-medium uppercase tracking-widest sm:flex">
           {NAV_LINKS.map((link) => (
             <Link
@@ -109,12 +116,12 @@ export default function Header() {
           onClick={irAlInicio}
         >
           <Image
-            src="/images/tamehouse.png"
+            src={modoOscuro ? "/images/tamehousenegro.png" : "/images/tamehouseblanco.png"}
             alt="Tamehouse"
             width={1536}
             height={1024}
             className={`object-contain transition-all ${
-              transparente ? "h-32 w-auto" : "h-20 w-auto"
+              transparente ? "h-20 w-auto" : "h-14 w-auto"
             }`}
             priority
           />
@@ -123,9 +130,22 @@ export default function Header() {
         <div className="flex items-center justify-end gap-8">
           <Link
             href={conSesion ? "/mi-cuenta" : "/login"}
-            className="hidden text-sm font-medium uppercase tracking-widest hover:opacity-70 sm:block"
+            className="hidden items-center gap-1.5 text-sm font-medium uppercase tracking-widest hover:opacity-70 sm:flex"
           >
             {conSesion ? truncarNombre(nombre || "Mi cuenta") : "Ingresa"}
+            {conSesion && (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                className="h-7 w-7"
+              >
+                <circle cx="12" cy="8" r="3.5" />
+                <path strokeLinecap="round" d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6" />
+              </svg>
+            )}
           </Link>
           <Link href="/carrito" aria-label="Carrito" className="hover:opacity-70">
             <svg
