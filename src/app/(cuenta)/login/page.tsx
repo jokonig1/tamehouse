@@ -26,24 +26,21 @@ export default function Page() {
     setError(null);
     setCargando(true);
 
-    const { data, error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const respuesta = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
     });
 
-    if (loginError || !data.user) {
-      setError("Correo o contraseña incorrectos.");
+    const resultado = await respuesta.json();
+
+    if (!respuesta.ok) {
+      setError(resultado.error ?? "No se pudo ingresar.");
       setCargando(false);
       return;
     }
 
-    const { data: perfil } = await supabase
-      .from("perfiles")
-      .select("rol")
-      .eq("id", data.user.id)
-      .single();
-
-    router.push(perfil?.rol === "admin" ? "/admin/productos" : "/mi-cuenta");
+    router.push(resultado.rol === "admin" ? "/admin/productos" : "/mi-cuenta");
     router.refresh();
   }
 
