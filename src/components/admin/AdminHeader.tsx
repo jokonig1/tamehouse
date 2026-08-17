@@ -10,7 +10,7 @@ export default function AdminHeader() {
 
   async function cerrarSesion() {
     await supabase.auth.signOut();
-    router.push("/admin/login");
+    router.push("/login");
     router.refresh();
   }
 

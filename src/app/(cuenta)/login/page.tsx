@@ -26,18 +26,24 @@ export default function Page() {
     setError(null);
     setCargando(true);
 
-    const { error: loginError } = await supabase.auth.signInWithPassword({
+    const { data, error: loginError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (loginError) {
+    if (loginError || !data.user) {
       setError("Correo o contraseña incorrectos.");
       setCargando(false);
       return;
     }
 
-    router.push("/mi-cuenta");
+    const { data: perfil } = await supabase
+      .from("perfiles")
+      .select("rol")
+      .eq("id", data.user.id)
+      .single();
+
+    router.push(perfil?.rol === "admin" ? "/admin/productos" : "/mi-cuenta");
     router.refresh();
   }
 

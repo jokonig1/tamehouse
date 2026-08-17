@@ -23,17 +23,12 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // La pagina de login del admin no requiere sesion previa
-  if (request.nextUrl.pathname === "/admin/login") {
-    return response;
-  }
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.redirect(new URL("/admin/login", request.url));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   const { data: perfil } = await supabase
@@ -43,7 +38,7 @@ export async function proxy(request: NextRequest) {
     .single();
 
   if (perfil?.rol !== "admin") {
-    return NextResponse.redirect(new URL("/admin/login", request.url));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return response;
