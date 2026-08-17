@@ -1,4 +1,4 @@
-import Image from "next/image";
+import HeroCarrusel from "@/components/HeroCarrusel";
 import TiendaFiltrable from "@/components/TiendaFiltrable";
 import ShowList from "@/components/ShowList";
 import RevealOnScroll from "@/components/RevealOnScroll";
@@ -14,14 +14,7 @@ export default async function Home() {
   return (
     <div className="flex flex-col">
       <section className="relative -mt-20 flex min-h-screen w-full flex-col justify-end overflow-hidden bg-zinc-950">
-        <Image
-          src="/images/fotoinicio1.png"
-          alt="Tamehouse"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-top"
-        />
+        <HeroCarrusel />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
 
         <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 pb-12">
