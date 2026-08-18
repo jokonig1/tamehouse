@@ -106,6 +106,21 @@ create table configuracion_musica (
 
 insert into configuracion_musica (id) values (1);
 
+-- Registro de intentos de login (para rate limiting). Se escribe y
+-- lee solo desde el server (service role) en /api/auth/login, nunca
+-- desde el cliente -- por eso no tiene ninguna policy: RLS activado
+-- sin excepciones bloquea a anon/authenticated por completo.
+create table intentos_login (
+  id bigint generated always as identity primary key,
+  email text not null,
+  ip text,
+  exitoso boolean not null,
+  creado_en timestamp with time zone default now()
+);
+
+create index intentos_login_email_creado_en_idx on intentos_login (email, creado_en);
+create index intentos_login_ip_creado_en_idx on intentos_login (ip, creado_en);
+
 -- ============================================
 -- PERMISOS (ROW LEVEL SECURITY)
 -- ============================================
@@ -117,6 +132,7 @@ alter table pedidos enable row level security;
 alter table pedido_items enable row level security;
 alter table shows enable row level security;
 alter table configuracion_musica enable row level security;
+alter table intentos_login enable row level security;
 
 -- Productos: lectura pública
 create policy "Productos visibles para todos"
