@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useHero } from "@/lib/hero";
@@ -24,6 +24,7 @@ function truncarNombre(texto: string) {
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const [transparente, setTransparente] = useState(false);
   const [conSesion, setConSesion] = useState(false);
   const [nombre, setNombre] = useState<string | null>(null);
@@ -56,6 +57,12 @@ export default function Header() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  async function cerrarSesion() {
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  }
 
   function irAlInicio(e: React.MouseEvent<HTMLAnchorElement>) {
     if (pathname === "/") {
@@ -128,25 +135,55 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center justify-end gap-8">
-          <Link
-            href={conSesion ? "/mi-cuenta" : "/login"}
-            className="hidden items-center gap-1.5 text-sm font-medium uppercase tracking-widest hover:opacity-70 sm:flex"
-          >
-            {conSesion ? truncarNombre(nombre || "Mi cuenta") : "Ingresa"}
-            {conSesion && (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.5}
-                className="h-7 w-7"
+          {conSesion ? (
+            <div className="group relative hidden sm:block">
+              <Link
+                href="/mi-cuenta"
+                className="flex items-center gap-1.5 text-sm font-medium uppercase tracking-widest hover:opacity-70"
               >
-                <circle cx="12" cy="8" r="3.5" />
-                <path strokeLinecap="round" d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6" />
-              </svg>
-            )}
-          </Link>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  className="h-7 w-7"
+                >
+                  <circle cx="12" cy="8" r="3.5" />
+                  <path strokeLinecap="round" d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6" />
+                </svg>
+                {truncarNombre(nombre || "Mi cuenta")}
+              </Link>
+
+              <div className="invisible absolute right-0 top-full pt-2 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100">
+                <div className="w-44 rounded-md border border-black/10 bg-white py-2 text-black shadow-lg">
+                  <Link href="/mi-cuenta" className="block px-4 py-2 text-sm hover:bg-black/5">
+                    Mi cuenta
+                  </Link>
+                  <Link
+                    href="/mi-cuenta/pedidos"
+                    className="block px-4 py-2 text-sm hover:bg-black/5"
+                  >
+                    Mis pedidos
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={cerrarSesion}
+                    className="block w-full px-4 py-2 text-left text-sm hover:bg-black/5"
+                  >
+                    Cerrar sesión
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="hidden items-center text-sm font-medium uppercase tracking-widest hover:opacity-70 sm:flex"
+            >
+              Ingresa
+            </Link>
+          )}
           <Link href="/carrito" aria-label="Carrito" className="hover:opacity-70">
             <svg
               xmlns="http://www.w3.org/2000/svg"

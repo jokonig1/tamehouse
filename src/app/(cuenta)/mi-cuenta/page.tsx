@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
@@ -15,7 +13,6 @@ const inputClass =
   "h-11 w-full rounded-md border border-black/15 bg-white px-4 text-sm text-black placeholder:text-black/40 outline-none focus:border-black/40";
 
 export default function Page() {
-  const router = useRouter();
   const [usuario, setUsuario] = useState<User | null>(null);
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [cargando, setCargando] = useState(true);
@@ -54,12 +51,6 @@ export default function Page() {
 
     cargar();
   }, []);
-
-  async function cerrarSesion() {
-    await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
-  }
 
   async function guardarPerfil(e: FormEvent) {
     e.preventDefault();
@@ -114,28 +105,13 @@ export default function Page() {
   }
 
   if (cargando) {
-    return (
-      <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-white">
-        <p className="text-sm text-zinc-500">Cargando...</p>
-      </div>
-    );
-  }
-
-  if (!usuario) {
-    return (
-      <div className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center gap-4 bg-white text-black">
-        <p className="text-zinc-500">Tenés que ingresar para ver tu cuenta.</p>
-        <Link href="/login" className="text-sm font-medium underline hover:opacity-70">
-          Ingresar
-        </Link>
-      </div>
-    );
+    return <p className="text-sm text-zinc-500">Cargando...</p>;
   }
 
   return (
-    <div className="mx-auto min-h-[calc(100vh-5rem)] w-full max-w-2xl bg-white px-6 py-16 text-black">
+    <div>
       <h1 className="text-3xl font-extrabold uppercase tracking-tight">Mi cuenta</h1>
-      <p className="mt-2 text-sm text-zinc-500">{usuario.email}</p>
+      <p className="mt-2 text-sm text-zinc-500">{usuario?.email}</p>
 
       {/* Perfil */}
       <div className="mt-8 rounded-lg border border-black/10 p-6">
@@ -258,27 +234,9 @@ export default function Page() {
             </div>
           </form>
         ) : (
-          <p className="mt-3 text-sm text-zinc-500">
-            {mensajePassword ?? "••••••••"}
-          </p>
+          <p className="mt-3 text-sm text-zinc-500">{mensajePassword ?? "••••••••"}</p>
         )}
       </div>
-
-      {/* Pedidos */}
-      <div className="mt-6 rounded-lg border border-black/10 p-6">
-        <h2 className="text-sm font-semibold uppercase tracking-widest">Mis pedidos</h2>
-        <p className="mt-2 text-sm text-zinc-500">
-          Próximamente vas a poder ver el estado de tus pedidos acá.
-        </p>
-      </div>
-
-      <button
-        type="button"
-        onClick={cerrarSesion}
-        className="mt-8 text-sm font-medium underline hover:opacity-70"
-      >
-        Cerrar sesión
-      </button>
     </div>
   );
 }
