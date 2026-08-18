@@ -72,15 +72,10 @@ export default function HeroPage() {
     setErrorTextos(null);
     setTextosGuardados(false);
 
-    if (!titulo.trim() || !subtitulo.trim()) {
-      setErrorTextos("El título y el subtítulo son obligatorios.");
-      return;
-    }
-
     setGuardandoTextos(true);
     const { error } = await supabase
       .from("configuracion_hero")
-      .update({ titulo: titulo.trim(), subtitulo: subtitulo.trim() })
+      .update({ titulo: titulo.trim() || null, subtitulo: subtitulo.trim() || null })
       .eq("id", 1);
 
     setGuardandoTextos(false);
@@ -175,7 +170,8 @@ export default function HeroPage() {
           Textos
         </h2>
         <p className="text-xs text-zinc-600 dark:text-zinc-400">
-          El título y subtítulo que se muestran sobre las imágenes en la home.
+          El título y subtítulo que se muestran sobre las imágenes en la home. Déjalos vacíos
+          si no quieres mostrar ninguno.
         </p>
 
         {errorTextos && <p className="text-sm text-red-600 dark:text-red-400">{errorTextos}</p>}

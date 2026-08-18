@@ -1,8 +1,8 @@
 import { supabase } from "@/lib/supabase";
 
 export type ConfiguracionHero = {
-  titulo: string;
-  subtitulo: string;
+  titulo: string | null;
+  subtitulo: string | null;
 };
 
 const VALORES_POR_DEFECTO: ConfiguracionHero = {
@@ -17,5 +17,6 @@ export async function getConfiguracionHero(): Promise<ConfiguracionHero> {
     .eq("id", 1)
     .single();
 
-  return data ?? VALORES_POR_DEFECTO;
+  if (!data) return VALORES_POR_DEFECTO;
+  return { titulo: data.titulo, subtitulo: data.subtitulo };
 }

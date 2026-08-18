@@ -19,12 +19,16 @@ export default async function Home() {
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
 
         <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 pb-12">
-          <span className="text-xs font-medium uppercase tracking-[0.3em] text-white/70">
-            {heroConfig.subtitulo}
-          </span>
-          <h1 className="whitespace-nowrap text-[clamp(3rem,12vw,9rem)] font-extrabold uppercase leading-[0.85] tracking-tight text-white">
-            {heroConfig.titulo}
-          </h1>
+          {heroConfig.subtitulo && (
+            <span className="text-xs font-medium uppercase tracking-[0.3em] text-white/70">
+              {heroConfig.subtitulo}
+            </span>
+          )}
+          {heroConfig.titulo && (
+            <h1 className="whitespace-nowrap text-[clamp(3rem,12vw,9rem)] font-extrabold uppercase leading-[0.85] tracking-tight text-white">
+              {heroConfig.titulo}
+            </h1>
+          )}
         </div>
       </section>
 

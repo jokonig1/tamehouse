@@ -134,11 +134,12 @@ create table hero_slides (
 );
 
 -- Título y subtítulo que se muestran sobre la portada de la home.
--- Fila única, id siempre 1, sembrada con el texto actual.
+-- Fila única, id siempre 1, sembrada con el texto actual. Pueden
+-- quedar en null si se prefiere no mostrar título/subtítulo.
 create table configuracion_hero (
   id integer primary key default 1,
-  titulo text not null default 'Aerstame',
-  subtitulo text not null default 'Merchandising oficial',
+  titulo text default 'Aerstame',
+  subtitulo text default 'Merchandising oficial',
   updated_at timestamp with time zone default now(),
   constraint configuracion_hero_fila_unica check (id = 1)
 );
