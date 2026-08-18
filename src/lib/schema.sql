@@ -121,6 +121,30 @@ create table intentos_login (
 create index intentos_login_email_creado_en_idx on intentos_login (email, creado_en);
 create index intentos_login_ip_creado_en_idx on intentos_login (ip, creado_en);
 
+-- Imagenes del hero de la home (una fila = una imagen, en orden).
+-- Con una sola fila se ve como imagen unica; con varias, como
+-- carrusel -- el frontend decide como mostrarlas, no la tabla.
+-- Los archivos viven en Supabase Storage, bucket "hero".
+create table hero_slides (
+  id uuid primary key default gen_random_uuid(),
+  url text not null,
+  logo_oscuro boolean not null default false,
+  orden integer not null default 0,
+  created_at timestamp with time zone default now()
+);
+
+-- Título y subtítulo que se muestran sobre la portada de la home.
+-- Fila única, id siempre 1, sembrada con el texto actual.
+create table configuracion_hero (
+  id integer primary key default 1,
+  titulo text not null default 'Aerstame',
+  subtitulo text not null default 'Merchandising oficial',
+  updated_at timestamp with time zone default now(),
+  constraint configuracion_hero_fila_unica check (id = 1)
+);
+
+insert into configuracion_hero (id) values (1);
+
 -- ============================================
 -- PERMISOS (ROW LEVEL SECURITY)
 -- ============================================
@@ -133,6 +157,8 @@ alter table pedido_items enable row level security;
 alter table shows enable row level security;
 alter table configuracion_musica enable row level security;
 alter table intentos_login enable row level security;
+alter table hero_slides enable row level security;
+alter table configuracion_hero enable row level security;
 
 -- Productos: lectura pública
 create policy "Productos visibles para todos"
@@ -157,6 +183,16 @@ using (true);
 -- Configuracion musica: lectura pública
 create policy "Configuracion musica visible para todos"
 on configuracion_musica for select
+using (true);
+
+-- Hero slides: lectura pública
+create policy "Hero slides visibles para todos"
+on hero_slides for select
+using (true);
+
+-- Configuracion hero: lectura pública
+create policy "Configuracion hero visible para todos"
+on configuracion_hero for select
 using (true);
 
 -- Pedidos: cada cliente solo ve y crea los suyos
@@ -324,6 +360,24 @@ create policy "Admins actualizan configuracion musica"
 on configuracion_musica for update
 using (public.is_admin());
 
+-- Hero slides: solo admin crea/edita/elimina (lectura ya es publica)
+create policy "Admins escriben hero slides"
+on hero_slides for insert
+with check (public.is_admin());
+
+create policy "Admins editan hero slides"
+on hero_slides for update
+using (public.is_admin());
+
+create policy "Admins eliminan hero slides"
+on hero_slides for delete
+using (public.is_admin());
+
+-- Configuracion hero: solo admin actualiza (fila unica, ya sembrada)
+create policy "Admins actualizan configuracion hero"
+on configuracion_hero for update
+using (public.is_admin());
+
 -- ============================================
 -- STORAGE (Supabase Storage)
 -- ============================================
@@ -345,3 +399,21 @@ with check (bucket_id = 'productos' and public.is_admin());
 create policy "Admins eliminan imagenes de productos (storage)"
 on storage.objects for delete
 using (bucket_id = 'productos' and public.is_admin());
+
+-- Bucket publico para las imagenes del hero. La URL publica de cada
+-- archivo queda registrada en hero_slides.url
+insert into storage.buckets (id, name, public)
+values ('hero', 'hero', true)
+on conflict (id) do nothing;
+
+create policy "Imagenes de hero visibles para todos (storage)"
+on storage.objects for select
+using (bucket_id = 'hero');
+
+create policy "Admins suben imagenes de hero (storage)"
+on storage.objects for insert
+with check (bucket_id = 'hero' and public.is_admin());
+
+create policy "Admins eliminan imagenes de hero (storage)"
+on storage.objects for delete
+using (bucket_id = 'hero' and public.is_admin());

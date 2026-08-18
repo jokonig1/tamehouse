@@ -7,6 +7,7 @@ const enlaces = [
   { href: "/admin/productos", label: "Productos" },
   { href: "/admin/pedidos", label: "Pedidos" },
   { href: "/admin/musica", label: "Música" },
+  { href: "/admin/hero", label: "Portada" },
 ];
 
 export default function AdminSidebar() {
