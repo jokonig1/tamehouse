@@ -28,6 +28,7 @@ export default function Header() {
   const [transparente, setTransparente] = useState(false);
   const [conSesion, setConSesion] = useState(false);
   const [nombre, setNombre] = useState<string | null>(null);
+  const [esAdmin, setEsAdmin] = useState(false);
   const { logoOscuro } = useHero();
   const modoOscuro = transparente && logoOscuro;
 
@@ -36,15 +37,17 @@ export default function Header() {
       if (!userId) {
         setConSesion(false);
         setNombre(null);
+        setEsAdmin(false);
         return;
       }
       setConSesion(true);
       const { data } = await supabase
         .from("perfiles")
-        .select("nombre")
+        .select("nombre, rol")
         .eq("id", userId)
         .single();
       setNombre(data?.nombre ?? null);
+      setEsAdmin(data?.rol === "admin");
     }
 
     supabase.auth.getUser().then(({ data }) => cargarSesion(data.user?.id));
@@ -157,6 +160,14 @@ export default function Header() {
 
               <div className="invisible absolute right-0 top-full pt-2 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100">
                 <div className="w-44 rounded-md border border-black/10 bg-white py-2 text-black shadow-lg">
+                  {esAdmin && (
+                    <Link
+                      href="/admin/productos"
+                      className="block px-4 py-2 text-sm hover:bg-black/5"
+                    >
+                      Panel admin
+                    </Link>
+                  )}
                   <Link href="/mi-cuenta" className="block px-4 py-2 text-sm hover:bg-black/5">
                     Mi cuenta
                   </Link>

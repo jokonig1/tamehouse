@@ -25,6 +25,7 @@ export default function MusicaPage() {
   const [cargandoEnlaces, setCargandoEnlaces] = useState(true);
   const [errorEnlaces, setErrorEnlaces] = useState<string | null>(null);
   const [guardandoEnlaces, setGuardandoEnlaces] = useState(false);
+  const [enlacesGuardados, setEnlacesGuardados] = useState(false);
 
   const cargarShows = useCallback(async () => {
     setCargando(true);
@@ -72,6 +73,7 @@ export default function MusicaPage() {
   async function guardarEnlaces(e: FormEvent) {
     e.preventDefault();
     setErrorEnlaces(null);
+    setEnlacesGuardados(false);
 
     if (spotifyUrl.trim() && !/^https?:\/\//i.test(spotifyUrl.trim())) {
       setErrorEnlaces("El link de Spotify debe empezar con http:// o https://");
@@ -96,6 +98,9 @@ export default function MusicaPage() {
       setErrorEnlaces(errorUpdate.message);
       return;
     }
+
+    setEnlacesGuardados(true);
+    setTimeout(() => setEnlacesGuardados(false), 3000);
   }
 
   async function agregarShow(e: FormEvent) {
@@ -167,6 +172,9 @@ export default function MusicaPage() {
         </p>
 
         {errorEnlaces && <p className="text-sm text-red-600 dark:text-red-400">{errorEnlaces}</p>}
+        {enlacesGuardados && (
+          <p className="text-sm text-green-600 dark:text-green-400">Guardado correctamente.</p>
+        )}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
