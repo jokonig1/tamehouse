@@ -26,7 +26,11 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       </div>
 
       <div className="flex items-start px-6 py-10 sm:px-12">
-        <ProductoDetalle producto={producto} variantes={variantes} />
+        <ProductoDetalle
+          producto={producto}
+          variantes={variantes}
+          imagenUrl={imagenes[0]?.url ?? null}
+        />
       </div>
     </div>
   );
