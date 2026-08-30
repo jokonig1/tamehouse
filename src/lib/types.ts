@@ -55,6 +55,16 @@ export interface Pedido {
   total: number;
   direccion: string | null;
   comuna: string | null;
+  comuna_code: string | null;
+  calle: string | null;
+  numero: string | null;
+  depto: string | null;
+  destinatario_nombre: string | null;
+  destinatario_telefono: string | null;
+  destinatario_email: string | null;
+  servicio_type_code: number | null;
+  retiro_oficina_code: number | null;
+  retiro_oficina_nombre: string | null;
   numero_seguimiento: string | null;
   created_at: string;
 }
