@@ -52,6 +52,31 @@ create table pedidos (
   created_at timestamp with time zone default now()
 );
 
+-- Datos de despacho del pedido, capturados en el checkout. Van
+-- aparte de direccion/comuna (que son el texto legible que se
+-- muestra en el panel) porque Chilexpress necesita el código de
+-- cobertura de la comuna y la calle/número por separado, no un
+-- solo texto libre. servicio_type_code es el código de servicio de
+-- Chilexpress a usar (elegido por el cliente en envío a domicilio,
+-- o el más barato disponible en retiro en sucursal).
+alter table pedidos
+  add column comuna_code text,
+  add column calle text,
+  add column numero text,
+  add column depto text,
+  add column destinatario_nombre text,
+  add column destinatario_telefono text,
+  add column destinatario_email text,
+  add column servicio_type_code integer,
+  add column retiro_oficina_code integer,
+  add column retiro_oficina_nombre text;
+
+-- Etiqueta de envío (imagen JPEG en base64) que devuelve Chilexpress
+-- al generar el envío. Se guarda para poder reimprimirla desde el
+-- panel sin tener que generar el envío de nuevo.
+alter table pedidos
+  add column etiqueta_chilexpress text;
+
 -- Tabla de items dentro de cada pedido
 create table pedido_items (
   id uuid primary key default gen_random_uuid(),
@@ -327,6 +352,13 @@ with check (public.is_admin());
 
 create policy "Admins eliminan imagenes de productos"
 on producto_imagenes for delete
+using (public.is_admin());
+
+-- Perfiles: admin ve todos (para mostrar el nombre del cliente en
+-- el panel de pedidos -- sin esto, RLS le esconde al admin el perfil
+-- de cualquiera que no sea el mismo, y el nombre nunca aparece)
+create policy "Admins ven todos los perfiles"
+on perfiles for select
 using (public.is_admin());
 
 -- Pedidos: admin ve todos y actualiza estado/seguimiento
