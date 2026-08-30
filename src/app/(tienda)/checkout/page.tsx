@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
@@ -646,7 +647,16 @@ export default function Page() {
           <ul className="flex flex-col gap-4">
             {items.map((item) => (
               <li key={item.id} className="flex items-center gap-4">
-                <div className="relative h-16 w-14 shrink-0 rounded-md bg-black/5">
+                <div className="relative h-16 w-14 shrink-0 overflow-hidden rounded-md bg-black/5">
+                  {item.imagenUrl && (
+                    <Image
+                      src={item.imagenUrl}
+                      alt={item.nombre}
+                      fill
+                      sizes="56px"
+                      className="object-cover"
+                    />
+                  )}
                   <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-black text-xs text-white">
                     {item.cantidad}
                   </span>

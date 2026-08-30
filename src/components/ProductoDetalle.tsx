@@ -30,9 +30,11 @@ const COLORES: Record<string, string> = {
 export default function ProductoDetalle({
   producto,
   variantes,
+  imagenUrl,
 }: {
   producto: Producto;
   variantes: Variante[];
+  imagenUrl: string | null;
 }) {
   const colores = useMemo(
     () => Array.from(new Set(variantes.map((v) => v.color).filter((c): c is string => !!c))),
@@ -83,6 +85,7 @@ export default function ProductoDetalle({
       talla,
       color,
       stockMaximo: stockDisponible,
+      imagenUrl,
     };
   }
 

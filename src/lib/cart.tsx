@@ -10,6 +10,7 @@ export type CartItem = {
   talla: string | null;
   color: string | null;
   stockMaximo: number | null;
+  imagenUrl: string | null;
   cantidad: number;
 };
 
