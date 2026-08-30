@@ -81,18 +81,18 @@ export default function Header() {
       return;
     }
 
-    const sentinela = document.getElementById("fin-hero");
-    if (!sentinela) {
-      setTransparente(false);
-      return;
+    function actualizar() {
+      const umbral = window.innerHeight - 230;
+      setTransparente(window.scrollY < umbral);
     }
 
-    setTransparente(true);
-    const observer = new IntersectionObserver(([entry]) => {
-      setTransparente(entry.boundingClientRect.top > 0);
-    });
-    observer.observe(sentinela);
-    return () => observer.disconnect();
+    actualizar();
+    window.addEventListener("scroll", actualizar, { passive: true });
+    window.addEventListener("resize", actualizar);
+    return () => {
+      window.removeEventListener("scroll", actualizar);
+      window.removeEventListener("resize", actualizar);
+    };
   }, [pathname]);
 
   return (
@@ -106,7 +106,11 @@ export default function Header() {
           transparente ? "pt-3" : ""
         }`}
       >
-        <nav className="hidden justify-start gap-10 text-sm font-medium uppercase tracking-widest sm:flex">
+        <nav
+          className={`hidden justify-start gap-10 text-sm font-medium uppercase tracking-widest transition-all sm:flex ${
+            transparente ? "-mt-3" : ""
+          }`}
+        >
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -122,22 +126,36 @@ export default function Header() {
         <Link
           href="/"
           aria-label="Tamehouse"
-          className="flex items-center justify-self-center"
+          className="relative flex h-14 w-28 items-center justify-center justify-self-center"
           onClick={irAlInicio}
         >
           <Image
-            src={modoOscuro ? "/images/tamehousenegro.png" : "/images/tamehouseblanco.png"}
+            src="/images/logooficial.png"
             alt="Tamehouse"
-            width={1536}
+            width={1224}
+            height={1285}
+            className={`absolute left-1/2 top-1/2 h-28 w-auto -translate-x-1/2 -translate-y-[calc(50%-14px)] object-contain transition-opacity duration-500 ${
+              transparente ? "opacity-100" : "opacity-0"
+            }`}
+            priority
+          />
+          <Image
+            src="/images/logolobo1.png"
+            alt="Tamehouse"
+            width={1024}
             height={1024}
-            className={`object-contain transition-all ${
-              transparente ? "h-20 w-auto" : "h-14 w-auto"
+            className={`absolute left-1/2 top-1/2 h-14 w-auto -translate-x-1/2 -translate-y-1/2 object-contain transition-opacity duration-500 ${
+              transparente ? "opacity-0" : "opacity-100"
             }`}
             priority
           />
         </Link>
 
-        <div className="flex items-center justify-end gap-8">
+        <div
+          className={`flex items-center justify-end gap-8 transition-all ${
+            transparente ? "-mt-3" : ""
+          }`}
+        >
           {conSesion ? (
             <div className="group relative hidden sm:block">
               <Link
