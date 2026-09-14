@@ -29,8 +29,14 @@ export default function Header() {
   const [conSesion, setConSesion] = useState(false);
   const [nombre, setNombre] = useState<string | null>(null);
   const [esAdmin, setEsAdmin] = useState(false);
+  const [menuAbierto, setMenuAbierto] = useState(false);
   const { logoOscuro } = useHero();
   const modoOscuro = transparente && logoOscuro;
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- cierra el menú móvil al cambiar de ruta
+    setMenuAbierto(false);
+  }, [pathname]);
 
   useEffect(() => {
     async function cargarSesion(userId: string | undefined) {
@@ -229,8 +235,73 @@ export default function Header() {
               />
             </svg>
           </Link>
+          <button
+            type="button"
+            aria-label={menuAbierto ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={menuAbierto}
+            onClick={() => setMenuAbierto((v) => !v)}
+            className="flex h-6 w-6 items-center justify-center sm:hidden"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              className="h-6 w-6"
+            >
+              {menuAbierto ? (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6L6 18" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+              )}
+            </svg>
+          </button>
         </div>
       </div>
+
+      {menuAbierto && (
+        <div className="border-t border-white/10 bg-black text-white sm:hidden">
+          <nav className="flex flex-col px-6 py-4 text-sm font-medium uppercase tracking-widest">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={link.href === "/" ? irAlInicio : undefined}
+                className="border-b border-white/10 py-3 first:pt-0 last:border-b-0"
+              >
+                {link.label}
+              </Link>
+            ))}
+            {conSesion ? (
+              <>
+                {esAdmin && (
+                  <Link href="/admin/productos" className="border-b border-white/10 py-3">
+                    Panel admin
+                  </Link>
+                )}
+                <Link href="/mi-cuenta" className="border-b border-white/10 py-3">
+                  Mi cuenta
+                </Link>
+                <Link href="/mi-cuenta/pedidos" className="border-b border-white/10 py-3">
+                  Mis pedidos
+                </Link>
+                <button
+                  type="button"
+                  onClick={cerrarSesion}
+                  className="py-3 text-left last:border-b-0"
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <Link href="/login" className="py-3 last:border-b-0">
+                Ingresa
+              </Link>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
