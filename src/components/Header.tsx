@@ -80,6 +80,11 @@ export default function Header() {
     }
   }
 
+  function irATienda(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+    document.getElementById("tienda")?.scrollIntoView({ behavior: "smooth" });
+  }
+
   useEffect(() => {
     if (pathname !== "/") {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza el fondo del header con la ruta actual
@@ -88,6 +93,10 @@ export default function Header() {
     }
 
     function actualizar() {
+      if (window.innerWidth < 640) {
+        setTransparente(false);
+        return;
+      }
       const umbral = window.innerHeight - 230;
       setTransparente(window.scrollY < umbral);
     }
@@ -112,22 +121,47 @@ export default function Header() {
           transparente ? "pt-3" : ""
         }`}
       >
-        <nav
-          className={`hidden justify-start gap-10 text-sm font-medium uppercase tracking-widest transition-all sm:flex ${
-            transparente ? "-mt-3" : ""
-          }`}
-        >
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={link.href === "/" ? irAlInicio : undefined}
-              className="hover:opacity-70"
+        <div className="flex items-center justify-start">
+          <button
+            type="button"
+            aria-label={menuAbierto ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={menuAbierto}
+            onClick={() => setMenuAbierto((v) => !v)}
+            className="flex h-6 w-6 items-center justify-center sm:hidden"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              className="h-6 w-6"
             >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+              {menuAbierto ? (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6L6 18" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+              )}
+            </svg>
+          </button>
+
+          <nav
+            className={`hidden gap-10 text-sm font-medium uppercase tracking-widest transition-all sm:flex ${
+              transparente ? "-mt-3" : ""
+            }`}
+          >
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={link.href === "/" ? irAlInicio : undefined}
+                className="hover:opacity-70"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
 
         <Link
           href="/"
@@ -219,6 +253,24 @@ export default function Header() {
               Ingresa
             </Link>
           )}
+          <Link
+            href="/#tienda"
+            aria-label="Buscar"
+            onClick={pathname === "/" ? irATienda : undefined}
+            className="hover:opacity-70 sm:hidden"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              className="h-6 w-6"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path strokeLinecap="round" d="m20 20-3.5-3.5" />
+            </svg>
+          </Link>
           <Link href="/carrito" aria-label="Carrito" className="hover:opacity-70">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -235,28 +287,6 @@ export default function Header() {
               />
             </svg>
           </Link>
-          <button
-            type="button"
-            aria-label={menuAbierto ? "Cerrar menú" : "Abrir menú"}
-            aria-expanded={menuAbierto}
-            onClick={() => setMenuAbierto((v) => !v)}
-            className="flex h-6 w-6 items-center justify-center sm:hidden"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              className="h-6 w-6"
-            >
-              {menuAbierto ? (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6L6 18" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h16" />
-              )}
-            </svg>
-          </button>
         </div>
       </div>
 

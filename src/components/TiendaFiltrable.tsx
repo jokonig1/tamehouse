@@ -34,7 +34,7 @@ export default function TiendaFiltrable({ productos }: { productos: Producto[] }
 
   return (
     <div>
-      <div className="flex items-center gap-3 overflow-x-auto pb-2">
+      <div className="flex flex-wrap items-center gap-3 pb-2 sm:flex-nowrap sm:overflow-x-auto">
         <button
           type="button"
           onClick={() => setCategoria(null)}
