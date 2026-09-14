@@ -14,7 +14,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col">
-      <section className="relative flex h-[68vh] w-full flex-col items-center justify-center overflow-hidden rounded-b-[2rem] bg-zinc-950 sm:-mt-20 sm:h-auto sm:min-h-screen sm:items-stretch sm:justify-end sm:rounded-none">
+      <section className="relative -mt-20 flex h-[68vh] w-full flex-col items-center justify-center overflow-hidden bg-zinc-950 sm:h-auto sm:min-h-screen sm:items-stretch sm:justify-end">
         <HeroCarrusel slides={heroSlides} />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
 

@@ -93,12 +93,12 @@ export default function Header() {
     }
 
     function actualizar() {
-      if (window.innerWidth < 640) {
+      const sentinela = document.getElementById("fin-hero");
+      if (!sentinela) {
         setTransparente(false);
         return;
       }
-      const umbral = window.innerHeight - 230;
-      setTransparente(window.scrollY < umbral);
+      setTransparente(sentinela.getBoundingClientRect().top > 140);
     }
 
     actualizar();
