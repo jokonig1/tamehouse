@@ -14,11 +14,11 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col">
-      <section className="relative -mt-20 flex h-[68vh] w-full flex-col items-center justify-center overflow-hidden bg-zinc-950 sm:h-auto sm:min-h-screen sm:items-stretch sm:justify-end">
+      <section className="relative -mt-20 flex h-[68vh] w-full flex-col items-center justify-end overflow-hidden bg-zinc-950 sm:h-auto sm:min-h-screen sm:items-stretch">
         <HeroCarrusel slides={heroSlides} />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
 
-        <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-3 px-6 pb-8 text-center sm:items-start sm:gap-6 sm:pb-12 sm:text-left">
+        <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-3 px-6 pb-4 text-center sm:items-start sm:gap-6 sm:pb-12 sm:text-left">
           {heroConfig.subtitulo && (
             <span className="text-xs font-medium uppercase tracking-[0.3em] text-white/70">
               {heroConfig.subtitulo}
