@@ -25,13 +25,18 @@ export default function ProductGrid({
       {productos.map((producto) => (
         <Link key={producto.id} href={`/producto/${producto.id}`} className="group">
           <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900">
+            {producto.agotado && (
+              <span className="absolute left-2 top-2 z-10 rounded-md bg-red-600 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white">
+                Sin stock
+              </span>
+            )}
             {producto.imagenUrl && (
               <Image
                 src={producto.imagenUrl}
                 alt={producto.nombre}
                 fill
                 sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                className="object-cover"
+                className={`object-cover ${producto.agotado ? "opacity-60" : ""}`}
               />
             )}
           </div>
