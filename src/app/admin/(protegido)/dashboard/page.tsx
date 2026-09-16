@@ -5,21 +5,54 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import StatTile from "@/components/admin/StatTile";
 import BarraRanking from "@/components/admin/BarraRanking";
+import TopProductos from "@/components/admin/TopProductos";
 import GraficoIngresosMensuales from "@/components/admin/GraficoIngresosMensuales";
 
 // Un color por tarjeta (de la paleta categórica validada) para que el
 // dashboard se distinga de un vistazo -- adentro de cada gráfico
 // sigue siendo un solo hue, como pide la guía de dataviz.
-const COLOR_INGRESOS = "bg-[#2a78d6] dark:bg-[#3987e5]";
 const COLOR_PRODUCTOS = "bg-[#1baf7a] dark:bg-[#199e70]";
 const COLOR_TALLAS = "bg-[#4a3aa7] dark:bg-[#9085e9]";
 const COLOR_COMUNAS = "bg-[#eb6834] dark:bg-[#d95926]";
+const COLOR_USUARIOS_NUEVOS = "bg-[#eda100] dark:bg-[#c98500]";
+const COLOR_ALERTA = "bg-[#d03b3b] dark:bg-[#e66767]";
 
-const BORDE_INGRESOS = "border-t-[#2a78d6] dark:border-t-[#3987e5]";
-const BORDE_PEDIDOS = "border-t-[#1baf7a] dark:border-t-[#199e70]";
-const BORDE_USUARIOS_NUEVOS = "border-t-[#eda100] dark:border-t-[#c98500]";
 const BORDE_USUARIOS_TOTAL = "border-t-[#4a3aa7] dark:border-t-[#9085e9]";
-const BORDE_ALERTA = "border-t-[#d03b3b] dark:border-t-[#e66767]";
+
+function IconoIngresos() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+  );
+}
+
+function IconoPedidos() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+      <path d="M6 7h12l1 13H5L6 7Z" />
+      <path d="M9 10V6a3 3 0 0 1 6 0v4" />
+    </svg>
+  );
+}
+
+function IconoUsuarios() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
+    </svg>
+  );
+}
+
+function IconoAlerta() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+      <path d="M12 3 2 20h20L12 3Z" />
+      <path d="M12 10v4M12 17h.01" />
+    </svg>
+  );
+}
 
 const formatoPrecio = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" });
 const formatoCompacto = new Intl.NumberFormat("es-CL", {
@@ -47,7 +80,10 @@ interface PerfilConsulta {
 interface VarianteEmbebida {
   talla: string | null;
   producto_id: string;
-  productos: { nombre: string } | null;
+  productos: {
+    nombre: string;
+    producto_imagenes: { url: string; orden: number }[] | null;
+  } | null;
 }
 
 interface PedidoItemConsulta {
@@ -89,7 +125,9 @@ export default function DashboardPage() {
         .order("created_at", { ascending: false }),
       supabase
         .from("pedido_items")
-        .select("cantidad, variantes(talla, producto_id, productos(nombre))"),
+        .select(
+          "cantidad, variantes(talla, producto_id, productos(nombre, producto_imagenes(url, orden)))"
+        ),
       supabase
         .from("variantes")
         .select("id, talla, stock, productos(nombre)")
@@ -174,15 +212,22 @@ export default function DashboardPage() {
   }, [clientes]);
 
   const productosMasVendidos = useMemo(() => {
-    const conteo = new Map<string, number>();
+    const conteo = new Map<string, { vendidos: number; imagenUrl: string | null }>();
     for (const item of items) {
-      const nombre = item.variantes?.productos?.nombre;
-      if (!nombre) continue;
-      conteo.set(nombre, (conteo.get(nombre) ?? 0) + item.cantidad);
+      const producto = item.variantes?.productos;
+      if (!producto) continue;
+
+      const actual = conteo.get(producto.nombre) ?? { vendidos: 0, imagenUrl: null };
+      actual.vendidos += item.cantidad;
+      if (!actual.imagenUrl) {
+        const imagenes = [...(producto.producto_imagenes ?? [])].sort((a, b) => a.orden - b.orden);
+        actual.imagenUrl = imagenes[0]?.url ?? null;
+      }
+      conteo.set(producto.nombre, actual);
     }
     return Array.from(conteo.entries())
-      .map(([label, valor]) => ({ id: label, label, valor }))
-      .sort((a, b) => b.valor - a.valor)
+      .map(([nombre, v]) => ({ id: nombre, nombre, ...v }))
+      .sort((a, b) => b.vendidos - a.vendidos)
       .slice(0, 6);
   }, [items]);
 
@@ -240,23 +285,27 @@ export default function DashboardPage() {
                       esBueno: kpis.deltaIngresos >= 0,
                     }
               }
-              color={BORDE_INGRESOS}
+              icono={<IconoIngresos />}
+              destacado
             />
             <StatTile
               label="Pedidos este mes"
               value={kpis.pedidosEsteMes.toString()}
-              color={BORDE_PEDIDOS}
+              icono={<IconoPedidos />}
+              color={COLOR_PRODUCTOS}
             />
             <StatTile
               label="Usuarios nuevos este mes"
               value={usuarios.nuevosEsteMes.toString()}
-              color={BORDE_USUARIOS_NUEVOS}
+              icono={<IconoUsuarios />}
+              color={COLOR_USUARIOS_NUEVOS}
             />
             <StatTile
               label="Variantes con stock bajo"
               value={stockBajo.length.toString()}
               alerta={stockBajo.length > 0}
-              color={stockBajo.length > 0 ? BORDE_ALERTA : undefined}
+              icono={<IconoAlerta />}
+              color={stockBajo.length > 0 ? COLOR_ALERTA : undefined}
             />
           </div>
 
@@ -267,7 +316,6 @@ export default function DashboardPage() {
             <GraficoIngresosMensuales
               datos={ingresosPorMes.map((b) => ({ mes: b.mes, ingresos: b.ingresos }))}
               formatoValor={(n) => formatoCompacto.format(n)}
-              color={COLOR_INGRESOS}
             />
           </div>
 
@@ -276,10 +324,14 @@ export default function DashboardPage() {
               <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
                 Productos más vendidos
               </h2>
-              <BarraRanking
-                items={productosMasVendidos}
+              <TopProductos
+                items={productosMasVendidos.map((p) => ({
+                  id: p.id,
+                  nombre: p.nombre,
+                  imagenUrl: p.imagenUrl,
+                  vendidos: p.vendidos,
+                }))}
                 vacio="Todavía no hay ventas."
-                color={COLOR_PRODUCTOS}
               />
             </div>
 
