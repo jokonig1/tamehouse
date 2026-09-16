@@ -228,7 +228,7 @@ export default function DashboardPage() {
 
       {!cargando && !error && (
         <div className="flex flex-col gap-8">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <StatTile
               label="Ingresos este mes"
               value={formatoPrecio.format(kpis.ingresosEsteMes)}
@@ -251,11 +251,6 @@ export default function DashboardPage() {
               label="Usuarios nuevos este mes"
               value={usuarios.nuevosEsteMes.toString()}
               color={BORDE_USUARIOS_NUEVOS}
-            />
-            <StatTile
-              label="Usuarios totales"
-              value={usuarios.total.toString()}
-              color={BORDE_USUARIOS_TOTAL}
             />
             <StatTile
               label="Variantes con stock bajo"
@@ -300,15 +295,31 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-black/8 p-5 dark:border-white/[.145]">
-            <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-              Comunas más frecuentes
-            </h2>
-            <BarraRanking
-              items={comunasFrecuentes}
-              vacio="Todavía no hay pedidos."
-              color={COLOR_COMUNAS}
-            />
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="rounded-xl border border-black/8 p-5 dark:border-white/[.145]">
+              <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+                Comunas más frecuentes
+              </h2>
+              <BarraRanking
+                items={comunasFrecuentes}
+                vacio="Todavía no hay pedidos."
+                color={COLOR_COMUNAS}
+              />
+            </div>
+
+            <div
+              className={`rounded-xl border border-t-4 border-black/8 p-5 dark:border-white/[.145] ${BORDE_USUARIOS_TOTAL}`}
+            >
+              <h2 className="mb-1 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+                Usuarios totales registrados
+              </h2>
+              <p className="mt-3 text-4xl font-semibold text-zinc-900 dark:text-zinc-100">
+                {usuarios.total}
+              </p>
+              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                Clientes con cuenta creada en la tienda, desde el inicio.
+              </p>
+            </div>
           </div>
 
           <div className="rounded-xl border border-black/8 p-5 dark:border-white/[.145]">
