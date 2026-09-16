@@ -34,7 +34,7 @@ export default async function Home() {
 
       <div id="fin-hero" className="h-px w-full" />
 
-      <section id="tienda" className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 py-12">
+      <section id="tienda" className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 pb-12 pt-6 sm:pt-12">
         <RevealOnScroll>
           <h2 className="text-2xl font-semibold tracking-tight">Tienda</h2>
           <div className="mt-6">
