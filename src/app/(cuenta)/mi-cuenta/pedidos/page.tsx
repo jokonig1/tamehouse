@@ -21,7 +21,7 @@ function formatoFecha(fechaIso: string) {
 }
 
 const ESTADOS: Record<string, { label: string; pill: string }> = {
-  pagado: { label: "Pagado", pill: "bg-yellow-100 text-yellow-700" },
+  pagado: { label: "Pagado", pill: "bg-emerald-100 text-emerald-700" },
   preparando: { label: "Preparando", pill: "bg-purple-100 text-purple-700" },
   despachado: { label: "Despachado", pill: "bg-blue-100 text-blue-700" },
   entregado: { label: "Entregado", pill: "bg-green-100 text-green-700" },
