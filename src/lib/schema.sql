@@ -315,6 +315,96 @@ create trigger on_auth_user_created
 after insert on auth.users
 for each row execute function public.handle_new_user();
 
+-- Crea un pedido completo (fila de pedidos + pedido_items + descuento
+-- de stock) en un solo paso atomico. security definer porque el
+-- cliente que compra no tiene permiso para editar variantes.stock
+-- directo (esa regla es a proposito, para que nadie pueda escribir
+-- cualquier valor ahi) -- esta funcion es la unica puerta angosta que
+-- le permite restar stock, y solo si alcanza. Si algun item no tiene
+-- stock suficiente, lanza una excepcion y Postgres deshace todo lo
+-- que la funcion haya insertado en esa misma llamada (no queda ni el
+-- pedido ni ningun item a medias).
+-- p_items: jsonb con forma [{"varianteId": uuid, "cantidad": int, "precioUnitario": int}, ...]
+create function public.crear_pedido(
+  p_total integer,
+  p_direccion text,
+  p_comuna text,
+  p_comuna_code text,
+  p_calle text,
+  p_numero text,
+  p_depto text,
+  p_destinatario_nombre text,
+  p_destinatario_telefono text,
+  p_destinatario_email text,
+  p_servicio_type_code integer,
+  p_retiro_oficina_code integer,
+  p_retiro_oficina_nombre text,
+  p_items jsonb
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_pedido_id uuid;
+  v_item jsonb;
+  v_variante_id uuid;
+  v_cantidad integer;
+  v_precio_unitario integer;
+  v_nombre_producto text;
+  v_talla text;
+begin
+  if auth.uid() is null then
+    raise exception 'Debes iniciar sesión para comprar.';
+  end if;
+
+  insert into pedidos (
+    cliente_id, estado, total, direccion, comuna, comuna_code, calle, numero, depto,
+    destinatario_nombre, destinatario_telefono, destinatario_email,
+    servicio_type_code, retiro_oficina_code, retiro_oficina_nombre
+  ) values (
+    auth.uid(), 'pagado', p_total, p_direccion, p_comuna, p_comuna_code, p_calle, p_numero, p_depto,
+    p_destinatario_nombre, p_destinatario_telefono, p_destinatario_email,
+    p_servicio_type_code, p_retiro_oficina_code, p_retiro_oficina_nombre
+  )
+  returning id into v_pedido_id;
+
+  for v_item in select * from jsonb_array_elements(p_items)
+  loop
+    v_variante_id := (v_item ->> 'varianteId')::uuid;
+    v_cantidad := (v_item ->> 'cantidad')::integer;
+    v_precio_unitario := (v_item ->> 'precioUnitario')::integer;
+
+    update variantes
+    set stock = stock - v_cantidad
+    where id = v_variante_id and stock >= v_cantidad;
+
+    if not found then
+      select p.nombre, va.talla into v_nombre_producto, v_talla
+      from variantes va join productos p on p.id = va.producto_id
+      where va.id = v_variante_id;
+
+      raise exception 'Sin stock suficiente de % (talla %).',
+        coalesce(v_nombre_producto, 'producto'), coalesce(v_talla, '-');
+    end if;
+
+    insert into pedido_items (pedido_id, variante_id, cantidad, precio_unitario)
+    values (v_pedido_id, v_variante_id, v_cantidad, v_precio_unitario);
+  end loop;
+
+  return v_pedido_id;
+end;
+$$;
+
+revoke execute on function public.crear_pedido(
+  integer, text, text, text, text, text, text, text, text, text, integer, integer, text, jsonb
+) from public;
+
+grant execute on function public.crear_pedido(
+  integer, text, text, text, text, text, text, text, text, text, integer, integer, text, jsonb
+) to authenticated;
+
 -- ============================================
 -- PERMISOS ADMIN (panel de administracion)
 -- ============================================
