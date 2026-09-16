@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -8,6 +9,11 @@ const formatoPrecio = new Intl.NumberFormat("es-CL", {
   style: "currency",
   currency: "CLP",
 });
+
+function imagenDe(item: ItemPedido) {
+  const imagenes = item.variantes?.productos?.producto_imagenes ?? [];
+  return [...imagenes].sort((a, b) => a.orden - b.orden)[0]?.url ?? null;
+}
 
 function formatoFecha(fechaIso: string) {
   const fecha = new Date(fechaIso);
@@ -27,7 +33,10 @@ type ItemPedido = {
   precio_unitario: number;
   variantes: {
     talla: string | null;
-    productos: { nombre: string } | null;
+    productos: {
+      nombre: string;
+      producto_imagenes: { url: string; orden: number }[];
+    } | null;
   } | null;
 };
 
@@ -55,7 +64,7 @@ export default function Page() {
       const { data, error: errorConsulta } = await supabase
         .from("pedidos")
         .select(
-          "id, estado, total, created_at, numero_seguimiento, pedido_items(id, cantidad, precio_unitario, variantes(talla, productos(nombre)))"
+          "id, estado, total, created_at, numero_seguimiento, pedido_items(id, cantidad, precio_unitario, variantes(talla, productos(nombre, producto_imagenes(url, orden))))"
         )
         .eq("cliente_id", usuario.user.id)
         .order("created_at", { ascending: false });
@@ -110,19 +119,33 @@ export default function Page() {
                   </span>
                 </div>
 
-                <ul className="mt-4 flex flex-col gap-2 border-t border-black/10 pt-4">
-                  {pedido.pedido_items.map((item) => (
-                    <li key={item.id} className="flex items-center justify-between text-sm">
-                      <span>
-                        {item.variantes?.productos?.nombre ?? "Producto"}
-                        {item.variantes?.talla ? ` · Talla ${item.variantes.talla}` : ""}
-                        {` × ${item.cantidad}`}
-                      </span>
-                      <span className="text-zinc-600">
-                        {formatoPrecio.format(item.precio_unitario * item.cantidad)}
-                      </span>
-                    </li>
-                  ))}
+                <ul className="mt-4 flex flex-col gap-4 border-t border-black/10 pt-4">
+                  {pedido.pedido_items.map((item) => {
+                    const imagenUrl = imagenDe(item);
+                    return (
+                      <li key={item.id} className="flex items-center gap-4">
+                        <div className="relative h-16 w-14 shrink-0 overflow-hidden rounded-md bg-black/5">
+                          {imagenUrl && (
+                            <Image
+                              src={imagenUrl}
+                              alt={item.variantes?.productos?.nombre ?? "Producto"}
+                              fill
+                              sizes="56px"
+                              className="object-cover"
+                            />
+                          )}
+                        </div>
+                        <span className="flex-1 text-sm">
+                          {item.variantes?.productos?.nombre ?? "Producto"}
+                          {item.variantes?.talla ? ` · Talla ${item.variantes.talla}` : ""}
+                          {` × ${item.cantidad}`}
+                        </span>
+                        <span className="text-sm text-zinc-600">
+                          {formatoPrecio.format(item.precio_unitario * item.cantidad)}
+                        </span>
+                      </li>
+                    );
+                  })}
                 </ul>
 
                 {pedido.numero_seguimiento && (
