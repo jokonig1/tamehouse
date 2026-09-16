@@ -17,7 +17,20 @@ const COLOR_COMUNAS = "bg-[#eb6834] dark:bg-[#d95926]";
 const COLOR_USUARIOS_NUEVOS = "bg-[#eda100] dark:bg-[#c98500]";
 const COLOR_ALERTA = "bg-[#d03b3b] dark:bg-[#e66767]";
 
+const BORDE_INGRESOS = "border-t-[#2a78d6] dark:border-t-[#3987e5]";
+const BORDE_PRODUCTOS = "border-t-[#1baf7a] dark:border-t-[#199e70]";
+const BORDE_TALLAS = "border-t-[#4a3aa7] dark:border-t-[#9085e9]";
+const BORDE_COMUNAS = "border-t-[#eb6834] dark:border-t-[#d95926]";
 const BORDE_USUARIOS_TOTAL = "border-t-[#4a3aa7] dark:border-t-[#9085e9]";
+const BORDE_ALERTA = "border-t-[#d03b3b] dark:border-t-[#e66767]";
+
+// Tarjetas con franja de color arriba, mismo estilo en todo el
+// dashboard para que sea consistente.
+const TARJETA = "rounded-xl border border-t-4 border-black/8 p-5 dark:border-white/[.145]";
+
+// No tiene sentido mostrar "todas" las comunas/tallas/productos --
+// solo el top que de verdad importa para decidir algo.
+const TOP_N = 5;
 
 function IconoIngresos() {
   return (
@@ -50,6 +63,15 @@ function IconoAlerta() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
       <path d="M12 3 2 20h20L12 3Z" />
       <path d="M12 10v4M12 17h.01" />
+    </svg>
+  );
+}
+
+function IconoOjo() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
     </svg>
   );
 }
@@ -95,6 +117,7 @@ interface VarianteStockBajo {
   id: string;
   talla: string | null;
   stock: number;
+  producto_id: string;
   productos: { nombre: string } | null;
 }
 
@@ -130,7 +153,7 @@ export default function DashboardPage() {
         ),
       supabase
         .from("variantes")
-        .select("id, talla, stock, productos(nombre)")
+        .select("id, talla, stock, producto_id, productos(nombre)")
         .lte("stock", UMBRAL_STOCK_BAJO)
         .order("stock", { ascending: true }),
       supabase.from("perfiles").select("id, created_at").eq("rol", "cliente"),
@@ -228,7 +251,7 @@ export default function DashboardPage() {
     return Array.from(conteo.entries())
       .map(([nombre, v]) => ({ id: nombre, nombre, ...v }))
       .sort((a, b) => b.vendidos - a.vendidos)
-      .slice(0, 6);
+      .slice(0, TOP_N);
   }, [items]);
 
   const tallasMasVendidas = useMemo(() => {
@@ -241,7 +264,7 @@ export default function DashboardPage() {
     return Array.from(conteo.entries())
       .map(([label, valor]) => ({ id: label, label, valor }))
       .sort((a, b) => b.valor - a.valor)
-      .slice(0, 6);
+      .slice(0, TOP_N);
   }, [items]);
 
   const comunasFrecuentes = useMemo(() => {
@@ -253,7 +276,7 @@ export default function DashboardPage() {
     return Array.from(conteo.entries())
       .map(([label, valor]) => ({ id: label, label, valor }))
       .sort((a, b) => b.valor - a.valor)
-      .slice(0, 6);
+      .slice(0, TOP_N);
   }, [pedidos]);
 
   return (
@@ -301,7 +324,7 @@ export default function DashboardPage() {
               color={COLOR_USUARIOS_NUEVOS}
             />
             <StatTile
-              label="Variantes con stock bajo"
+              label="Productos con stock bajo"
               value={stockBajo.length.toString()}
               alerta={stockBajo.length > 0}
               icono={<IconoAlerta />}
@@ -309,7 +332,7 @@ export default function DashboardPage() {
             />
           </div>
 
-          <div className="rounded-xl border border-black/8 p-5 dark:border-white/[.145]">
+          <div className={`${TARJETA} ${BORDE_INGRESOS}`}>
             <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
               Ingresos por mes
             </h2>
@@ -320,7 +343,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="rounded-xl border border-black/8 p-5 dark:border-white/[.145]">
+            <div className={`${TARJETA} ${BORDE_PRODUCTOS}`}>
               <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
                 Productos más vendidos
               </h2>
@@ -335,7 +358,7 @@ export default function DashboardPage() {
               />
             </div>
 
-            <div className="rounded-xl border border-black/8 p-5 dark:border-white/[.145]">
+            <div className={`${TARJETA} ${BORDE_TALLAS}`}>
               <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
                 Tallas más vendidas
               </h2>
@@ -348,7 +371,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="rounded-xl border border-black/8 p-5 dark:border-white/[.145]">
+            <div className={`${TARJETA} ${BORDE_COMUNAS}`}>
               <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
                 Comunas más frecuentes
               </h2>
@@ -359,9 +382,7 @@ export default function DashboardPage() {
               />
             </div>
 
-            <div
-              className={`rounded-xl border border-t-4 border-black/8 p-5 dark:border-white/[.145] ${BORDE_USUARIOS_TOTAL}`}
-            >
+            <div className={`${TARJETA} ${BORDE_USUARIOS_TOTAL}`}>
               <h2 className="mb-1 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
                 Usuarios totales registrados
               </h2>
@@ -374,9 +395,9 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-black/8 p-5 dark:border-white/[.145]">
+          <div className={`${TARJETA} ${BORDE_ALERTA}`}>
             <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-              Variantes con stock bajo (≤ {UMBRAL_STOCK_BAJO})
+              Productos con stock bajo (≤ {UMBRAL_STOCK_BAJO})
             </h2>
 
             {stockBajo.length === 0 && (
@@ -402,6 +423,15 @@ export default function DashboardPage() {
                         }`}
                       >
                         {v.stock === 0 ? "Agotado" : `${v.stock} unidades`}
+                      </td>
+                      <td className="w-8 py-2 pl-2 text-right">
+                        <Link
+                          href={`/admin/productos/${v.producto_id}`}
+                          className="inline-flex text-zinc-500 hover:text-black dark:text-zinc-400 dark:hover:text-white"
+                          title="Ver / editar producto"
+                        >
+                          <IconoOjo />
+                        </Link>
                       </td>
                     </tr>
                   ))}
