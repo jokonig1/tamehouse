@@ -628,7 +628,7 @@ export default function Page() {
         </div>
       </div>
 
-      <div className="bg-zinc-50 px-6 py-10 sm:px-12">
+      <div className="bg-zinc-50 px-6 py-10 sm:px-12 lg:sticky lg:top-20 lg:h-fit lg:self-start">
         <div className="mx-auto flex max-w-md flex-col gap-6">
           <ul className="flex flex-col gap-4">
             {items.map((item) => (
