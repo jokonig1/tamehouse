@@ -11,10 +11,18 @@
 // su propio cliente, y consulta el tracking llamando a nuestra propia
 // ruta /api/chilexpress/tracking en vez de usar la librería directo.
 //
-// Ojo: qué frase exacta usa Chilexpress para cada evento
-// (RECEPCIONADO, ENTREGADO, etc.) solo lo vimos en el ejemplo fijo de
-// su documentación -- si en producción usan otra redacción, hay que
-// ajustar las palabras clave de abajo.
+// Palabras clave según la tabla oficial de eventos de tracking que
+// entrega Chilexpress (doc "Nuevas API Chilexpress"):
+//   4      RECEPCIONADA                          -> recibido por Chilexpress
+//   11-0   TRANSFERENCIA LOCAL (OTBCS)            -> en tránsito hacia destino
+//   13-0   PIEZA EN RUTA AL DESTINATARIO          -> en despacho hacia destinatario
+//   13-1   PIEZA EN RUTA AL REMITENTE             -> en despacho DE VUELTA a nosotros
+//   14-0   PIEZA ENTREGADA A DESTINATARIO         -> entregado al cliente
+//   14-1   PIEZA ENTREGADA A REMITENTE            -> devuelto a nosotros, NO es una entrega
+// Ojo con 13-1/14-1: contienen "RUTA"/"ENTREGAD" igual que 13-0/14-0,
+// pero significan lo opuesto (el paquete vuelve, no que llegó al
+// cliente) -- por eso exigimos que la descripción también diga
+// "DESTINATARIO" antes de marcar despachado/entregado.
 //
 // Requiere en las variables de entorno de Netlify (Site settings >
 // Environment variables, no alcanza con .env.local): NEXT_PUBLIC_SUPABASE_URL,
@@ -72,9 +80,15 @@ const handler = async () => {
       const estadoEnvio = (await res.json()) as EstadoEnvio;
       const descripciones = estadoEnvio.eventos.map((e) => e.descripcion.toUpperCase());
 
-      const entregado = descripciones.some((d) => d.includes("ENTREGAD"));
+      const entregado = descripciones.some(
+        (d) => d.includes("ENTREGAD") && d.includes("DESTINATARIO")
+      );
       const recepcionado = descripciones.some(
-        (d) => d.includes("RECEPCION") || d.includes("RUTA") || d.includes("TRANSITO")
+        (d) =>
+          d.includes("RECEPCION") ||
+          d.includes("TRANSFERENCIA") ||
+          d.includes("TRANSITO") ||
+          (d.includes("RUTA") && d.includes("DESTINATARIO"))
       );
 
       let nuevoEstado: string | null = null;
