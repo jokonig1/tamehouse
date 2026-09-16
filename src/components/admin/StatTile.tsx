@@ -3,11 +3,20 @@ type StatTileProps = {
   value: string;
   delta?: { texto: string; esBueno: boolean } | null;
   alerta?: boolean;
+  // Clases Tailwind border-*, una por modo -- una franja de color por
+  // tarjeta para distinguirlas de un vistazo. Puramente identificativo
+  // (no es una métrica de estado), por eso no se usa la paleta de
+  // status acá salvo cuando alerta=true.
+  color?: string;
 };
 
-export default function StatTile({ label, value, delta, alerta }: StatTileProps) {
+export default function StatTile({ label, value, delta, alerta, color }: StatTileProps) {
   return (
-    <div className="rounded-xl border border-black/8 p-4 dark:border-white/[.145]">
+    <div
+      className={`rounded-xl border border-t-4 border-black/8 p-4 dark:border-white/[.145] ${
+        color ?? "border-t-black/8 dark:border-t-white/[.145]"
+      }`}
+    >
       <p className="text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
         {label}
       </p>

@@ -6,7 +6,20 @@ import { supabase } from "@/lib/supabase";
 import StatTile from "@/components/admin/StatTile";
 import BarraRanking from "@/components/admin/BarraRanking";
 import GraficoIngresosMensuales from "@/components/admin/GraficoIngresosMensuales";
-import BarraApilada from "@/components/admin/BarraApilada";
+
+// Un color por tarjeta (de la paleta categórica validada) para que el
+// dashboard se distinga de un vistazo -- adentro de cada gráfico
+// sigue siendo un solo hue, como pide la guía de dataviz.
+const COLOR_INGRESOS = "bg-[#2a78d6] dark:bg-[#3987e5]";
+const COLOR_PRODUCTOS = "bg-[#1baf7a] dark:bg-[#199e70]";
+const COLOR_TALLAS = "bg-[#4a3aa7] dark:bg-[#9085e9]";
+const COLOR_COMUNAS = "bg-[#eb6834] dark:bg-[#d95926]";
+
+const BORDE_INGRESOS = "border-t-[#2a78d6] dark:border-t-[#3987e5]";
+const BORDE_PEDIDOS = "border-t-[#1baf7a] dark:border-t-[#199e70]";
+const BORDE_USUARIOS_NUEVOS = "border-t-[#eda100] dark:border-t-[#c98500]";
+const BORDE_USUARIOS_TOTAL = "border-t-[#4a3aa7] dark:border-t-[#9085e9]";
+const BORDE_ALERTA = "border-t-[#d03b3b] dark:border-t-[#e66767]";
 
 const formatoPrecio = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" });
 const formatoCompacto = new Intl.NumberFormat("es-CL", {
@@ -23,7 +36,11 @@ interface PedidoConsulta {
   id: string;
   total: number;
   comuna: string | null;
-  retiro_oficina_code: number | null;
+  created_at: string;
+}
+
+interface PerfilConsulta {
+  id: string;
   created_at: string;
 }
 
@@ -57,6 +74,7 @@ export default function DashboardPage() {
   const [pedidos, setPedidos] = useState<PedidoConsulta[]>([]);
   const [items, setItems] = useState<PedidoItemConsulta[]>([]);
   const [stockBajo, setStockBajo] = useState<VarianteStockBajo[]>([]);
+  const [clientes, setClientes] = useState<PerfilConsulta[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,10 +82,10 @@ export default function DashboardPage() {
     setCargando(true);
     setError(null);
 
-    const [respPedidos, respItems, respStock] = await Promise.all([
+    const [respPedidos, respItems, respStock, respClientes] = await Promise.all([
       supabase
         .from("pedidos")
-        .select("id, total, comuna, retiro_oficina_code, created_at")
+        .select("id, total, comuna, created_at")
         .order("created_at", { ascending: false }),
       supabase
         .from("pedido_items")
@@ -77,13 +95,15 @@ export default function DashboardPage() {
         .select("id, talla, stock, productos(nombre)")
         .lte("stock", UMBRAL_STOCK_BAJO)
         .order("stock", { ascending: true }),
+      supabase.from("perfiles").select("id, created_at").eq("rol", "cliente"),
     ]);
 
-    if (respPedidos.error || respItems.error || respStock.error) {
+    if (respPedidos.error || respItems.error || respStock.error || respClientes.error) {
       setError(
         respPedidos.error?.message ??
           respItems.error?.message ??
           respStock.error?.message ??
+          respClientes.error?.message ??
           "No se pudieron cargar las métricas."
       );
       setCargando(false);
@@ -93,6 +113,7 @@ export default function DashboardPage() {
     setPedidos((respPedidos.data ?? []) as unknown as PedidoConsulta[]);
     setItems((respItems.data ?? []) as unknown as PedidoItemConsulta[]);
     setStockBajo((respStock.data ?? []) as unknown as VarianteStockBajo[]);
+    setClientes((respClientes.data ?? []) as unknown as PerfilConsulta[]);
     setCargando(false);
   }, []);
 
@@ -136,17 +157,21 @@ export default function DashboardPage() {
         ? Math.round(((ingresosEsteMes - ingresosMesAnterior) / ingresosMesAnterior) * 100)
         : null;
 
-    const ticketPromedio = pedidos.length > 0
-      ? pedidos.reduce((suma, p) => suma + p.total, 0) / pedidos.length
-      : 0;
-
     return {
       ingresosEsteMes,
       pedidosEsteMes: pedidosEsteMes.length,
       deltaIngresos,
-      ticketPromedio,
     };
   }, [pedidos]);
+
+  const usuarios = useMemo(() => {
+    const claveEsteMes = claveMes(new Date());
+    const nuevosEsteMes = clientes.filter(
+      (c) => claveMes(new Date(c.created_at)) === claveEsteMes
+    ).length;
+
+    return { nuevosEsteMes, total: clientes.length };
+  }, [clientes]);
 
   const productosMasVendidos = useMemo(() => {
     const conteo = new Map<string, number>();
@@ -186,15 +211,6 @@ export default function DashboardPage() {
       .slice(0, 6);
   }, [pedidos]);
 
-  const entrega = useMemo(() => {
-    const retiro = pedidos.filter((p) => p.retiro_oficina_code !== null).length;
-    const envio = pedidos.length - retiro;
-    return [
-      { id: "envio", label: "Envío a domicilio", valor: envio, color: "bg-[#2a78d6] dark:bg-[#3987e5]" },
-      { id: "retiro", label: "Retiro en sucursal", valor: retiro, color: "bg-[#eb6834] dark:bg-[#d95926]" },
-    ];
-  }, [pedidos]);
-
   return (
     <div>
       <nav className="mb-2 text-xs text-zinc-500 dark:text-zinc-400">
@@ -212,7 +228,7 @@ export default function DashboardPage() {
 
       {!cargando && !error && (
         <div className="flex flex-col gap-8">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             <StatTile
               label="Ingresos este mes"
               value={formatoPrecio.format(kpis.ingresosEsteMes)}
@@ -224,13 +240,28 @@ export default function DashboardPage() {
                       esBueno: kpis.deltaIngresos >= 0,
                     }
               }
+              color={BORDE_INGRESOS}
             />
-            <StatTile label="Pedidos este mes" value={kpis.pedidosEsteMes.toString()} />
-            <StatTile label="Ticket promedio" value={formatoPrecio.format(kpis.ticketPromedio)} />
+            <StatTile
+              label="Pedidos este mes"
+              value={kpis.pedidosEsteMes.toString()}
+              color={BORDE_PEDIDOS}
+            />
+            <StatTile
+              label="Usuarios nuevos este mes"
+              value={usuarios.nuevosEsteMes.toString()}
+              color={BORDE_USUARIOS_NUEVOS}
+            />
+            <StatTile
+              label="Usuarios totales"
+              value={usuarios.total.toString()}
+              color={BORDE_USUARIOS_TOTAL}
+            />
             <StatTile
               label="Variantes con stock bajo"
               value={stockBajo.length.toString()}
               alerta={stockBajo.length > 0}
+              color={stockBajo.length > 0 ? BORDE_ALERTA : undefined}
             />
           </div>
 
@@ -241,6 +272,7 @@ export default function DashboardPage() {
             <GraficoIngresosMensuales
               datos={ingresosPorMes.map((b) => ({ mes: b.mes, ingresos: b.ingresos }))}
               formatoValor={(n) => formatoCompacto.format(n)}
+              color={COLOR_INGRESOS}
             />
           </div>
 
@@ -249,31 +281,34 @@ export default function DashboardPage() {
               <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
                 Productos más vendidos
               </h2>
-              <BarraRanking items={productosMasVendidos} vacio="Todavía no hay ventas." />
+              <BarraRanking
+                items={productosMasVendidos}
+                vacio="Todavía no hay ventas."
+                color={COLOR_PRODUCTOS}
+              />
             </div>
 
             <div className="rounded-xl border border-black/8 p-5 dark:border-white/[.145]">
               <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
                 Tallas más vendidas
               </h2>
-              <BarraRanking items={tallasMasVendidas} vacio="Todavía no hay ventas." />
+              <BarraRanking
+                items={tallasMasVendidas}
+                vacio="Todavía no hay ventas."
+                color={COLOR_TALLAS}
+              />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="rounded-xl border border-black/8 p-5 dark:border-white/[.145]">
-              <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-                Comunas más frecuentes
-              </h2>
-              <BarraRanking items={comunasFrecuentes} vacio="Todavía no hay pedidos." />
-            </div>
-
-            <div className="rounded-xl border border-black/8 p-5 dark:border-white/[.145]">
-              <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-                Envío vs. retiro
-              </h2>
-              <BarraApilada segmentos={entrega} />
-            </div>
+          <div className="rounded-xl border border-black/8 p-5 dark:border-white/[.145]">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+              Comunas más frecuentes
+            </h2>
+            <BarraRanking
+              items={comunasFrecuentes}
+              vacio="Todavía no hay pedidos."
+              color={COLOR_COMUNAS}
+            />
           </div>
 
           <div className="rounded-xl border border-black/8 p-5 dark:border-white/[.145]">

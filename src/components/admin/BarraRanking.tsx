@@ -4,12 +4,16 @@ type BarraRankingProps = {
   items: Item[];
   formatoValor?: (n: number) => string;
   vacio?: string;
+  // Clases Tailwind bg-*, una por modo. Cada tarjeta del dashboard usa
+  // su propio color para distinguirse de un vistazo, pero adentro de
+  // CADA gráfico sigue siendo un solo hue (secuencial) porque el
+  // trabajo es "comparar tamaño", no "distinguir series".
+  color?: string;
 };
 
-// Barras horizontales para comparar magnitud entre categorías (top
-// productos, tallas, comunas). Un solo hue (secuencial) porque el
-// trabajo es "comparar tamaño", no "distinguir series".
-export default function BarraRanking({ items, formatoValor, vacio }: BarraRankingProps) {
+const COLOR_DEFECTO = "bg-[#2a78d6] dark:bg-[#3987e5]";
+
+export default function BarraRanking({ items, formatoValor, vacio, color }: BarraRankingProps) {
   if (items.length === 0) {
     return <p className="text-sm text-zinc-500 dark:text-zinc-400">{vacio ?? "Sin datos."}</p>;
   }
@@ -27,7 +31,7 @@ export default function BarraRanking({ items, formatoValor, vacio }: BarraRankin
           <div className="flex flex-1 items-center gap-2">
             <div className="h-5 flex-1 overflow-hidden rounded-sm bg-black/[.04] dark:bg-white/[.06]">
               <div
-                className="h-full rounded-r-sm bg-[#2a78d6] dark:bg-[#3987e5]"
+                className={`h-full rounded-r-sm ${color ?? COLOR_DEFECTO}`}
                 style={{ width: `${Math.max(4, (item.valor / max) * 100)}%` }}
                 title={`${item.label}: ${formatear(item.valor)}`}
               />
