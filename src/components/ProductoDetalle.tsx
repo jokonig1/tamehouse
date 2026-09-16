@@ -66,7 +66,7 @@ export default function ProductoDetalle({
 
   const tieneVariantes = variantes.length > 0;
   const varianteActual = variantes.find(
-    (v) => v.color === color && v.talla?.toUpperCase() === talla
+    (v) => v.color === color && (v.talla?.toUpperCase() ?? null) === talla
   );
   const stockDisponible = tieneVariantes ? (varianteActual?.stock ?? 0) : null;
   const disponible = tieneVariantes ? !!varianteActual && (stockDisponible ?? 0) > 0 : true;
