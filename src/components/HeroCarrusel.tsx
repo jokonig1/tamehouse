@@ -52,7 +52,7 @@ export default function HeroCarrusel({ slides }: HeroCarruselProps) {
       ))}
 
       {slidesAMostrar.length > 1 && (
-        <div className="absolute inset-x-0 bottom-4 z-10 flex items-center justify-center gap-2 sm:hidden">
+        <div className="absolute inset-x-0 bottom-1 z-10 flex items-center justify-center gap-2 sm:hidden">
           {slidesAMostrar.map((slide, i) => (
             <span
               key={slide.url}
