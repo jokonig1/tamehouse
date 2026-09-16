@@ -247,57 +247,43 @@ export default function Page() {
         ? comunas.find((c) => c.countyCode === comunaCode)?.countyName ?? ""
         : comunaRetiroNombre;
 
-    const { data: pedido, error: errorInsertPedido } = await supabase
-      .from("pedidos")
-      .insert({
-        cliente_id: user.id,
-        estado: "pagado",
-        total,
-        direccion:
-          entrega === "envio"
-            ? `${calleEnvio.trim()} ${numeroEnvio.trim()}`
-            : `Retiro en ${oficina?.officeName ?? "sucursal"}`,
-        comuna: comunaNombre,
-        comuna_code: entrega === "envio" ? comunaCode : comunaRetiroCode,
-        calle: entrega === "envio" ? calleEnvio.trim() : "DEFAULT",
-        numero: entrega === "envio" ? numeroEnvio.trim() : "0",
-        depto: entrega === "envio" ? depto.trim() || null : null,
-        destinatario_nombre: `${nombre.trim()} ${apellidos.trim()}`.trim(),
-        destinatario_telefono: telefono.trim(),
-        destinatario_email: email.trim(),
-        servicio_type_code: entrega === "envio" ? servicioSeleccionado : servicioRetiro,
-        retiro_oficina_code: entrega === "retiro" ? oficinaSeleccionada : null,
-        retiro_oficina_nombre: entrega === "retiro" ? oficina?.officeName ?? null : null,
-      })
-      .select("id")
-      .single();
-
-    if (errorInsertPedido || !pedido) {
-      setErrorPedido(errorInsertPedido?.message ?? "No se pudo crear el pedido.");
-      setCreandoPedido(false);
-      return;
-    }
-
-    const { error: errorInsertItems } = await supabase.from("pedido_items").insert(
-      items.map((item) => ({
-        pedido_id: pedido.id,
-        variante_id: item.id,
+    // crear_pedido hace todo en un solo paso atómico dentro de la base
+    // de datos: crea el pedido, guarda los items y descuenta el stock
+    // de cada variante -- si a algún producto no le alcanza el stock,
+    // no queda nada a medias (ni el pedido ni los items se crean).
+    const { data: pedidoId, error: errorPedidoRpc } = await supabase.rpc("crear_pedido", {
+      p_total: total,
+      p_direccion:
+        entrega === "envio"
+          ? `${calleEnvio.trim()} ${numeroEnvio.trim()}`
+          : `Retiro en ${oficina?.officeName ?? "sucursal"}`,
+      p_comuna: comunaNombre,
+      p_comuna_code: entrega === "envio" ? comunaCode : comunaRetiroCode,
+      p_calle: entrega === "envio" ? calleEnvio.trim() : "DEFAULT",
+      p_numero: entrega === "envio" ? numeroEnvio.trim() : "0",
+      p_depto: entrega === "envio" ? depto.trim() || null : null,
+      p_destinatario_nombre: `${nombre.trim()} ${apellidos.trim()}`.trim(),
+      p_destinatario_telefono: telefono.trim(),
+      p_destinatario_email: email.trim(),
+      p_servicio_type_code: entrega === "envio" ? servicioSeleccionado : servicioRetiro,
+      p_retiro_oficina_code: entrega === "retiro" ? oficinaSeleccionada : null,
+      p_retiro_oficina_nombre: entrega === "retiro" ? oficina?.officeName ?? null : null,
+      p_items: items.map((item) => ({
+        varianteId: item.id,
         cantidad: item.cantidad,
-        precio_unitario: item.precio,
-      }))
-    );
+        precioUnitario: item.precio,
+      })),
+    });
 
     setCreandoPedido(false);
 
-    if (errorInsertItems) {
-      setErrorPedido(
-        `El pedido se creó pero no se pudieron guardar los productos: ${errorInsertItems.message}`
-      );
+    if (errorPedidoRpc || !pedidoId) {
+      setErrorPedido(errorPedidoRpc?.message ?? "No se pudo crear el pedido.");
       return;
     }
 
     clearCart();
-    setPedidoCreado(pedido.id);
+    setPedidoCreado(pedidoId);
   }
 
   if (pedidoCreado) {
