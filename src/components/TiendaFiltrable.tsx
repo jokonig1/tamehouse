@@ -38,16 +38,9 @@ export default function TiendaFiltrable({ productos }: { productos: Producto[] }
         <button
           type="button"
           onClick={() => setCategoria(null)}
-          className={`flex h-10 shrink-0 items-center gap-2 rounded-full px-5 text-sm font-semibold transition-all duration-200 ${pillClass(categoria === null)}`}
+          className={`h-10 shrink-0 rounded-full px-5 text-sm font-semibold transition-all duration-200 ${pillClass(categoria === null)}`}
         >
           Ver todo
-          <span
-            className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold ${
-              categoria === null ? "bg-white/20" : "bg-black/10 dark:bg-white/20"
-            }`}
-          >
-            {lista.length}
-          </span>
         </button>
 
         {categorias.map((c) => (
