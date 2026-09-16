@@ -36,10 +36,7 @@ export default async function Home() {
 
       <section className="mx-auto w-full max-w-6xl px-6 py-12">
         <RevealOnScroll>
-          <h2 className="text-2xl font-semibold tracking-tight">Tienda</h2>
-          <div className="mt-6">
-            <TiendaFiltrable productos={productos} />
-          </div>
+          <TiendaFiltrable productos={productos} />
         </RevealOnScroll>
       </section>
     </div>

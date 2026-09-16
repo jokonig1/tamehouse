@@ -6,8 +6,8 @@ import { PRODUCTOS_BOCETO, type Producto } from "@/lib/productos";
 
 function pillClass(activo: boolean) {
   return activo
-    ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
-    : "border-black/10 bg-white text-black hover:bg-black/5 dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/10";
+    ? "bg-black text-white shadow-sm dark:bg-white dark:text-black"
+    : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/20";
 }
 
 export default function TiendaFiltrable({ productos }: { productos: Producto[] }) {
@@ -34,14 +34,20 @@ export default function TiendaFiltrable({ productos }: { productos: Producto[] }
 
   return (
     <div>
-      <div className="flex items-center gap-3 overflow-x-auto pb-2">
+      <div className="flex flex-wrap items-center gap-2.5 sm:flex-nowrap sm:overflow-x-auto sm:pb-2">
         <button
           type="button"
           onClick={() => setCategoria(null)}
-          className={`flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-5 text-sm font-medium transition-colors ${pillClass(categoria === null)}`}
+          className={`flex h-10 shrink-0 items-center gap-2 rounded-full px-5 text-sm font-semibold transition-all duration-200 ${pillClass(categoria === null)}`}
         >
           Ver todo
-          <span className="text-xs opacity-60">{lista.length}</span>
+          <span
+            className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold ${
+              categoria === null ? "bg-white/20" : "bg-black/10 dark:bg-white/20"
+            }`}
+          >
+            {lista.length}
+          </span>
         </button>
 
         {categorias.map((c) => (
@@ -49,7 +55,7 @@ export default function TiendaFiltrable({ productos }: { productos: Producto[] }
             key={c}
             type="button"
             onClick={() => setCategoria(c)}
-            className={`h-10 shrink-0 rounded-full border px-5 text-sm font-medium transition-colors ${pillClass(categoria === c)}`}
+            className={`h-10 shrink-0 rounded-full px-5 text-sm font-semibold transition-all duration-200 ${pillClass(categoria === c)}`}
           >
             {c}
           </button>
@@ -62,7 +68,7 @@ export default function TiendaFiltrable({ productos }: { productos: Producto[] }
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               placeholder="Buscar productos..."
-              className="h-10 w-40 rounded-full border border-black/10 px-4 text-sm outline-none dark:border-white/20 dark:bg-transparent sm:w-56"
+              className="h-10 w-40 rounded-full bg-zinc-100 px-4 text-sm outline-none dark:bg-white/10 sm:w-56"
             />
           )}
           <button
@@ -72,7 +78,7 @@ export default function TiendaFiltrable({ productos }: { productos: Producto[] }
               setBusquedaAbierta((v) => !v);
             }}
             aria-label="Buscar"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
