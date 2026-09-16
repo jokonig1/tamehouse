@@ -66,10 +66,11 @@ export default function ProductoDetalle({
 
   const tieneVariantes = variantes.length > 0;
   const varianteActual = variantes.find(
-    (v) => v.color === color && v.talla?.toUpperCase() === talla
+    (v) => v.color === color && (v.talla?.toUpperCase() ?? null) === talla
   );
   const stockDisponible = tieneVariantes ? (varianteActual?.stock ?? 0) : null;
   const disponible = tieneVariantes ? !!varianteActual && (stockDisponible ?? 0) > 0 : true;
+  const agotado = tieneVariantes && variantes.every((v) => v.stock <= 0);
 
   function tallaDisponible(t: string) {
     const variante = variantes.find((v) => v.color === color && v.talla?.toUpperCase() === t);
@@ -126,6 +127,12 @@ export default function ProductoDetalle({
           {formatoPrecio.format(producto.precio)}
         </p>
       </div>
+
+      {agotado && (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          Sin stock disponible por el momento.
+        </div>
+      )}
 
       {producto.descripcion && (
         <p className="max-w-md text-sm text-black">{producto.descripcion}</p>
