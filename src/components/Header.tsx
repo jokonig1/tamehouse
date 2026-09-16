@@ -291,7 +291,7 @@ export default function Header() {
       </div>
 
       {menuAbierto && (
-        <div className="border-t border-white/10 bg-black text-white sm:hidden">
+        <div className="absolute inset-x-0 top-full border-t border-white/10 bg-black text-white sm:hidden">
           <nav className="flex flex-col px-6 py-4 text-sm font-medium uppercase tracking-widest">
             {NAV_LINKS.map((link) => (
               <Link
