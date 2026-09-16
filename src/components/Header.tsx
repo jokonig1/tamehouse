@@ -128,7 +128,7 @@ export default function Header() {
             aria-label={menuAbierto ? "Cerrar menú" : "Abrir menú"}
             aria-expanded={menuAbierto}
             onClick={() => setMenuAbierto((v) => !v)}
-            className="flex h-6 w-6 items-center justify-center sm:hidden"
+            className="flex h-6 w-6 items-center justify-center lg:hidden"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -147,7 +147,7 @@ export default function Header() {
           </button>
 
           <nav
-            className={`hidden gap-10 text-sm font-medium uppercase tracking-widest transition-all sm:flex ${
+            className={`hidden gap-10 text-sm font-medium uppercase tracking-widest transition-all lg:flex ${
               transparenteVisual ? "-mt-3" : ""
             }`}
           >
@@ -198,7 +198,7 @@ export default function Header() {
           }`}
         >
           {conSesion ? (
-            <div className="group relative hidden sm:block">
+            <div className="group relative hidden lg:block">
               <Link
                 href="/mi-cuenta"
                 className="flex items-center gap-1.5 text-sm font-medium uppercase tracking-widest hover:opacity-70"
@@ -249,7 +249,7 @@ export default function Header() {
           ) : (
             <Link
               href="/login"
-              className="hidden items-center text-sm font-medium uppercase tracking-widest hover:opacity-70 sm:flex"
+              className="hidden items-center text-sm font-medium uppercase tracking-widest hover:opacity-70 lg:flex"
             >
               Ingresa
             </Link>
@@ -258,7 +258,7 @@ export default function Header() {
             href="/#tienda"
             aria-label="Buscar"
             onClick={pathname === "/" ? irATienda : undefined}
-            className="hover:opacity-70 sm:hidden"
+            className="hover:opacity-70 lg:hidden"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -292,7 +292,7 @@ export default function Header() {
       </div>
 
       {menuAbierto && (
-        <div className="absolute inset-x-0 top-full border-t border-white/10 bg-black text-white sm:hidden">
+        <div className="absolute inset-x-0 top-full border-t border-white/10 bg-black text-white lg:hidden">
           <nav className="flex flex-col px-6 py-4 text-sm font-medium uppercase tracking-widest">
             {NAV_LINKS.map((link) => (
               <Link
