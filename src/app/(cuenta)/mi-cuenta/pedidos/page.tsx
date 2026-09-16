@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import SeguimientoPedido from "@/components/SeguimientoPedido";
 import { supabase } from "@/lib/supabase";
 
 const formatoPrecio = new Intl.NumberFormat("es-CL", {
@@ -52,6 +53,16 @@ type Pedido = {
 export default function Page() {
   const [pedidos, setPedidos] = useState<Pedido[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [expandidos, setExpandidos] = useState<Set<string>>(new Set());
+
+  function alternarExpandido(id: string) {
+    setExpandidos((prev) => {
+      const siguiente = new Set(prev);
+      if (siguiente.has(id)) siguiente.delete(id);
+      else siguiente.add(id);
+      return siguiente;
+    });
+  }
 
   useEffect(() => {
     async function cargar() {
@@ -148,16 +159,28 @@ export default function Page() {
                   })}
                 </ul>
 
-                {pedido.numero_seguimiento && (
-                  <p className="mt-3 text-xs text-zinc-500">
-                    N.º de seguimiento: {pedido.numero_seguimiento}
-                  </p>
-                )}
-
                 <div className="mt-4 flex items-center justify-between border-t border-black/10 pt-4 font-semibold">
                   <span>Total</span>
                   <span>{formatoPrecio.format(pedido.total)}</span>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => alternarExpandido(pedido.id)}
+                  className="mt-4 text-sm font-medium underline hover:opacity-70"
+                >
+                  {expandidos.has(pedido.id) ? "Ver menos" : "Ver más"}
+                </button>
+
+                {expandidos.has(pedido.id) && (
+                  <div className="mt-4 border-t border-black/10 pt-4">
+                    <SeguimientoPedido
+                      estado={pedido.estado}
+                      fechaCreacion={pedido.created_at}
+                      numeroSeguimiento={pedido.numero_seguimiento}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
