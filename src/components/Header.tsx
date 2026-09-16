@@ -31,7 +31,8 @@ export default function Header() {
   const [esAdmin, setEsAdmin] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(false);
   const { logoOscuro } = useHero();
-  const modoOscuro = transparente && logoOscuro;
+  const transparenteVisual = transparente && !menuAbierto;
+  const modoOscuro = transparenteVisual && logoOscuro;
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- cierra el menú móvil al cambiar de ruta
@@ -113,12 +114,12 @@ export default function Header() {
   return (
     <header
       className={`sticky top-0 z-20 transition-colors ${
-        transparente ? "bg-transparent" : "bg-black"
+        transparenteVisual ? "bg-transparent" : "bg-black"
       } ${modoOscuro ? "text-black" : "text-white"}`}
     >
       <div
         className={`grid h-20 w-full grid-cols-3 items-center px-6 transition-all sm:px-10 ${
-          transparente ? "pt-3" : ""
+          transparenteVisual ? "pt-3" : ""
         }`}
       >
         <div className="flex items-center justify-start">
@@ -147,7 +148,7 @@ export default function Header() {
 
           <nav
             className={`hidden gap-10 text-sm font-medium uppercase tracking-widest transition-all sm:flex ${
-              transparente ? "-mt-3" : ""
+              transparenteVisual ? "-mt-3" : ""
             }`}
           >
             {NAV_LINKS.map((link) => (
@@ -175,7 +176,7 @@ export default function Header() {
             width={1224}
             height={1285}
             className={`absolute left-1/2 top-1/2 h-28 w-auto -translate-x-1/2 -translate-y-[calc(50%-14px)] object-contain transition-opacity duration-500 ${
-              transparente ? "opacity-100" : "opacity-0"
+              transparenteVisual ? "opacity-100" : "opacity-0"
             }`}
             priority
           />
@@ -185,7 +186,7 @@ export default function Header() {
             width={1024}
             height={1024}
             className={`absolute left-1/2 top-1/2 h-14 w-auto -translate-x-1/2 -translate-y-1/2 object-contain transition-opacity duration-500 ${
-              transparente ? "opacity-0" : "opacity-100"
+              transparenteVisual ? "opacity-0" : "opacity-100"
             }`}
             priority
           />
@@ -193,7 +194,7 @@ export default function Header() {
 
         <div
           className={`flex items-center justify-end gap-8 transition-all ${
-            transparente ? "-mt-3" : ""
+            transparenteVisual ? "-mt-3" : ""
           }`}
         >
           {conSesion ? (
