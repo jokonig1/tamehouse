@@ -17,7 +17,7 @@ export default function AdminHeader() {
   return (
     <header className="sticky top-0 z-20 bg-black text-white">
       <div className="grid h-20 w-full grid-cols-3 items-center px-6">
-        <Link href="/admin/productos" aria-label="Tamehouse" className="flex items-center">
+        <Link href="/admin/pedidos" aria-label="Tamehouse" className="flex items-center">
           <Image
             src="/images/logolobo1.png"
             alt="Tamehouse"

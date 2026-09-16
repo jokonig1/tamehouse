@@ -221,7 +221,7 @@ export default function Header() {
                 <div className="w-44 rounded-md border border-black/10 bg-white py-2 text-black shadow-lg">
                   {esAdmin && (
                     <Link
-                      href="/admin/productos"
+                      href="/admin/pedidos"
                       className="block px-4 py-2 text-sm hover:bg-black/5"
                     >
                       Panel admin
@@ -307,7 +307,7 @@ export default function Header() {
             {conSesion ? (
               <>
                 {esAdmin && (
-                  <Link href="/admin/productos" className="border-b border-white/10 py-3">
+                  <Link href="/admin/pedidos" className="border-b border-white/10 py-3">
                     Panel admin
                   </Link>
                 )}
