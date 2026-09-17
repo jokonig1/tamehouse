@@ -21,8 +21,7 @@ export default function EmbedBox({
         src={url}
         title={titulo}
         className="h-[152px] w-full rounded-lg"
-        allow="encrypted-media"
-        loading="lazy"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
       />
     );
   }
@@ -35,7 +34,6 @@ export default function EmbedBox({
         className="absolute inset-0 h-full w-full"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
-        loading="lazy"
       />
     </div>
   );
