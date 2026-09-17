@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import CodigoDescuentoRow from "@/components/admin/CodigoDescuentoRow";
+import PrecioInput from "@/components/admin/PrecioInput";
 import { campoClaseRedondeado, etiquetaClaseFuerte, tarjetaClase } from "@/components/admin/ProductoForm";
 import type { CodigoDescuento } from "@/lib/types";
 
@@ -158,44 +159,36 @@ export default function DescuentosPage() {
             <label className={etiquetaClaseFuerte}>
               Valor {tipo === "porcentaje" ? "(%)" : "(CLP)"}
             </label>
-            <input
-              type="number"
-              min={1}
+            <PrecioInput
               value={valor}
-              onChange={(e) => setValor(e.target.value)}
+              onChange={setValor}
+              prefijo={tipo === "monto_fijo" ? "$" : null}
+              sufijo={tipo === "porcentaje" ? "%" : undefined}
               className={campoClaseRedondeado}
             />
           </div>
           <div>
             <label className={etiquetaClaseFuerte}>Compra mínima (opcional)</label>
-            <input
-              type="number"
-              min={0}
+            <PrecioInput
               value={montoMinimo}
-              onChange={(e) => setMontoMinimo(e.target.value)}
-              placeholder="Sin mínimo"
+              onChange={setMontoMinimo}
               className={campoClaseRedondeado}
             />
           </div>
           <div>
             <label className={etiquetaClaseFuerte}>Tope máximo de descuento (opcional)</label>
-            <input
-              type="number"
-              min={1}
+            <PrecioInput
               value={topeMaximo}
-              onChange={(e) => setTopeMaximo(e.target.value)}
-              placeholder="Sin tope"
+              onChange={setTopeMaximo}
               className={campoClaseRedondeado}
             />
           </div>
           <div>
             <label className={etiquetaClaseFuerte}>Usos máximos (opcional)</label>
-            <input
-              type="number"
-              min={1}
+            <PrecioInput
               value={usosMaximos}
-              onChange={(e) => setUsosMaximos(e.target.value)}
-              placeholder="Sin límite"
+              onChange={setUsosMaximos}
+              prefijo={null}
               className={campoClaseRedondeado}
             />
           </div>

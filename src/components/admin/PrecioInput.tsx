@@ -6,9 +6,19 @@ interface PrecioInputProps {
   value: string;
   onChange: (value: string) => void;
   className: string;
+  // "$" por defecto (uso original: precios). Pasa null para números
+  // sin símbolo (ej. usos máximos) o cambia el sufijo para "%", etc.
+  prefijo?: string | null;
+  sufijo?: string;
 }
 
-export default function PrecioInput({ value, onChange, className }: PrecioInputProps) {
+export default function PrecioInput({
+  value,
+  onChange,
+  className,
+  prefijo = "$",
+  sufijo,
+}: PrecioInputProps) {
   const formateado = value ? Number(value).toLocaleString("es-CL") : "";
 
   function manejarCambio(e: ChangeEvent<HTMLInputElement>) {
@@ -17,7 +27,7 @@ export default function PrecioInput({ value, onChange, className }: PrecioInputP
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-zinc-500">$</span>
+      {prefijo && <span className="text-sm text-zinc-500">{prefijo}</span>}
       <input
         type="text"
         inputMode="numeric"
@@ -25,6 +35,7 @@ export default function PrecioInput({ value, onChange, className }: PrecioInputP
         onChange={manejarCambio}
         className={className}
       />
+      {sufijo && <span className="text-sm text-zinc-500">{sufijo}</span>}
     </div>
   );
 }
