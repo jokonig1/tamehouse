@@ -1009,3 +1009,15 @@ begin
   return v_pedido_id;
 end;
 $$;
+
+-- Recuerda si la oferta rápida (desde la fila del listado de
+-- productos) se cargó como % o como $ fijo, para poder mostrar el
+-- mismo tipo la próxima vez que se abre el editor -- precio_oferta ya
+-- guarda el precio final calculado y sigue siendo lo único que usan
+-- catálogo/ficha/carrito. Si la oferta se edita desde el formulario
+-- completo de producto (que solo pide el precio final), estas dos
+-- columnas se limpian a null porque ya no se sabe con qué tipo se
+-- originó.
+alter table productos
+  add column oferta_tipo text check (oferta_tipo in ('porcentaje', 'monto_fijo')),
+  add column oferta_valor integer;

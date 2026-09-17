@@ -28,6 +28,8 @@ export default function ProductoRow({
   const [precio, setPrecio] = useState(producto.precio);
   const [precioOferta, setPrecioOferta] = useState(producto.precioOferta);
   const [ofertaHasta, setOfertaHasta] = useState(producto.ofertaHasta);
+  const [ofertaTipo, setOfertaTipo] = useState(producto.ofertaTipo);
+  const [ofertaValor, setOfertaValor] = useState(producto.ofertaValor);
 
   const ofertaVigente =
     precioOferta !== null &&
@@ -199,9 +201,13 @@ export default function ProductoRow({
             onPrecioGuardado={setPrecio}
             precioOfertaInicial={precioOferta}
             ofertaHastaInicial={ofertaHasta}
-            onOfertaGuardada={(nuevoPrecioOferta, nuevaOfertaHasta) => {
+            ofertaTipoInicial={ofertaTipo}
+            ofertaValorInicial={ofertaValor}
+            onOfertaGuardada={(nuevoPrecioOferta, nuevaOfertaHasta, nuevoTipo, nuevoValor) => {
               setPrecioOferta(nuevoPrecioOferta);
               setOfertaHasta(nuevaOfertaHasta);
+              setOfertaTipo(nuevoTipo);
+              setOfertaValor(nuevoValor);
             }}
           />
         </div>

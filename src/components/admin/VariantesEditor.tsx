@@ -20,7 +20,14 @@ interface VariantesEditorProps {
   onPrecioGuardado: (nuevoPrecio: number) => void;
   precioOfertaInicial: number | null;
   ofertaHastaInicial: string | null;
-  onOfertaGuardada: (precioOferta: number | null, ofertaHasta: string | null) => void;
+  ofertaTipoInicial: TipoOferta | null;
+  ofertaValorInicial: number | null;
+  onOfertaGuardada: (
+    precioOferta: number | null,
+    ofertaHasta: string | null,
+    ofertaTipo: TipoOferta | null,
+    ofertaValor: number | null
+  ) => void;
 }
 
 function calcularPrecioOferta(precio: number, tipo: TipoOferta, valor: number) {
@@ -34,14 +41,20 @@ export default function VariantesEditor({
   onPrecioGuardado,
   precioOfertaInicial,
   ofertaHastaInicial,
+  ofertaTipoInicial,
+  ofertaValorInicial,
   onOfertaGuardada,
 }: VariantesEditorProps) {
   const [filas, setFilas] = useState<FilaTalla[]>([]);
   const [modoAvanzado, setModoAvanzado] = useState(false);
   const [precio, setPrecio] = useState(String(precioInicial));
-  const [tipoOferta, setTipoOferta] = useState<TipoOferta>("monto_fijo");
+  const [tipoOferta, setTipoOferta] = useState<TipoOferta>(ofertaTipoInicial ?? "monto_fijo");
   const [valorOferta, setValorOferta] = useState(
-    precioOfertaInicial !== null ? String(precioInicial - precioOfertaInicial) : ""
+    ofertaValorInicial !== null
+      ? String(ofertaValorInicial)
+      : precioOfertaInicial !== null
+        ? String(precioInicial - precioOfertaInicial)
+        : ""
   );
   const [ofertaHasta, setOfertaHasta] = useState(
     ofertaHastaInicial ? ofertaHastaInicial.slice(0, 10) : ""
@@ -104,8 +117,14 @@ export default function VariantesEditor({
   function cancelar() {
     setError(null);
     setPrecio(String(precioInicial));
-    setTipoOferta("monto_fijo");
-    setValorOferta(precioOfertaInicial !== null ? String(precioInicial - precioOfertaInicial) : "");
+    setTipoOferta(ofertaTipoInicial ?? "monto_fijo");
+    setValorOferta(
+      ofertaValorInicial !== null
+        ? String(ofertaValorInicial)
+        : precioOfertaInicial !== null
+          ? String(precioInicial - precioOfertaInicial)
+          : ""
+    );
     setOfertaHasta(ofertaHastaInicial ? ofertaHastaInicial.slice(0, 10) : "");
     cargarVariantes();
   }
@@ -154,15 +173,25 @@ export default function VariantesEditor({
 
     const ofertaHastaIso =
       precioOfertaNuevo !== null && ofertaHasta ? new Date(ofertaHasta).toISOString() : null;
+    const ofertaTipoNuevo = precioOfertaNuevo !== null ? tipoOferta : null;
+    const ofertaValorNuevo = precioOfertaNuevo !== null ? valorOfertaNumero : null;
     const huboCambioDePrecio =
       precioNumero !== precioInicial ||
       precioOfertaNuevo !== precioOfertaInicial ||
-      ofertaHastaIso !== ofertaHastaInicial;
+      ofertaHastaIso !== ofertaHastaInicial ||
+      ofertaTipoNuevo !== ofertaTipoInicial ||
+      ofertaValorNuevo !== ofertaValorInicial;
 
     if (huboCambioDePrecio) {
       const { error: errorPrecio } = await supabase
         .from("productos")
-        .update({ precio: precioNumero, precio_oferta: precioOfertaNuevo, oferta_hasta: ofertaHastaIso })
+        .update({
+          precio: precioNumero,
+          precio_oferta: precioOfertaNuevo,
+          oferta_hasta: ofertaHastaIso,
+          oferta_tipo: ofertaTipoNuevo,
+          oferta_valor: ofertaValorNuevo,
+        })
         .eq("id", productoId);
 
       if (errorPrecio) {
@@ -170,7 +199,7 @@ export default function VariantesEditor({
         setGuardando(false);
         return;
       }
-      onOfertaGuardada(precioOfertaNuevo, ofertaHastaIso);
+      onOfertaGuardada(precioOfertaNuevo, ofertaHastaIso, ofertaTipoNuevo, ofertaValorNuevo);
     }
 
     const nuevas = filas

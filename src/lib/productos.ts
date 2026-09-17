@@ -59,7 +59,7 @@ export async function getProducto(id: string): Promise<ProductoDetalle | null> {
   const { data } = await supabase
     .from("productos")
     .select(
-      "id, nombre, descripcion, precio, precio_oferta, oferta_hasta, categoria, activo, alto_cm, ancho_cm, largo_cm, peso_kg, created_at"
+      "id, nombre, descripcion, precio, precio_oferta, oferta_hasta, oferta_tipo, oferta_valor, categoria, activo, alto_cm, ancho_cm, largo_cm, peso_kg, created_at"
     )
     .eq("id", id)
     .eq("activo", true)

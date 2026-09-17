@@ -229,6 +229,12 @@ export default function EditarProductoPage() {
         peso_kg: pesoKg ? Number(pesoKg) : null,
         precio_oferta: precioOfertaNumero,
         oferta_hasta: ofertaHasta ? new Date(ofertaHasta).toISOString() : null,
+        // Se guarda con el precio final directo (no % ni $ de descuento),
+        // así que se limpia el recuerdo del tipo que usa el editor rápido
+        // de la fila del listado -- si no, quedaría mostrando un % o $
+        // que ya no corresponde al precio_oferta real.
+        oferta_tipo: null,
+        oferta_valor: null,
       })
       .eq("id", id);
 
