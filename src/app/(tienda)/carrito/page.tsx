@@ -37,7 +37,7 @@ export default function Page() {
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-white text-black">
       <div className="mx-auto w-full max-w-6xl px-6 py-16">
-        <span className="text-xs font-medium uppercase tracking-[0.3em] text-black">
+        <span className="text-xs font-medium uppercase tracking-[0.3em] text-red-500">
           Tu selección
         </span>
         <h1 className="mt-2 text-5xl font-extrabold uppercase tracking-tight sm:text-6xl">
@@ -94,7 +94,7 @@ export default function Page() {
                 </div>
 
                 <div className="flex flex-col items-end gap-2">
-                  <span className="font-medium text-green-600">
+                  <span className="font-medium text-amber-600">
                     {formatoPrecio.format(item.precio * item.cantidad)}
                   </span>
                   <button
