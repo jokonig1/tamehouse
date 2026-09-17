@@ -12,6 +12,21 @@ const formatoPrecio = new Intl.NumberFormat("es-CL", {
 
 const ORDEN_TALLAS = ["XS", "S", "M", "L", "XL", "XXL"];
 
+const COLORES: Record<string, string> = {
+  negro: "#171717",
+  blanco: "#f5f5f5",
+  gris: "#71717a",
+  rojo: "#ef4444",
+  azul: "#3b82f6",
+  verde: "#22c55e",
+  amarillo: "#eab308",
+  beige: "#d6cbb0",
+  cafe: "#78350f",
+  café: "#78350f",
+  rosado: "#f472b6",
+  rosa: "#f472b6",
+};
+
 export default function ProductoDetalle({
   producto,
   variantes,
@@ -21,6 +36,10 @@ export default function ProductoDetalle({
   variantes: Variante[];
   imagenUrl: string | null;
 }) {
+  const colores = useMemo(
+    () => Array.from(new Set(variantes.map((v) => v.color).filter((c): c is string => !!c))),
+    [variantes]
+  );
   const tallas = useMemo(() => {
     const disponibles = Array.from(
       new Set(
@@ -37,6 +56,7 @@ export default function ProductoDetalle({
     });
   }, [variantes]);
 
+  const [color, setColor] = useState(colores[0] ?? null);
   const [talla, setTalla] = useState(tallas[0] ?? null);
   const [cantidad, setCantidad] = useState(1);
   const [avisoStock, setAvisoStock] = useState(false);
@@ -45,13 +65,15 @@ export default function ProductoDetalle({
   const router = useRouter();
 
   const tieneVariantes = variantes.length > 0;
-  const varianteActual = variantes.find((v) => (v.talla?.toUpperCase() ?? null) === talla);
+  const varianteActual = variantes.find(
+    (v) => v.color === color && (v.talla?.toUpperCase() ?? null) === talla
+  );
   const stockDisponible = tieneVariantes ? (varianteActual?.stock ?? 0) : null;
   const disponible = tieneVariantes ? !!varianteActual && (stockDisponible ?? 0) > 0 : true;
   const agotado = tieneVariantes && variantes.every((v) => v.stock <= 0);
 
   function tallaDisponible(t: string) {
-    const variante = variantes.find((v) => v.talla?.toUpperCase() === t);
+    const variante = variantes.find((v) => v.color === color && v.talla?.toUpperCase() === t);
     return (variante?.stock ?? 0) > 0;
   }
 
@@ -62,7 +84,7 @@ export default function ProductoDetalle({
       nombre: producto.nombre,
       precio: producto.precio,
       talla,
-      color: null,
+      color,
       stockMaximo: stockDisponible,
       imagenUrl,
     };
@@ -114,6 +136,34 @@ export default function ProductoDetalle({
 
       {producto.descripcion && (
         <p className="max-w-md text-sm text-black">{producto.descripcion}</p>
+      )}
+
+      {colores.length > 0 && (
+        <div>
+          <h2 className="text-xs font-medium uppercase tracking-widest text-black">Color</h2>
+          <div className="mt-2 flex gap-3">
+            {colores.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => {
+                  setColor(c);
+                  setAvisoStock(false);
+                }}
+                aria-label={c}
+                title={c}
+                className={`h-8 w-8 rounded-full border-2 transition-colors ${
+                  color === c ? "border-black" : "border-transparent"
+                }`}
+              >
+                <span
+                  className="block h-full w-full rounded-full border border-black/10"
+                  style={{ backgroundColor: COLORES[c.toLowerCase()] ?? "#a1a1aa" }}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
       )}
 
       {tallas.length > 0 && (
