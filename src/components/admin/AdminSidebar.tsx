@@ -10,6 +10,7 @@ const enlaces = [
   { href: "/admin/descuentos", label: "Descuentos" },
   { href: "/admin/musica", label: "Música" },
   { href: "/admin/hero", label: "Portada" },
+  { href: "/admin/biografia", label: "Biografía" },
 ];
 
 export default function AdminSidebar() {
