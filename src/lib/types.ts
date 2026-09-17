@@ -42,6 +42,8 @@ export interface ProductoListado {
   id: string;
   nombre: string;
   precio: number;
+  precioOferta: number | null;
+  ofertaHasta: string | null;
   categoria: string | null;
   activo: boolean;
   stockTotal: number;

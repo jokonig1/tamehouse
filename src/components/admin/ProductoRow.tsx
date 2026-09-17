@@ -26,6 +26,12 @@ export default function ProductoRow({
   const [activo, setActivo] = useState(producto.activo);
   const [guardandoActivo, setGuardandoActivo] = useState(false);
   const [precio, setPrecio] = useState(producto.precio);
+  const [precioOferta, setPrecioOferta] = useState(producto.precioOferta);
+  const [ofertaHasta, setOfertaHasta] = useState(producto.ofertaHasta);
+
+  const ofertaVigente =
+    precioOferta !== null &&
+    (ofertaHasta === null || new Date(ofertaHasta).getTime() > new Date().getTime());
 
   async function alternarActivo() {
     const nuevoValor = !activo;
@@ -92,7 +98,7 @@ export default function ProductoRow({
           </div>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pl-9 text-xs text-zinc-600 dark:text-zinc-400">
-            <span>${precio.toLocaleString("es-CL")}</span>
+            <PrecioConOferta precio={precio} precioOferta={precioOferta} ofertaVigente={ofertaVigente} />
             <span className="flex items-center gap-1">
               {producto.stockTotal} unidades
               {producto.tieneTallaSinStock && <IconoAviso />}
@@ -153,7 +159,7 @@ export default function ProductoRow({
           </div>
 
           <span className="text-zinc-600 dark:text-zinc-400">{producto.categoria ?? "-"}</span>
-          <span>${precio.toLocaleString("es-CL")}</span>
+          <PrecioConOferta precio={precio} precioOferta={precioOferta} ofertaVigente={ofertaVigente} />
 
           <span className="flex items-center gap-1.5">
             {producto.stockTotal} unidades
@@ -191,13 +197,41 @@ export default function ProductoRow({
             productoId={producto.id}
             precioInicial={precio}
             onPrecioGuardado={setPrecio}
-            activo={activo}
-            guardandoActivo={guardandoActivo}
-            onAlternarActivo={alternarActivo}
+            precioOfertaInicial={precioOferta}
+            ofertaHastaInicial={ofertaHasta}
+            onOfertaGuardada={(nuevoPrecioOferta, nuevaOfertaHasta) => {
+              setPrecioOferta(nuevoPrecioOferta);
+              setOfertaHasta(nuevaOfertaHasta);
+            }}
           />
         </div>
       )}
     </div>
+  );
+}
+
+function PrecioConOferta({
+  precio,
+  precioOferta,
+  ofertaVigente,
+}: {
+  precio: number;
+  precioOferta: number | null;
+  ofertaVigente: boolean;
+}) {
+  if (precioOferta === null || !ofertaVigente) {
+    return <span>${precio.toLocaleString("es-CL")}</span>;
+  }
+
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className="text-zinc-400 line-through dark:text-zinc-500">
+        ${precio.toLocaleString("es-CL")}
+      </span>
+      <span className="font-semibold text-red-600 dark:text-red-400">
+        ${precioOferta.toLocaleString("es-CL")}
+      </span>
+    </span>
   );
 }
 

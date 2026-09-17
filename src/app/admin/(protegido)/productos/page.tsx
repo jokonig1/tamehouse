@@ -31,6 +31,8 @@ interface ProductoConVariantes {
   id: string;
   nombre: string;
   precio: number;
+  precio_oferta: number | null;
+  oferta_hasta: string | null;
   categoria: string | null;
   activo: boolean;
   variantes: VarianteStock[];
@@ -83,7 +85,9 @@ export default function ProductosPage() {
     setCargando(true);
     const { data, error } = await supabase
       .from("productos")
-      .select("id, nombre, precio, categoria, activo, variantes(stock), producto_imagenes(url, orden)")
+      .select(
+        "id, nombre, precio, precio_oferta, oferta_hasta, categoria, activo, variantes(stock), producto_imagenes(url, orden)"
+      )
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -100,6 +104,8 @@ export default function ProductosPage() {
           id: p.id,
           nombre: p.nombre,
           precio: p.precio,
+          precioOferta: p.precio_oferta,
+          ofertaHasta: p.oferta_hasta,
           categoria: p.categoria,
           activo: p.activo,
           stockTotal: p.variantes.reduce((acc, v) => acc + v.stock, 0),
