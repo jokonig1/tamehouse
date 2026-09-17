@@ -151,24 +151,16 @@ export default function Header() {
               transparenteVisual ? "-mt-3" : ""
             }`}
           >
-            {NAV_LINKS.map((link) => {
-              const activo = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={link.href === "/" ? irAlInicio : undefined}
-                  className="relative inline-block pb-1 hover:opacity-70"
-                >
-                  {link.label}
-                  <span
-                    className={`absolute inset-x-0 -bottom-0.5 h-[2px] rounded-full bg-current transition-transform duration-300 ${
-                      activo ? "scale-x-100" : "scale-x-0"
-                    }`}
-                  />
-                </Link>
-              );
-            })}
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={link.href === "/" ? irAlInicio : undefined}
+                className="hover:opacity-70"
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
         </div>
 
