@@ -11,6 +11,8 @@ export interface Producto {
   peso_kg: number | null;
   precio_oferta: number | null;
   oferta_hasta: string | null;
+  oferta_tipo: "porcentaje" | "monto_fijo" | null;
+  oferta_valor: number | null;
   created_at: string;
 }
 
@@ -42,6 +44,10 @@ export interface ProductoListado {
   id: string;
   nombre: string;
   precio: number;
+  precioOferta: number | null;
+  ofertaHasta: string | null;
+  ofertaTipo: "porcentaje" | "monto_fijo" | null;
+  ofertaValor: number | null;
   categoria: string | null;
   activo: boolean;
   stockTotal: number;

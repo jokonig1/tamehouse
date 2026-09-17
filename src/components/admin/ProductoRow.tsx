@@ -26,6 +26,14 @@ export default function ProductoRow({
   const [activo, setActivo] = useState(producto.activo);
   const [guardandoActivo, setGuardandoActivo] = useState(false);
   const [precio, setPrecio] = useState(producto.precio);
+  const [precioOferta, setPrecioOferta] = useState(producto.precioOferta);
+  const [ofertaHasta, setOfertaHasta] = useState(producto.ofertaHasta);
+  const [ofertaTipo, setOfertaTipo] = useState(producto.ofertaTipo);
+  const [ofertaValor, setOfertaValor] = useState(producto.ofertaValor);
+
+  const ofertaVigente =
+    precioOferta !== null &&
+    (ofertaHasta === null || new Date(ofertaHasta).getTime() > new Date().getTime());
 
   async function alternarActivo() {
     const nuevoValor = !activo;
@@ -56,125 +64,132 @@ export default function ProductoRow({
             setExpandido((v) => !v);
           }
         }}
-        className="grid cursor-pointer grid-cols-[1.5rem_1.5rem_2fr_1fr_1fr_1fr_7rem_6rem] items-center gap-6 px-4 py-4 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-900"
+        className="cursor-pointer px-4 py-4 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-900"
       >
-        <input
-          type="checkbox"
-          checked={seleccionado}
-          onClick={(e) => e.stopPropagation()}
-          onChange={onSeleccionar}
-          className="accent-blue-600"
-          aria-label={`Seleccionar ${producto.nombre}`}
-        />
-
-        <span aria-hidden="true" className="w-6 text-zinc-500">
-          {expandido ? "▾" : "▸"}
-        </span>
-
-        <div className="flex items-center gap-3">
-          {producto.imagenUrl ? (
-            <Image
-              src={producto.imagenUrl}
-              alt=""
-              width={40}
-              height={40}
-              className="h-10 w-10 shrink-0 rounded-md object-cover"
+        {/* Tarjeta apilada (mobile) -- nunca scroll horizontal */}
+        <div className="flex flex-col gap-2 sm:hidden">
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={seleccionado}
+              onClick={(e) => e.stopPropagation()}
+              onChange={onSeleccionar}
+              className="accent-blue-600"
+              aria-label={`Seleccionar ${producto.nombre}`}
             />
-          ) : (
-            <div className="h-10 w-10 shrink-0 rounded-md bg-zinc-100 dark:bg-zinc-800" />
-          )}
-          <p className="font-medium">{producto.nombre}</p>
+            {producto.imagenUrl ? (
+              <Image
+                src={producto.imagenUrl}
+                alt=""
+                width={40}
+                height={40}
+                className="h-10 w-10 shrink-0 rounded-md object-cover"
+              />
+            ) : (
+              <div className="h-10 w-10 shrink-0 rounded-md bg-zinc-100 dark:bg-zinc-800" />
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium">{producto.nombre}</p>
+              <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+                {producto.categoria ?? "-"}
+              </p>
+            </div>
+            <span aria-hidden="true" className="shrink-0 text-zinc-500">
+              {expandido ? "▾" : "▸"}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pl-9 text-xs text-zinc-600 dark:text-zinc-400">
+            <PrecioConOferta precio={precio} precioOferta={precioOferta} ofertaVigente={ofertaVigente} />
+            <span className="flex items-center gap-1">
+              {producto.stockTotal} unidades
+              {producto.tieneTallaSinStock && <IconoAviso />}
+            </span>
+            <button
+              type="button"
+              disabled={guardandoActivo}
+              onClick={(e) => {
+                e.stopPropagation();
+                alternarActivo();
+              }}
+              className={`rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-widest disabled:cursor-wait ${
+                activo
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+                  : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+              }`}
+            >
+              {activo ? "Activo" : "Inactivo"}
+            </button>
+          </div>
+
+          <div
+            className="flex items-center gap-4 pl-9 text-zinc-500 dark:text-zinc-400"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AccionesProducto productoId={producto.id} onEliminar={() => onEliminar(producto.id)} />
+          </div>
         </div>
 
-        <span className="text-zinc-600 dark:text-zinc-400">{producto.categoria ?? "-"}</span>
-        <span>${precio.toLocaleString("es-CL")}</span>
+        {/* Fila en columnas (sm y más) */}
+        <div className="hidden grid-cols-[1.5rem_1.5rem_2fr_1fr_1fr_1fr_7rem_6rem] items-center gap-6 sm:grid">
+          <input
+            type="checkbox"
+            checked={seleccionado}
+            onClick={(e) => e.stopPropagation()}
+            onChange={onSeleccionar}
+            className="accent-blue-600"
+            aria-label={`Seleccionar ${producto.nombre}`}
+          />
 
-        <span className="flex items-center gap-1.5">
-          {producto.stockTotal} unidades
-          {producto.tieneTallaSinStock && (
-            <svg
-              viewBox="0 0 24 24"
-              className="h-4 w-4 shrink-0"
-              aria-label="Hay tallas sin stock"
-            >
-              <title>Hay tallas sin stock</title>
-              <path
-                d="M12 3.5 2 20.5h20L12 3.5Z"
-                fill="#facc15"
-                stroke="black"
-                strokeWidth={1.5}
-                strokeLinejoin="round"
+          <span aria-hidden="true" className="w-6 text-zinc-500">
+            {expandido ? "▾" : "▸"}
+          </span>
+
+          <div className="flex items-center gap-3">
+            {producto.imagenUrl ? (
+              <Image
+                src={producto.imagenUrl}
+                alt=""
+                width={40}
+                height={40}
+                className="h-10 w-10 shrink-0 rounded-md object-cover"
               />
-              <rect x="11.1" y="10" width="1.8" height="5.5" rx="0.9" fill="black" />
-              <circle cx="12" cy="17.5" r="1.1" fill="black" />
-            </svg>
-          )}
-        </span>
+            ) : (
+              <div className="h-10 w-10 shrink-0 rounded-md bg-zinc-100 dark:bg-zinc-800" />
+            )}
+            <p className="font-medium">{producto.nombre}</p>
+          </div>
 
-        <button
-          type="button"
-          disabled={guardandoActivo}
-          onClick={(e) => {
-            e.stopPropagation();
-            alternarActivo();
-          }}
-          className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-widest disabled:cursor-wait ${
-            activo
-              ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
-              : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
-          }`}
-        >
-          {activo ? "Activo" : "Inactivo"}
-        </button>
+          <span className="text-zinc-600 dark:text-zinc-400">{producto.categoria ?? "-"}</span>
+          <PrecioConOferta precio={precio} precioOferta={precioOferta} ofertaVigente={ofertaVigente} />
 
-        <div
-          className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Link
-            href={`/producto/${producto.id}`}
-            target="_blank"
-            aria-label="Ver en la tienda"
-            className="hover:text-blue-600 dark:hover:text-blue-400"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={iconoClase}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </Link>
-
-          <Link
-            href={`/admin/productos/${producto.id}`}
-            aria-label="Editar"
-            className="hover:text-blue-600 dark:hover:text-blue-400"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={iconoClase}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"
-              />
-            </svg>
-          </Link>
+          <span className="flex items-center gap-1.5">
+            {producto.stockTotal} unidades
+            {producto.tieneTallaSinStock && <IconoAviso />}
+          </span>
 
           <button
             type="button"
-            onClick={() => onEliminar(producto.id)}
-            aria-label="Eliminar"
-            className="hover:text-red-600 dark:hover:text-red-400"
+            disabled={guardandoActivo}
+            onClick={(e) => {
+              e.stopPropagation();
+              alternarActivo();
+            }}
+            className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-widest disabled:cursor-wait ${
+              activo
+                ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+                : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+            }`}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={iconoClase}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
-              />
-              <path strokeLinecap="round" d="M10 11v6M14 11v6" />
-            </svg>
+            {activo ? "Activo" : "Inactivo"}
           </button>
+
+          <div
+            className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AccionesProducto productoId={producto.id} onEliminar={() => onEliminar(producto.id)} />
+          </div>
         </div>
       </div>
 
@@ -184,12 +199,109 @@ export default function ProductoRow({
             productoId={producto.id}
             precioInicial={precio}
             onPrecioGuardado={setPrecio}
-            activo={activo}
-            guardandoActivo={guardandoActivo}
-            onAlternarActivo={alternarActivo}
+            precioOfertaInicial={precioOferta}
+            ofertaHastaInicial={ofertaHasta}
+            ofertaTipoInicial={ofertaTipo}
+            ofertaValorInicial={ofertaValor}
+            onOfertaGuardada={(nuevoPrecioOferta, nuevaOfertaHasta, nuevoTipo, nuevoValor) => {
+              setPrecioOferta(nuevoPrecioOferta);
+              setOfertaHasta(nuevaOfertaHasta);
+              setOfertaTipo(nuevoTipo);
+              setOfertaValor(nuevoValor);
+            }}
           />
         </div>
       )}
     </div>
+  );
+}
+
+function PrecioConOferta({
+  precio,
+  precioOferta,
+  ofertaVigente,
+}: {
+  precio: number;
+  precioOferta: number | null;
+  ofertaVigente: boolean;
+}) {
+  if (precioOferta === null || !ofertaVigente) {
+    return <span>${precio.toLocaleString("es-CL")}</span>;
+  }
+
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className="text-zinc-400 line-through dark:text-zinc-500">
+        ${precio.toLocaleString("es-CL")}
+      </span>
+      <span className="font-semibold text-red-600 dark:text-red-400">
+        ${precioOferta.toLocaleString("es-CL")}
+      </span>
+    </span>
+  );
+}
+
+function IconoAviso() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-label="Hay tallas sin stock">
+      <title>Hay tallas sin stock</title>
+      <path
+        d="M12 3.5 2 20.5h20L12 3.5Z"
+        fill="#facc15"
+        stroke="black"
+        strokeWidth={1.5}
+        strokeLinejoin="round"
+      />
+      <rect x="11.1" y="10" width="1.8" height="5.5" rx="0.9" fill="black" />
+      <circle cx="12" cy="17.5" r="1.1" fill="black" />
+    </svg>
+  );
+}
+
+function AccionesProducto({
+  productoId,
+  onEliminar,
+}: {
+  productoId: string;
+  onEliminar: () => void;
+}) {
+  return (
+    <>
+      <Link
+        href={`/producto/${productoId}`}
+        target="_blank"
+        aria-label="Ver en la tienda"
+        className="hover:text-blue-600 dark:hover:text-blue-400"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={iconoClase}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      </Link>
+
+      <Link
+        href={`/admin/productos/${productoId}`}
+        aria-label="Editar"
+        className="hover:text-blue-600 dark:hover:text-blue-400"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={iconoClase}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"
+          />
+        </svg>
+      </Link>
+
+      <button type="button" onClick={onEliminar} aria-label="Eliminar" className="hover:text-red-600 dark:hover:text-red-400">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={iconoClase}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+          <path strokeLinecap="round" d="M10 11v6M14 11v6" />
+        </svg>
+      </button>
+    </>
   );
 }

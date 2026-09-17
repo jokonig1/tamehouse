@@ -31,6 +31,10 @@ interface ProductoConVariantes {
   id: string;
   nombre: string;
   precio: number;
+  precio_oferta: number | null;
+  oferta_hasta: string | null;
+  oferta_tipo: "porcentaje" | "monto_fijo" | null;
+  oferta_valor: number | null;
   categoria: string | null;
   activo: boolean;
   variantes: VarianteStock[];
@@ -83,7 +87,9 @@ export default function ProductosPage() {
     setCargando(true);
     const { data, error } = await supabase
       .from("productos")
-      .select("id, nombre, precio, categoria, activo, variantes(stock), producto_imagenes(url, orden)")
+      .select(
+        "id, nombre, precio, precio_oferta, oferta_hasta, oferta_tipo, oferta_valor, categoria, activo, variantes(stock), producto_imagenes(url, orden)"
+      )
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -100,6 +106,10 @@ export default function ProductosPage() {
           id: p.id,
           nombre: p.nombre,
           precio: p.precio,
+          precioOferta: p.precio_oferta,
+          ofertaHasta: p.oferta_hasta,
+          ofertaTipo: p.oferta_tipo,
+          ofertaValor: p.oferta_valor,
           categoria: p.categoria,
           activo: p.activo,
           stockTotal: p.variantes.reduce((acc, v) => acc + v.stock, 0),
@@ -354,7 +364,18 @@ export default function ProductosPage() {
 
       {!cargando && !error && (
         <div className="overflow-hidden rounded-xl border border-black/8 dark:border-white/[.145]">
-          <div className="grid grid-cols-[1.5rem_1.5rem_2fr_1fr_1fr_1fr_7rem_6rem] items-center gap-6 bg-zinc-50 px-4 py-3 text-left text-xs font-medium uppercase tracking-widest text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
+          <div className="flex items-center gap-2 border-b border-black/8 bg-zinc-50 px-4 py-3 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:border-white/[.145] dark:bg-zinc-900 dark:text-zinc-400 sm:hidden">
+            <input
+              type="checkbox"
+              checked={todosEnPaginaSeleccionados}
+              onChange={alternarSeleccionTodos}
+              className="accent-blue-600"
+              aria-label="Seleccionar todos"
+            />
+            <span>Seleccionar todos</span>
+          </div>
+
+          <div className="hidden grid-cols-[1.5rem_1.5rem_2fr_1fr_1fr_1fr_7rem_6rem] items-center gap-6 bg-zinc-50 px-4 py-3 text-left text-xs font-medium uppercase tracking-widest text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400 sm:grid">
             <input
               type="checkbox"
               checked={todosEnPaginaSeleccionados}

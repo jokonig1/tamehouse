@@ -275,7 +275,7 @@ export default function PedidosPage() {
 
       {!cargando && !error && (
         <div className="overflow-hidden rounded-xl border border-black/8 dark:border-white/[.145]">
-          <div className="grid grid-cols-[1.5rem_1fr_1fr_1fr_0.7fr_1fr_1fr] gap-6 bg-zinc-50 px-4 py-3 text-left text-xs font-medium uppercase tracking-widest text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
+          <div className="hidden grid-cols-[1.5rem_1fr_1fr_1fr_0.7fr_1fr_1fr] gap-6 bg-zinc-50 px-4 py-3 text-left text-xs font-medium uppercase tracking-widest text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400 sm:grid">
             <span></span>
             <span>Pedido</span>
             <span>Cliente</span>

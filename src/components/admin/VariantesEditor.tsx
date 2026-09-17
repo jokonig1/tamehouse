@@ -12,26 +12,53 @@ function aFilas(variantes: Variante[]): FilaTalla[] {
   return variantes.map((v) => ({ id: v.id, talla: v.talla ?? "", stock: String(v.stock) }));
 }
 
+type TipoOferta = "porcentaje" | "monto_fijo";
+
 interface VariantesEditorProps {
   productoId: string;
   precioInicial: number;
   onPrecioGuardado: (nuevoPrecio: number) => void;
-  activo: boolean;
-  guardandoActivo: boolean;
-  onAlternarActivo: () => void;
+  precioOfertaInicial: number | null;
+  ofertaHastaInicial: string | null;
+  ofertaTipoInicial: TipoOferta | null;
+  ofertaValorInicial: number | null;
+  onOfertaGuardada: (
+    precioOferta: number | null,
+    ofertaHasta: string | null,
+    ofertaTipo: TipoOferta | null,
+    ofertaValor: number | null
+  ) => void;
+}
+
+function calcularPrecioOferta(precio: number, tipo: TipoOferta, valor: number) {
+  if (!valor || valor <= 0) return null;
+  return tipo === "porcentaje" ? Math.round(precio * (1 - valor / 100)) : precio - valor;
 }
 
 export default function VariantesEditor({
   productoId,
   precioInicial,
   onPrecioGuardado,
-  activo,
-  guardandoActivo,
-  onAlternarActivo,
+  precioOfertaInicial,
+  ofertaHastaInicial,
+  ofertaTipoInicial,
+  ofertaValorInicial,
+  onOfertaGuardada,
 }: VariantesEditorProps) {
   const [filas, setFilas] = useState<FilaTalla[]>([]);
   const [modoAvanzado, setModoAvanzado] = useState(false);
   const [precio, setPrecio] = useState(String(precioInicial));
+  const [tipoOferta, setTipoOferta] = useState<TipoOferta>(ofertaTipoInicial ?? "monto_fijo");
+  const [valorOferta, setValorOferta] = useState(
+    ofertaValorInicial !== null
+      ? String(ofertaValorInicial)
+      : precioOfertaInicial !== null
+        ? String(precioInicial - precioOfertaInicial)
+        : ""
+  );
+  const [ofertaHasta, setOfertaHasta] = useState(
+    ofertaHastaInicial ? ofertaHastaInicial.slice(0, 10) : ""
+  );
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,6 +117,15 @@ export default function VariantesEditor({
   function cancelar() {
     setError(null);
     setPrecio(String(precioInicial));
+    setTipoOferta(ofertaTipoInicial ?? "monto_fijo");
+    setValorOferta(
+      ofertaValorInicial !== null
+        ? String(ofertaValorInicial)
+        : precioOfertaInicial !== null
+          ? String(precioInicial - precioOfertaInicial)
+          : ""
+    );
+    setOfertaHasta(ofertaHastaInicial ? ofertaHastaInicial.slice(0, 10) : "");
     cargarVariantes();
   }
 
@@ -99,6 +135,29 @@ export default function VariantesEditor({
     const precioNumero = Number(precio);
     if (!precio || Number.isNaN(precioNumero) || precioNumero <= 0) {
       setError("El precio debe ser un número mayor a 0.");
+      return;
+    }
+
+    const valorOfertaNumero = Number(valorOferta);
+    if (valorOferta && (Number.isNaN(valorOfertaNumero) || valorOfertaNumero <= 0)) {
+      setError("El descuento de la oferta debe ser un número mayor a 0.");
+      return;
+    }
+    if (tipoOferta === "porcentaje" && valorOfertaNumero > 100) {
+      setError("El porcentaje de descuento no puede ser mayor a 100.");
+      return;
+    }
+
+    const precioOfertaNuevo = valorOferta
+      ? calcularPrecioOferta(precioNumero, tipoOferta, valorOfertaNumero)
+      : null;
+
+    if (precioOfertaNuevo !== null && precioOfertaNuevo <= 0) {
+      setError("Ese descuento deja el precio en oferta en $0 o menos.");
+      return;
+    }
+    if (precioOfertaNuevo !== null && precioOfertaNuevo >= precioNumero) {
+      setError("El precio en oferta debe quedar por debajo del precio original.");
       return;
     }
 
@@ -112,10 +171,27 @@ export default function VariantesEditor({
 
     setGuardando(true);
 
-    if (precioNumero !== precioInicial) {
+    const ofertaHastaIso =
+      precioOfertaNuevo !== null && ofertaHasta ? new Date(ofertaHasta).toISOString() : null;
+    const ofertaTipoNuevo = precioOfertaNuevo !== null ? tipoOferta : null;
+    const ofertaValorNuevo = precioOfertaNuevo !== null ? valorOfertaNumero : null;
+    const huboCambioDePrecio =
+      precioNumero !== precioInicial ||
+      precioOfertaNuevo !== precioOfertaInicial ||
+      ofertaHastaIso !== ofertaHastaInicial ||
+      ofertaTipoNuevo !== ofertaTipoInicial ||
+      ofertaValorNuevo !== ofertaValorInicial;
+
+    if (huboCambioDePrecio) {
       const { error: errorPrecio } = await supabase
         .from("productos")
-        .update({ precio: precioNumero })
+        .update({
+          precio: precioNumero,
+          precio_oferta: precioOfertaNuevo,
+          oferta_hasta: ofertaHastaIso,
+          oferta_tipo: ofertaTipoNuevo,
+          oferta_valor: ofertaValorNuevo,
+        })
         .eq("id", productoId);
 
       if (errorPrecio) {
@@ -123,6 +199,7 @@ export default function VariantesEditor({
         setGuardando(false);
         return;
       }
+      onOfertaGuardada(precioOfertaNuevo, ofertaHastaIso, ofertaTipoNuevo, ofertaValorNuevo);
     }
 
     const nuevas = filas
@@ -167,6 +244,9 @@ export default function VariantesEditor({
     return <p className="text-sm text-zinc-600 dark:text-zinc-400">Cargando variantes...</p>;
 
   const modoSimple = !modoAvanzado && filas.length === 1 && filas[0].talla === "";
+  const precioOfertaVista = valorOferta
+    ? calcularPrecioOferta(Number(precio) || 0, tipoOferta, Number(valorOferta) || 0)
+    : null;
 
   return (
     <div className="space-y-6">
@@ -204,7 +284,7 @@ export default function VariantesEditor({
 
         <div>
           <h3 className="mb-2 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-            Precio
+            Precio original
           </h3>
           <PrecioInput
             value={precio}
@@ -212,28 +292,58 @@ export default function VariantesEditor({
             className="w-32 border border-zinc-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-black dark:border-zinc-700 dark:focus:border-white"
           />
 
-          <div className="mt-4 flex items-center gap-3">
-            <button
-              type="button"
-              role="switch"
-              aria-checked={activo}
-              aria-label={activo ? "Ocultar de la tienda" : "Mostrar en la tienda"}
-              disabled={guardandoActivo}
-              onClick={onAlternarActivo}
-              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-wait disabled:opacity-50 ${
-                activo ? "bg-green-500" : "bg-zinc-300 dark:bg-zinc-700"
-              }`}
+          <h3 className="mt-4 mb-2 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+            Oferta (opcional)
+          </h3>
+          <div className="flex items-center gap-2">
+            <select
+              value={tipoOferta}
+              onChange={(e) => setTipoOferta(e.target.value as TipoOferta)}
+              className="border border-zinc-300 bg-transparent px-2 py-2 text-sm outline-none focus:border-black dark:border-zinc-700 dark:focus:border-white"
             >
-              <span
-                className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                  activo ? "translate-x-5" : "translate-x-0"
-                }`}
-              />
-            </button>
-            <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-              {activo ? "Visible en la tienda" : "Oculto de la tienda"}
-            </span>
+              <option value="porcentaje">% dcto.</option>
+              <option value="monto_fijo">$ dcto.</option>
+            </select>
+            <PrecioInput
+              value={valorOferta}
+              onChange={setValorOferta}
+              prefijo={tipoOferta === "monto_fijo" ? "$" : null}
+              sufijo={tipoOferta === "porcentaje" ? "%" : undefined}
+              className="w-28 border border-zinc-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-black dark:border-zinc-700 dark:focus:border-white"
+            />
+            {valorOferta && (
+              <button
+                type="button"
+                onClick={() => setValorOferta("")}
+                className="text-xs font-medium text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400"
+              >
+                Quitar
+              </button>
+            )}
           </div>
+
+          {valorOferta && (
+            <>
+              {precioOfertaVista !== null && precioOfertaVista > 0 && (
+                <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-400">
+                  Precio en oferta:{" "}
+                  <span className="font-semibold text-red-600 dark:text-red-400">
+                    ${precioOfertaVista.toLocaleString("es-CL")}
+                  </span>
+                </p>
+              )}
+
+              <label className="mt-2 block text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+                Vence (opcional)
+              </label>
+              <input
+                type="date"
+                value={ofertaHasta}
+                onChange={(e) => setOfertaHasta(e.target.value)}
+                className="mt-1 border border-zinc-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-black dark:border-zinc-700 dark:focus:border-white"
+              />
+            </>
+          )}
         </div>
       </div>
 
