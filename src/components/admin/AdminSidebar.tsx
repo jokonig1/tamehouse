@@ -1,16 +1,75 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const enlaces = [
-  { href: "/admin/dashboard", label: "Dashboard" },
-  { href: "/admin/pedidos", label: "Pedidos" },
-  { href: "/admin/productos", label: "Productos" },
-  { href: "/admin/descuentos", label: "Descuentos" },
-  { href: "/admin/musica", label: "Música" },
-  { href: "/admin/hero", label: "Portada" },
+function IconoDashboard() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <rect x="3" y="3" width="7" height="9" rx="1" />
+      <rect x="14" y="3" width="7" height="5" rx="1" />
+      <rect x="14" y="12" width="7" height="9" rx="1" />
+      <rect x="3" y="16" width="7" height="5" rx="1" />
+    </svg>
+  );
+}
+
+function IconoPedidos() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <path d="M6 7h12l1 13H5L6 7Z" />
+      <path d="M9 10V6a3 3 0 0 1 6 0v4" />
+    </svg>
+  );
+}
+
+function IconoProductos() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <path d="M20.5 12.5 12 21l-9-9L11.5 3.5H19a1.5 1.5 0 0 1 1.5 1.5v7.5Z" />
+      <circle cx="15.5" cy="8.5" r="1.2" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function IconoDescuentos() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <path d="M19 5 5 19" />
+      <circle cx="7" cy="7" r="2.2" />
+      <circle cx="17" cy="17" r="2.2" />
+    </svg>
+  );
+}
+
+function IconoMusica() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <path d="M9 18V5l11-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="17" cy="16" r="3" />
+    </svg>
+  );
+}
+
+function IconoPortada() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <circle cx="8.5" cy="9.5" r="1.5" />
+      <path d="M21 15.5 16 11l-8.5 8.5" />
+    </svg>
+  );
+}
+
+const enlaces: { href: string; label: string; icono: ReactNode }[] = [
+  { href: "/admin/dashboard", label: "Dashboard", icono: <IconoDashboard /> },
+  { href: "/admin/pedidos", label: "Pedidos", icono: <IconoPedidos /> },
+  { href: "/admin/productos", label: "Productos", icono: <IconoProductos /> },
+  { href: "/admin/descuentos", label: "Descuentos", icono: <IconoDescuentos /> },
+  { href: "/admin/musica", label: "Música", icono: <IconoMusica /> },
+  { href: "/admin/hero", label: "Portada", icono: <IconoPortada /> },
 ];
 
 interface AdminSidebarProps {
@@ -57,10 +116,13 @@ export default function AdminSidebar({ abierto, onCerrar }: AdminSidebarProps) {
               <li key={enlace.href}>
                 <Link
                   href={enlace.href}
-                  className={`block px-2 py-2 text-xs font-medium uppercase tracking-widest hover:opacity-70 ${
-                    activo ? "" : "text-zinc-600 dark:text-zinc-400"
+                  className={`flex items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium uppercase tracking-widest transition-colors ${
+                    activo
+                      ? "bg-black text-white dark:bg-white dark:text-black"
+                      : "text-zinc-600 hover:bg-black/5 dark:text-zinc-400 dark:hover:bg-white/10"
                   }`}
                 >
+                  {enlace.icono}
                   {enlace.label}
                 </Link>
               </li>
