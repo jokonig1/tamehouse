@@ -1,39 +1,50 @@
-"use client";
-
 import Image from "next/image";
+import { getBiografiaFases, getBiografiaGaleria } from "@/lib/biografia";
 
-const FASES = [
+type FaseMostrada = {
+  id: string;
+  year: string;
+  titulo: string;
+  texto: string;
+  foto_url: string | null;
+};
+
+const FASES_POR_DEFECTO: FaseMostrada[] = [
   {
+    id: "2018",
     year: "2018",
     titulo: "Los inicios",
     texto:
       "Primeras canciones grabadas en casa y los primeros shows en bares pequeños, buscando un sonido propio.",
-    foto: "tamehouse-2018-a",
+    foto_url: null,
   },
   {
+    id: "2021",
     year: "2021",
     titulo: "El quiebre",
     texto:
       "El primer álbum y una gira que llenó salas medianas por primera vez. El proyecto empezó a tomar forma propia.",
-    foto: "tamehouse-2021-a",
+    foto_url: null,
   },
   {
+    id: "2023",
     year: "2023",
     titulo: "La consagración",
     texto:
       "Estadios llenos y el reconocimiento del público masivo. La música empezó a viajar más allá de las fronteras.",
-    foto: "tamehouse-2023-a",
+    foto_url: null,
   },
   {
+    id: "2026",
     year: "2026",
     titulo: "Hoy",
     texto:
       "Una nueva era, nueva música y una tienda oficial para quienes acompañan el proyecto desde siempre.",
-    foto: "tamehouse-2026-a",
+    foto_url: null,
   },
 ];
 
-function Seccion({ fase, indice }: { fase: (typeof FASES)[number]; indice: number }) {
+function Seccion({ fase, indice }: { fase: FaseMostrada; indice: number }) {
   const invertido = indice % 2 === 1;
 
   return (
@@ -52,13 +63,15 @@ function Seccion({ fase, indice }: { fase: (typeof FASES)[number]; indice: numbe
       >
         <div className="relative w-full max-w-sm shrink-0">
           <div className="relative aspect-[3/4] w-full overflow-hidden rounded-sm bg-stone-200">
-            <Image
-              src={`https://picsum.photos/seed/${fase.foto}/600/800`}
-              alt={fase.titulo}
-              fill
-              sizes="(min-width: 640px) 384px, 90vw"
-              className="object-cover"
-            />
+            {fase.foto_url && (
+              <Image
+                src={fase.foto_url}
+                alt={fase.titulo}
+                fill
+                sizes="(min-width: 640px) 384px, 90vw"
+                className="object-cover"
+              />
+            )}
           </div>
           <span
             aria-hidden
@@ -67,9 +80,11 @@ function Seccion({ fase, indice }: { fase: (typeof FASES)[number]; indice: numbe
         </div>
 
         <div className="relative min-w-0 flex-1 text-center sm:text-left">
-          <span className="text-xs font-medium tracking-[0.3em] text-stone-400 uppercase">
-            {fase.year}
-          </span>
+          {fase.year && (
+            <span className="text-xs font-medium tracking-[0.3em] text-stone-400 uppercase">
+              {fase.year}
+            </span>
+          )}
           <h2 className="mt-3 font-serif text-4xl italic sm:text-5xl">{fase.titulo}</h2>
           <p className="mx-auto mt-4 max-w-md leading-relaxed text-stone-600 sm:mx-0">
             {fase.texto}
@@ -80,7 +95,10 @@ function Seccion({ fase, indice }: { fase: (typeof FASES)[number]; indice: numbe
   );
 }
 
-export default function Page() {
+export default async function Page() {
+  const [fasesGuardadas, galeria] = await Promise.all([getBiografiaFases(), getBiografiaGaleria()]);
+  const fases = fasesGuardadas.length > 0 ? fasesGuardadas : FASES_POR_DEFECTO;
+
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-stone-50 text-stone-900">
       <div className="mx-auto w-full max-w-6xl px-6 pt-12">
@@ -93,10 +111,36 @@ export default function Page() {
       </div>
 
       <div className="mt-4 flex flex-col divide-y divide-stone-200">
-        {FASES.map((fase, i) => (
-          <Seccion key={fase.year} fase={fase} indice={i} />
+        {fases.map((fase, i) => (
+          <Seccion key={fase.id} fase={fase} indice={i} />
         ))}
       </div>
+
+      {galeria.length > 0 && (
+        <section className="border-t border-stone-200 px-6 py-16 sm:py-24">
+          <div className="mx-auto w-full max-w-6xl">
+            <h2 className="text-center text-4xl font-extrabold tracking-tight uppercase sm:text-5xl">
+              Galería
+            </h2>
+            <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+              {galeria.map((foto) => (
+                <div
+                  key={foto.id}
+                  className="relative aspect-square overflow-hidden rounded-sm bg-stone-200"
+                >
+                  <Image
+                    src={foto.url}
+                    alt=""
+                    fill
+                    sizes="(min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

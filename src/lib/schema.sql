@@ -1009,3 +1009,77 @@ begin
   return v_pedido_id;
 end;
 $$;
+
+-- ============================================
+-- BIOGRAFÍA (secciones alternadas + galería)
+-- ============================================
+
+-- Cada fila es una "era" de la biografía (año, título, texto e
+-- imagen), mostradas alternando foto/texto de lado en la página
+-- pública, en el orden de la columna orden. El archivo vive en
+-- Supabase Storage, bucket "biografia".
+create table biografia_fases (
+  id uuid primary key default gen_random_uuid(),
+  year text not null,
+  titulo text not null,
+  texto text not null,
+  foto_url text,
+  orden integer not null default 0,
+  created_at timestamp with time zone default now()
+);
+
+-- Fotos de la sección de galería al final de la biografía.
+create table biografia_galeria (
+  id uuid primary key default gen_random_uuid(),
+  url text not null,
+  orden integer not null default 0,
+  created_at timestamp with time zone default now()
+);
+
+alter table biografia_fases enable row level security;
+alter table biografia_galeria enable row level security;
+
+create policy "Biografia fases visibles para todos"
+on biografia_fases for select
+using (true);
+
+create policy "Biografia galeria visible para todos"
+on biografia_galeria for select
+using (true);
+
+create policy "Admins escriben biografia fases"
+on biografia_fases for insert
+with check (public.is_admin());
+
+create policy "Admins editan biografia fases"
+on biografia_fases for update
+using (public.is_admin());
+
+create policy "Admins eliminan biografia fases"
+on biografia_fases for delete
+using (public.is_admin());
+
+create policy "Admins escriben biografia galeria"
+on biografia_galeria for insert
+with check (public.is_admin());
+
+create policy "Admins eliminan biografia galeria"
+on biografia_galeria for delete
+using (public.is_admin());
+
+-- Bucket publico para las imagenes de biografia (fases + galeria).
+insert into storage.buckets (id, name, public)
+values ('biografia', 'biografia', true)
+on conflict (id) do nothing;
+
+create policy "Imagenes de biografia visibles para todos (storage)"
+on storage.objects for select
+using (bucket_id = 'biografia');
+
+create policy "Admins suben imagenes de biografia (storage)"
+on storage.objects for insert
+with check (bucket_id = 'biografia' and public.is_admin());
+
+create policy "Admins eliminan imagenes de biografia (storage)"
+on storage.objects for delete
+using (bucket_id = 'biografia' and public.is_admin());
