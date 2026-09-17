@@ -379,7 +379,7 @@ export default function EditarProductoPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className={etiquetaClaseFuerte}>Precio (CLP)</label>
               <PrecioInput value={precio} onChange={setPrecio} className={campoClaseRedondeado} />
@@ -466,7 +466,7 @@ export default function EditarProductoPage() {
             <legend className="px-1 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
               Datos de envío (uso interno, no se muestran al público)
             </legend>
-            <div className="mt-2 grid grid-cols-2 gap-4">
+            <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className={etiquetaClaseFuerte}>Alto (cm)</label>
                 <input
@@ -522,7 +522,7 @@ export default function EditarProductoPage() {
             <legend className="px-1 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
               Oferta (opcional)
             </legend>
-            <div className="mt-2 grid grid-cols-2 gap-4">
+            <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className={etiquetaClaseFuerte}>Precio de oferta (CLP)</label>
                 <PrecioInput

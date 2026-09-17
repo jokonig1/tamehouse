@@ -273,6 +273,8 @@ export default function MusicaPage() {
 
       {!cargando && !error && (
         <div className="overflow-hidden rounded-xl border border-black/8 dark:border-white/[.145]">
+          <div className="overflow-x-auto">
+          <div className="min-w-[640px]">
           <div className="grid grid-cols-[1fr_1fr_1fr_1fr_5rem] gap-6 bg-zinc-50 px-4 py-3 text-left text-xs font-medium uppercase tracking-widest text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
             <span>Fecha</span>
             <span>Ciudad</span>
@@ -290,6 +292,8 @@ export default function MusicaPage() {
           {shows.map((s) => (
             <ShowRow key={s.id} show={s} onEliminar={eliminarShow} onActualizado={actualizarShow} />
           ))}
+          </div>
+          </div>
         </div>
       )}
     </div>

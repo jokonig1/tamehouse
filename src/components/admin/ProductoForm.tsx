@@ -112,7 +112,7 @@ export default function ProductoForm({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className={etiquetaClase}>Precio (CLP)</label>
           <PrecioInput value={precio} onChange={setPrecio} className={campoClase} />
@@ -136,7 +136,7 @@ export default function ProductoForm({
         <legend className="px-1 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
           Datos de envío (uso interno, no se muestran al público)
         </legend>
-        <div className="mt-2 grid grid-cols-2 gap-4">
+        <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className={etiquetaClase}>Alto (cm)</label>
             <input
