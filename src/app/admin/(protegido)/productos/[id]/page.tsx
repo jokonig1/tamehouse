@@ -331,7 +331,7 @@ export default function EditarProductoPage() {
   return (
     <div>
       <nav className="mb-2 text-xs text-zinc-500 dark:text-zinc-400">
-        <Link href="/admin/productos" className="hover:text-black dark:hover:text-white">
+        <Link href="/admin/pedidos" className="hover:text-black dark:hover:text-white">
           Panel admin
         </Link>
         <span className="mx-1.5">/</span>

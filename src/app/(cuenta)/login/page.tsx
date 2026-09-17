@@ -40,7 +40,7 @@ export default function Page() {
       return;
     }
 
-    router.push(resultado.rol === "admin" ? "/admin/productos" : "/mi-cuenta");
+    router.push(resultado.rol === "admin" ? "/admin/pedidos" : "/mi-cuenta");
     router.refresh();
   }
 
