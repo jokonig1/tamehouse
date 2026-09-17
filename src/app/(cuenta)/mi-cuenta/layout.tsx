@@ -78,7 +78,7 @@ export default function MiCuentaLayout({ children }: { children: React.ReactNode
           <button
             type="button"
             onClick={cerrarSesion}
-            className="mt-4 rounded-md px-3 py-2 text-left text-sm font-medium text-zinc-500 hover:bg-black/5 sm:mt-4"
+            className="rounded-md px-3 py-2 text-left text-sm font-medium text-zinc-500 hover:bg-black/5 sm:mt-4"
           >
             Cerrar sesión
           </button>
