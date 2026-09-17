@@ -11,6 +11,9 @@ export type CartItem = {
   color: string | null;
   stockMaximo: number | null;
   imagenUrl: string | null;
+  // true si `precio` corresponde al precio de oferta del producto en
+  // el momento en que se agregó al carrito (no se recalcula solo).
+  enOferta: boolean;
   cantidad: number;
 };
 

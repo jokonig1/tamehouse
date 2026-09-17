@@ -9,6 +9,23 @@ export interface Producto {
   ancho_cm: number | null;
   largo_cm: number | null;
   peso_kg: number | null;
+  precio_oferta: number | null;
+  oferta_hasta: string | null;
+  created_at: string;
+}
+
+export interface CodigoDescuento {
+  id: string;
+  codigo: string;
+  tipo: "porcentaje" | "monto_fijo";
+  valor: number;
+  permite_con_oferta: boolean;
+  monto_minimo: number | null;
+  tope_maximo: number | null;
+  usos_maximos: number | null;
+  usos_actuales: number;
+  vigente_hasta: string | null;
+  activo: boolean;
   created_at: string;
 }
 
@@ -66,6 +83,8 @@ export interface Pedido {
   retiro_oficina_code: number | null;
   retiro_oficina_nombre: string | null;
   numero_seguimiento: string | null;
+  codigo_descuento: string | null;
+  descuento_aplicado: number;
   created_at: string;
 }
 

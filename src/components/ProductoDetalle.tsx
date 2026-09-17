@@ -72,6 +72,15 @@ export default function ProductoDetalle({
   const disponible = tieneVariantes ? !!varianteActual && (stockDisponible ?? 0) > 0 : true;
   const agotado = tieneVariantes && variantes.every((v) => v.stock <= 0);
 
+  const enOferta = useMemo(
+    () =>
+      producto.precio_oferta !== null &&
+      (producto.oferta_hasta === null ||
+        new Date(producto.oferta_hasta).getTime() > new Date().getTime()),
+    [producto.precio_oferta, producto.oferta_hasta]
+  );
+  const precioEfectivo = enOferta ? (producto.precio_oferta as number) : producto.precio;
+
   function tallaDisponible(t: string) {
     const variante = variantes.find((v) => v.color === color && v.talla?.toUpperCase() === t);
     return (variante?.stock ?? 0) > 0;
@@ -82,11 +91,12 @@ export default function ProductoDetalle({
       id: varianteActual?.id ?? producto.id,
       productoId: producto.id,
       nombre: producto.nombre,
-      precio: producto.precio,
+      precio: precioEfectivo,
       talla,
       color,
       stockMaximo: stockDisponible,
       imagenUrl,
+      enOferta,
     };
   }
 
@@ -123,9 +133,18 @@ export default function ProductoDetalle({
         <h1 className="mt-2 text-3xl font-extrabold uppercase tracking-tight text-black sm:text-4xl">
           {producto.nombre}
         </h1>
-        <p className="mt-2 text-xl font-semibold text-black">
-          {formatoPrecio.format(producto.precio)}
-        </p>
+        {enOferta ? (
+          <p className="mt-2 flex items-baseline gap-2 text-xl font-semibold">
+            <span className="text-red-600">{formatoPrecio.format(precioEfectivo)}</span>
+            <span className="text-base font-medium text-black/40 line-through">
+              {formatoPrecio.format(producto.precio)}
+            </span>
+          </p>
+        ) : (
+          <p className="mt-2 text-xl font-semibold text-black">
+            {formatoPrecio.format(producto.precio)}
+          </p>
+        )}
       </div>
 
       {agotado && (

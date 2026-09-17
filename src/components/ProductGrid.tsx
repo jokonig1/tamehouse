@@ -30,6 +30,11 @@ export default function ProductGrid({
                 Sin stock
               </span>
             )}
+            {!producto.agotado && producto.precioOferta !== null && (
+              <span className="absolute left-2 top-2 z-10 rounded-md bg-black px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white dark:bg-white dark:text-black">
+                Oferta
+              </span>
+            )}
             {producto.imagenUrl && (
               <Image
                 src={producto.imagenUrl}
@@ -43,9 +48,20 @@ export default function ProductGrid({
           <p className="mt-3 text-sm font-medium group-hover:opacity-70">
             {producto.nombre}
           </p>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            {formatoPrecio.format(producto.precio)}
-          </p>
+          {producto.precioOferta !== null ? (
+            <p className="flex items-baseline gap-1.5 text-sm">
+              <span className="font-semibold text-red-600 dark:text-red-400">
+                {formatoPrecio.format(producto.precioOferta)}
+              </span>
+              <span className="text-zinc-400 line-through dark:text-zinc-500">
+                {formatoPrecio.format(producto.precio)}
+              </span>
+            </p>
+          ) : (
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              {formatoPrecio.format(producto.precio)}
+            </p>
+          )}
         </Link>
       ))}
     </div>

@@ -191,7 +191,44 @@ export default function Page() {
     entrega === "retiro"
       ? costoRetiro
       : opcionesEnvio.find((o) => o.servicio === servicioSeleccionado)?.precio ?? 0;
-  const total = subtotal + costoEnvio;
+
+  const [codigoInput, setCodigoInput] = useState("");
+  const [codigoAplicado, setCodigoAplicado] = useState<{ codigo: string; descuento: number } | null>(
+    null
+  );
+  const [aplicandoCodigo, setAplicandoCodigo] = useState(false);
+  const [errorCodigo, setErrorCodigo] = useState<string | null>(null);
+
+  const descuento = codigoAplicado?.descuento ?? 0;
+  const total = Math.max(0, subtotal - descuento) + costoEnvio;
+
+  async function aplicarCodigo() {
+    setErrorCodigo(null);
+    if (!codigoInput.trim()) return;
+
+    setAplicandoCodigo(true);
+    const { data, error } = await supabase.rpc("validar_codigo_descuento", {
+      p_codigo: codigoInput.trim(),
+      p_subtotal: subtotal,
+      p_tiene_oferta: items.some((item) => item.enOferta),
+    });
+    setAplicandoCodigo(false);
+
+    const resultado = data?.[0];
+    if (error || !resultado?.valido) {
+      setErrorCodigo(resultado?.mensaje ?? error?.message ?? "No se pudo validar el código.");
+      setCodigoAplicado(null);
+      return;
+    }
+
+    setCodigoAplicado({ codigo: codigoInput.trim().toUpperCase(), descuento: resultado.descuento });
+  }
+
+  function quitarCodigo() {
+    setCodigoAplicado(null);
+    setCodigoInput("");
+    setErrorCodigo(null);
+  }
 
   const [nombre, setNombre] = useState("");
   const [apellidos, setApellidos] = useState("");
@@ -252,7 +289,8 @@ export default function Page() {
     // de cada variante -- si a algún producto no le alcanza el stock,
     // no queda nada a medias (ni el pedido ni los items se crean).
     const { data: pedidoId, error: errorPedidoRpc } = await supabase.rpc("crear_pedido", {
-      p_total: total,
+      p_subtotal: subtotal,
+      p_costo_envio: costoEnvio,
       p_direccion:
         entrega === "envio"
           ? `${calleEnvio.trim()} ${numeroEnvio.trim()}`
@@ -273,6 +311,7 @@ export default function Page() {
         cantidad: item.cantidad,
         precioUnitario: item.precio,
       })),
+      p_codigo_descuento: codigoAplicado?.codigo ?? null,
     });
 
     setCreandoPedido(false);
@@ -664,18 +703,38 @@ export default function Page() {
             ))}
           </ul>
 
-          <div className="flex gap-3">
-            <input
-              placeholder="Código de descuento"
-              className={`${inputClass} bg-white`}
-            />
-            <button
-              type="button"
-              className="rounded-md border border-black/15 px-5 text-sm font-medium text-black/60 hover:bg-black/5"
-            >
-              Aplicar
-            </button>
-          </div>
+          {codigoAplicado ? (
+            <div className="flex items-center justify-between rounded-md border border-black/15 bg-black/[.02] px-4 py-3 text-sm">
+              <span>
+                Código <span className="font-semibold">{codigoAplicado.codigo}</span> aplicado
+              </span>
+              <button
+                type="button"
+                onClick={quitarCodigo}
+                className="text-xs font-medium uppercase tracking-widest text-black/60 hover:opacity-70"
+              >
+                Quitar
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-3">
+              <input
+                placeholder="Código de descuento"
+                value={codigoInput}
+                onChange={(e) => setCodigoInput(e.target.value)}
+                className={`${inputClass} bg-white`}
+              />
+              <button
+                type="button"
+                onClick={aplicarCodigo}
+                disabled={aplicandoCodigo}
+                className="rounded-md border border-black/15 px-5 text-sm font-medium text-black/60 hover:bg-black/5 disabled:opacity-50"
+              >
+                {aplicandoCodigo ? "..." : "Aplicar"}
+              </button>
+            </div>
+          )}
+          {errorCodigo && <p className="text-sm text-red-600">{errorCodigo}</p>}
 
           <div className="flex flex-col gap-2 border-t border-black/10 pt-4 text-sm">
             <div className="flex items-center justify-between">
@@ -702,6 +761,12 @@ export default function Page() {
                   : formatoPrecio.format(costoEnvio)}
               </span>
             </div>
+            {codigoAplicado && (
+              <div className="flex items-center justify-between text-red-600">
+                <span>Descuento ({codigoAplicado.codigo})</span>
+                <span>-{formatoPrecio.format(descuento)}</span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between border-t border-black/10 pt-4 text-lg font-semibold">

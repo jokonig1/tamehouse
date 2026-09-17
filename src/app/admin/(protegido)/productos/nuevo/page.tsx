@@ -41,6 +41,9 @@ export default function NuevoProductoPage() {
   const [largoCm, setLargoCm] = useState("");
   const [pesoKg, setPesoKg] = useState("");
 
+  const [precioOferta, setPrecioOferta] = useState("");
+  const [ofertaHasta, setOfertaHasta] = useState("");
+
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,6 +85,16 @@ export default function NuevoProductoPage() {
       return;
     }
 
+    const precioOfertaNumero = precioOferta ? Number(precioOferta) : null;
+    if (precioOferta && (Number.isNaN(precioOfertaNumero) || precioOfertaNumero! <= 0)) {
+      setError("El precio de oferta debe ser un número mayor a 0.");
+      return;
+    }
+    if (precioOfertaNumero !== null && precioOfertaNumero >= precioNumero) {
+      setError("El precio de oferta debe ser menor al precio normal.");
+      return;
+    }
+
     if (modoStock === "unico") {
       const stockNumero = Number(stockUnico);
       if (stockUnico.trim() === "" || Number.isNaN(stockNumero) || stockNumero < 0) {
@@ -112,6 +125,8 @@ export default function NuevoProductoPage() {
         ancho_cm: anchoCm ? Number(anchoCm) : null,
         largo_cm: largoCm ? Number(largoCm) : null,
         peso_kg: pesoKg ? Number(pesoKg) : null,
+        precio_oferta: precioOfertaNumero,
+        oferta_hasta: ofertaHasta ? new Date(ofertaHasta).toISOString() : null,
       })
       .select("id")
       .single();
@@ -347,6 +362,35 @@ export default function NuevoProductoPage() {
                 />
               </div>
             </div>
+          </fieldset>
+
+          <fieldset className="rounded-xl border border-zinc-200 p-4 dark:border-white/[.145]">
+            <legend className="px-1 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+              Oferta (opcional)
+            </legend>
+            <div className="mt-2 grid grid-cols-2 gap-4">
+              <div>
+                <label className={etiquetaClaseFuerte}>Precio de oferta (CLP)</label>
+                <PrecioInput
+                  value={precioOferta}
+                  onChange={setPrecioOferta}
+                  className={campoClaseRedondeado}
+                />
+              </div>
+              <div>
+                <label className={etiquetaClaseFuerte}>Vigente hasta (opcional)</label>
+                <input
+                  type="date"
+                  value={ofertaHasta}
+                  onChange={(e) => setOfertaHasta(e.target.value)}
+                  className={campoClaseRedondeado}
+                />
+              </div>
+            </div>
+            <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+              Vacío el precio de oferta = sin oferta. Vacía la fecha = la oferta dura hasta que la
+              saques a mano.
+            </p>
           </fieldset>
         </div>
 

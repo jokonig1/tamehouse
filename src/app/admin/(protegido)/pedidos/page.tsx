@@ -43,6 +43,8 @@ interface PedidoConsulta {
   retiro_oficina_code: number | null;
   retiro_oficina_nombre: string | null;
   numero_seguimiento: string | null;
+  codigo_descuento: string | null;
+  descuento_aplicado: number;
   created_at: string;
   pedido_items: { count: number }[];
 }
@@ -60,7 +62,7 @@ export default function PedidosPage() {
     const { data, error } = await supabase
       .from("pedidos")
       .select(
-        "id, cliente_id, estado, total, direccion, comuna, comuna_code, calle, numero, depto, destinatario_nombre, destinatario_telefono, destinatario_email, servicio_type_code, retiro_oficina_code, retiro_oficina_nombre, numero_seguimiento, created_at, pedido_items(count)"
+        "id, cliente_id, estado, total, direccion, comuna, comuna_code, calle, numero, depto, destinatario_nombre, destinatario_telefono, destinatario_email, servicio_type_code, retiro_oficina_code, retiro_oficina_nombre, numero_seguimiento, codigo_descuento, descuento_aplicado, created_at, pedido_items(count)"
       )
       .order("created_at", { ascending: false });
 
@@ -106,6 +108,8 @@ export default function PedidosPage() {
         retiro_oficina_code: p.retiro_oficina_code,
         retiro_oficina_nombre: p.retiro_oficina_nombre,
         numero_seguimiento: p.numero_seguimiento,
+        codigo_descuento: p.codigo_descuento,
+        descuento_aplicado: p.descuento_aplicado,
         created_at: p.created_at,
         itemsCount: p.pedido_items?.[0]?.count ?? 0,
         clienteNombre: p.cliente_id ? (nombresPorId[p.cliente_id] ?? null) : null,
