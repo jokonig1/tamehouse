@@ -275,35 +275,31 @@ export default function PedidosPage() {
 
       {!cargando && !error && (
         <div className="overflow-hidden rounded-xl border border-black/8 dark:border-white/[.145]">
-          <div className="overflow-x-auto">
-            <div className="min-w-[760px]">
-              <div className="grid grid-cols-[1.5rem_1fr_1fr_1fr_0.7fr_1fr_1fr] gap-6 bg-zinc-50 px-4 py-3 text-left text-xs font-medium uppercase tracking-widest text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
-                <span></span>
-                <span>Pedido</span>
-                <span>Cliente</span>
-                <span>Fecha</span>
-                <span>Items</span>
-                <span>Total</span>
-                <span>Estado</span>
-              </div>
-
-              {pedidos.length === 0 && (
-                <p className="border-t border-black/8 p-4 text-sm text-zinc-600 dark:border-white/[.145] dark:text-zinc-400">
-                  No hay pedidos todavía.
-                </p>
-              )}
-
-              {pedidos.length > 0 && pedidosFiltrados.length === 0 && (
-                <p className="border-t border-black/8 p-4 text-sm text-zinc-600 dark:border-white/[.145] dark:text-zinc-400">
-                  Ningún pedido coincide con el filtro.
-                </p>
-              )}
-
-              {pedidosPagina.map((p) => (
-                <PedidoRow key={p.id} pedido={p} />
-              ))}
-            </div>
+          <div className="hidden grid-cols-[1.5rem_1fr_1fr_1fr_0.7fr_1fr_1fr] gap-6 bg-zinc-50 px-4 py-3 text-left text-xs font-medium uppercase tracking-widest text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400 sm:grid">
+            <span></span>
+            <span>Pedido</span>
+            <span>Cliente</span>
+            <span>Fecha</span>
+            <span>Items</span>
+            <span>Total</span>
+            <span>Estado</span>
           </div>
+
+          {pedidos.length === 0 && (
+            <p className="border-t border-black/8 p-4 text-sm text-zinc-600 dark:border-white/[.145] dark:text-zinc-400">
+              No hay pedidos todavía.
+            </p>
+          )}
+
+          {pedidos.length > 0 && pedidosFiltrados.length === 0 && (
+            <p className="border-t border-black/8 p-4 text-sm text-zinc-600 dark:border-white/[.145] dark:text-zinc-400">
+              Ningún pedido coincide con el filtro.
+            </p>
+          )}
+
+          {pedidosPagina.map((p) => (
+            <PedidoRow key={p.id} pedido={p} />
+          ))}
 
           {pedidosFiltrados.length > 0 && (
             <div className="flex items-center justify-between border-t border-black/8 px-4 py-3 text-xs text-zinc-600 dark:border-white/[.145] dark:text-zinc-400">

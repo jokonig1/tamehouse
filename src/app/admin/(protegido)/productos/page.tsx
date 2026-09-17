@@ -354,9 +354,18 @@ export default function ProductosPage() {
 
       {!cargando && !error && (
         <div className="overflow-hidden rounded-xl border border-black/8 dark:border-white/[.145]">
-          <div className="overflow-x-auto">
-          <div className="min-w-[820px]">
-          <div className="grid grid-cols-[1.5rem_1.5rem_2fr_1fr_1fr_1fr_7rem_6rem] items-center gap-6 bg-zinc-50 px-4 py-3 text-left text-xs font-medium uppercase tracking-widest text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
+          <div className="flex items-center gap-2 border-b border-black/8 bg-zinc-50 px-4 py-3 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:border-white/[.145] dark:bg-zinc-900 dark:text-zinc-400 sm:hidden">
+            <input
+              type="checkbox"
+              checked={todosEnPaginaSeleccionados}
+              onChange={alternarSeleccionTodos}
+              className="accent-blue-600"
+              aria-label="Seleccionar todos"
+            />
+            <span>Seleccionar todos</span>
+          </div>
+
+          <div className="hidden grid-cols-[1.5rem_1.5rem_2fr_1fr_1fr_1fr_7rem_6rem] items-center gap-6 bg-zinc-50 px-4 py-3 text-left text-xs font-medium uppercase tracking-widest text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400 sm:grid">
             <input
               type="checkbox"
               checked={todosEnPaginaSeleccionados}
@@ -429,8 +438,6 @@ export default function ProductosPage() {
               onSeleccionar={() => alternarSeleccion(p.id)}
             />
           ))}
-          </div>
-          </div>
 
           {productosFiltrados.length > 0 && (
             <div className="flex items-center justify-between border-t border-black/8 px-4 py-3 text-xs text-zinc-600 dark:border-white/[.145] dark:text-zinc-400">

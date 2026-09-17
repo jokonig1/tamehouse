@@ -230,9 +230,7 @@ export default function DescuentosPage() {
 
       {!cargando && !error && (
         <div className="overflow-hidden rounded-xl border border-black/8 dark:border-white/[.145]">
-          <div className="overflow-x-auto">
-          <div className="min-w-[720px]">
-          <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_6rem] gap-4 bg-zinc-50 px-4 py-3 text-left text-xs font-medium uppercase tracking-widest text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
+          <div className="hidden grid-cols-[1fr_1fr_1fr_1fr_1fr_6rem] gap-4 bg-zinc-50 px-4 py-3 text-left text-xs font-medium uppercase tracking-widest text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400 sm:grid">
             <span>Código</span>
             <span>Valor</span>
             <span>Usos</span>
@@ -255,8 +253,6 @@ export default function DescuentosPage() {
               onActualizado={actualizarCodigo}
             />
           ))}
-          </div>
-          </div>
         </div>
       )}
     </div>

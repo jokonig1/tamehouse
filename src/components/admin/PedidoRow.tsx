@@ -383,37 +383,79 @@ export default function PedidoRow({ pedido }: PedidoRowProps) {
             setExpandido((v) => !v);
           }
         }}
-        className="grid cursor-pointer grid-cols-[1.5rem_1fr_1fr_1fr_0.7fr_1fr_1fr] items-center gap-6 px-4 py-4 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-900"
+        className="cursor-pointer px-4 py-4 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-900"
       >
-        <span aria-hidden="true" className="w-6 text-zinc-500">
-          {expandido ? "▾" : "▸"}
-        </span>
-        <span className="font-mono font-semibold text-orange-600 dark:text-orange-500">
-          {pedido.id.slice(0, 8).toUpperCase()}
-        </span>
-        <span className="text-zinc-600 dark:text-zinc-400">{pedido.clienteNombre ?? "Invitado"}</span>
-        <span>{formatoFecha(pedido.created_at)}</span>
-        <span className="text-zinc-600 dark:text-zinc-400">
-          {pedido.itemsCount} {pedido.itemsCount === 1 ? "item" : "items"}
-        </span>
-        <span>{formatoPrecio.format(pedido.total)}</span>
-        <div
-          className={`inline-flex w-fit items-center gap-1.5 rounded-full py-1 pr-2.5 pl-2 ${estadoInfo.pill}`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <select
-            value={estado}
-            disabled={guardandoEstado}
-            onChange={(e) => actualizarEstado(e.target.value as EstadoPedido)}
-            className="cursor-pointer appearance-none border-none bg-transparent p-0 text-xs font-semibold uppercase tracking-widest outline-none disabled:cursor-wait"
+        {/* Tarjeta apilada (mobile) -- nunca scroll horizontal */}
+        <div className="flex flex-col gap-2 sm:hidden">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-mono font-semibold text-orange-600 dark:text-orange-500">
+              {pedido.id.slice(0, 8).toUpperCase()}
+            </span>
+            <span aria-hidden="true" className="text-zinc-500">
+              {expandido ? "▾" : "▸"}
+            </span>
+          </div>
+          <span className="text-zinc-600 dark:text-zinc-400">
+            {pedido.clienteNombre ?? "Invitado"}
+          </span>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs text-zinc-500 dark:text-zinc-400">
+              {formatoFecha(pedido.created_at)} · {pedido.itemsCount}{" "}
+              {pedido.itemsCount === 1 ? "item" : "items"} · {formatoPrecio.format(pedido.total)}
+            </span>
+            <div
+              className={`inline-flex w-fit items-center gap-1.5 rounded-full py-1 pr-2.5 pl-2 ${estadoInfo.pill}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <select
+                value={estado}
+                disabled={guardandoEstado}
+                onChange={(e) => actualizarEstado(e.target.value as EstadoPedido)}
+                className="cursor-pointer appearance-none border-none bg-transparent p-0 text-xs font-semibold uppercase tracking-widest outline-none disabled:cursor-wait"
+              >
+                {ESTADOS.map((e) => (
+                  <option key={e.valor} value={e.valor} className="text-black">
+                    {e.label}
+                  </option>
+                ))}
+              </select>
+              <span aria-hidden="true" className="text-sm leading-none">▾</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Fila en columnas (sm y más) */}
+        <div className="hidden grid-cols-[1.5rem_1fr_1fr_1fr_0.7fr_1fr_1fr] items-center gap-6 sm:grid">
+          <span aria-hidden="true" className="w-6 text-zinc-500">
+            {expandido ? "▾" : "▸"}
+          </span>
+          <span className="font-mono font-semibold text-orange-600 dark:text-orange-500">
+            {pedido.id.slice(0, 8).toUpperCase()}
+          </span>
+          <span className="text-zinc-600 dark:text-zinc-400">{pedido.clienteNombre ?? "Invitado"}</span>
+          <span>{formatoFecha(pedido.created_at)}</span>
+          <span className="text-zinc-600 dark:text-zinc-400">
+            {pedido.itemsCount} {pedido.itemsCount === 1 ? "item" : "items"}
+          </span>
+          <span>{formatoPrecio.format(pedido.total)}</span>
+          <div
+            className={`inline-flex w-fit items-center gap-1.5 rounded-full py-1 pr-2.5 pl-2 ${estadoInfo.pill}`}
+            onClick={(e) => e.stopPropagation()}
           >
-            {ESTADOS.map((e) => (
-              <option key={e.valor} value={e.valor} className="text-black">
-                {e.label}
-              </option>
-            ))}
-          </select>
-          <span aria-hidden="true" className="text-sm leading-none">▾</span>
+            <select
+              value={estado}
+              disabled={guardandoEstado}
+              onChange={(e) => actualizarEstado(e.target.value as EstadoPedido)}
+              className="cursor-pointer appearance-none border-none bg-transparent p-0 text-xs font-semibold uppercase tracking-widest outline-none disabled:cursor-wait"
+            >
+              {ESTADOS.map((e) => (
+                <option key={e.valor} value={e.valor} className="text-black">
+                  {e.label}
+                </option>
+              ))}
+            </select>
+            <span aria-hidden="true" className="text-sm leading-none">▾</span>
+          </div>
         </div>
       </div>
 

@@ -151,58 +151,76 @@ export default function ShowRow({ show, onEliminar, onActualizado }: ShowRowProp
   }
 
   return (
-    <div className="grid grid-cols-[1fr_1fr_1fr_1fr_5rem] items-center gap-6 border-t border-black/8 px-4 py-4 text-sm dark:border-white/[.145]">
-      <span className="font-medium">{formatoFecha(show.fecha)}</span>
-      <span>{show.ciudad}</span>
-      <span className="text-zinc-600 dark:text-zinc-400">{show.lugar ?? "-"}</span>
-      {show.link_entradas ? (
-        <a
-          href={show.link_entradas}
-          target="_blank"
-          rel="noreferrer"
-          className="truncate text-blue-600 hover:underline dark:text-blue-400"
-        >
-          Ver entradas
-        </a>
-      ) : (
-        <span className="text-zinc-400">-</span>
-      )}
-
-      <div className="flex items-center justify-end gap-3 text-zinc-500 dark:text-zinc-400">
-        <button
-          type="button"
-          onClick={() => setEditando(true)}
-          aria-label="Editar"
-          className="hover:text-blue-600 dark:hover:text-blue-400"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={iconoClase}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"
-            />
-          </svg>
-        </button>
-
-        <button
-          type="button"
-          onClick={eliminar}
-          aria-label="Eliminar"
-          className="hover:text-red-600 dark:hover:text-red-400"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={iconoClase}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
-            />
-            <path strokeLinecap="round" d="M10 11v6M14 11v6" />
-          </svg>
-        </button>
+    <div className="border-t border-black/8 px-4 py-4 text-sm dark:border-white/[.145]">
+      {/* Tarjeta apilada (mobile) -- nunca scroll horizontal */}
+      <div className="flex flex-col gap-1.5 sm:hidden">
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-medium">{formatoFecha(show.fecha)} · {show.ciudad}</span>
+          <AccionesShow onEditar={() => setEditando(true)} onEliminar={eliminar} />
+        </div>
+        <span className="text-zinc-600 dark:text-zinc-400">{show.lugar ?? "-"}</span>
+        {show.link_entradas ? (
+          <a
+            href={show.link_entradas}
+            target="_blank"
+            rel="noreferrer"
+            className="text-blue-600 hover:underline dark:text-blue-400"
+          >
+            Ver entradas
+          </a>
+        ) : (
+          <span className="text-zinc-400">-</span>
+        )}
       </div>
+
+      {/* Fila en columnas (sm y más) */}
+      <div className="hidden grid-cols-[1fr_1fr_1fr_1fr_5rem] items-center gap-6 sm:grid">
+        <span className="font-medium">{formatoFecha(show.fecha)}</span>
+        <span>{show.ciudad}</span>
+        <span className="text-zinc-600 dark:text-zinc-400">{show.lugar ?? "-"}</span>
+        {show.link_entradas ? (
+          <a
+            href={show.link_entradas}
+            target="_blank"
+            rel="noreferrer"
+            className="truncate text-blue-600 hover:underline dark:text-blue-400"
+          >
+            Ver entradas
+          </a>
+        ) : (
+          <span className="text-zinc-400">-</span>
+        )}
+
+        <div className="flex items-center justify-end gap-3 text-zinc-500 dark:text-zinc-400">
+          <AccionesShow onEditar={() => setEditando(true)} onEliminar={eliminar} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AccionesShow({ onEditar, onEliminar }: { onEditar: () => void; onEliminar: () => void }) {
+  return (
+    <div className="flex shrink-0 items-center gap-3 text-zinc-500 dark:text-zinc-400">
+      <button type="button" onClick={onEditar} aria-label="Editar" className="hover:text-blue-600 dark:hover:text-blue-400">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={iconoClase}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"
+          />
+        </svg>
+      </button>
+
+      <button type="button" onClick={onEliminar} aria-label="Eliminar" className="hover:text-red-600 dark:hover:text-red-400">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={iconoClase}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+          <path strokeLinecap="round" d="M10 11v6M14 11v6" />
+        </svg>
+      </button>
     </div>
   );
 }
