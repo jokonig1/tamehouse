@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { BiografiaFoto } from "@/lib/biografia";
 
 const POR_PAGINA = 4;
@@ -27,10 +27,33 @@ function Flecha({ direccion }: { direccion: "izquierda" | "derecha" }) {
 
 export default function GaleriaBiografia({ fotos }: { fotos: BiografiaFoto[] }) {
   const [pagina, setPagina] = useState(0);
-  const [fotoAmpliada, setFotoAmpliada] = useState<BiografiaFoto | null>(null);
+  const [indiceAmpliado, setIndiceAmpliado] = useState<number | null>(null);
 
   const totalPaginas = Math.ceil(fotos.length / POR_PAGINA);
   const visibles = fotos.slice(pagina * POR_PAGINA, pagina * POR_PAGINA + POR_PAGINA);
+  const fotoAmpliada = indiceAmpliado !== null ? fotos[indiceAmpliado] : null;
+
+  function irAnterior() {
+    setIndiceAmpliado((i) => (i === null ? null : (i - 1 + fotos.length) % fotos.length));
+  }
+
+  function irSiguiente() {
+    setIndiceAmpliado((i) => (i === null ? null : (i + 1) % fotos.length));
+  }
+
+  useEffect(() => {
+    if (indiceAmpliado === null) return;
+
+    function alPresionarTecla(e: KeyboardEvent) {
+      if (e.key === "Escape") setIndiceAmpliado(null);
+      if (e.key === "ArrowLeft") irAnterior();
+      if (e.key === "ArrowRight") irSiguiente();
+    }
+
+    window.addEventListener("keydown", alPresionarTecla);
+    return () => window.removeEventListener("keydown", alPresionarTecla);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo debe reengancharse al abrir/cerrar el lightbox
+  }, [indiceAmpliado === null]);
 
   return (
     <>
@@ -46,11 +69,11 @@ export default function GaleriaBiografia({ fotos }: { fotos: BiografiaFoto[] }) 
         </button>
 
         <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-4">
-          {visibles.map((foto) => (
+          {visibles.map((foto, i) => (
             <button
               key={foto.id}
               type="button"
-              onClick={() => setFotoAmpliada(foto)}
+              onClick={() => setIndiceAmpliado(pagina * POR_PAGINA + i)}
               aria-label="Ver foto completa"
               className="group relative aspect-square overflow-hidden rounded-sm bg-stone-200"
             >
@@ -96,12 +119,12 @@ export default function GaleriaBiografia({ fotos }: { fotos: BiografiaFoto[] }) 
         <div
           role="dialog"
           aria-modal
-          onClick={() => setFotoAmpliada(null)}
+          onClick={() => setIndiceAmpliado(null)}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-6"
         >
           <button
             type="button"
-            onClick={() => setFotoAmpliada(null)}
+            onClick={() => setIndiceAmpliado(null)}
             aria-label="Cerrar"
             className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full text-white hover:bg-white/10"
           >
@@ -117,6 +140,20 @@ export default function GaleriaBiografia({ fotos }: { fotos: BiografiaFoto[] }) 
             </svg>
           </button>
 
+          {fotos.length > 1 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                irAnterior();
+              }}
+              aria-label="Foto anterior"
+              className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full text-white hover:bg-white/10 sm:left-5"
+            >
+              <Flecha direccion="izquierda" />
+            </button>
+          )}
+
           <div className="relative h-full max-h-[85vh] w-full max-w-4xl">
             <Image
               src={fotoAmpliada.url}
@@ -127,6 +164,20 @@ export default function GaleriaBiografia({ fotos }: { fotos: BiografiaFoto[] }) 
               onClick={(e) => e.stopPropagation()}
             />
           </div>
+
+          {fotos.length > 1 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                irSiguiente();
+              }}
+              aria-label="Foto siguiente"
+              className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full text-white hover:bg-white/10 sm:right-5"
+            >
+              <Flecha direccion="derecha" />
+            </button>
+          )}
         </div>
       )}
     </>
