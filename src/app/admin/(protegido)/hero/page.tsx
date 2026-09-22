@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import HeroPreview from "@/components/admin/HeroPreview";
 import HeroSlideRow from "@/components/admin/HeroSlideRow";
 import {
   campoClaseRedondeado,
@@ -164,6 +165,10 @@ export default function HeroPage() {
       </nav>
 
       <h1 className="mb-6 text-3xl font-bold tracking-tight">Portada</h1>
+
+      <div className={`${tarjetaClase} mb-6`}>
+        <HeroPreview slides={slides} titulo={titulo} subtitulo={subtitulo} />
+      </div>
 
       <form onSubmit={guardarTextos} className={`${tarjetaClase} mb-6 space-y-4`}>
         <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-900 dark:text-zinc-100">
