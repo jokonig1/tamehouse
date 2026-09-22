@@ -1095,3 +1095,13 @@ using (bucket_id = 'biografia' and public.is_admin());
 alter table productos
   add column oferta_tipo text check (oferta_tipo in ('porcentaje', 'monto_fijo')),
   add column oferta_valor integer;
+
+-- Punto focal horizontal (0-100, % desde la izquierda) que usa cada
+-- imagen del hero solo en mobile. En desktop el contenedor es ancho
+-- y "object-top" (centrado) siempre se ve bien, pero en mobile el
+-- contenedor es angosto y si el sujeto de la foto no está centrado,
+-- object-cover lo corta -- 50 (centro) es el comportamiento anterior,
+-- así que no cambia nada hasta que el admin lo ajuste por imagen.
+alter table hero_slides
+  add column foco_movil_x smallint not null default 50
+    check (foco_movil_x between 0 and 100);

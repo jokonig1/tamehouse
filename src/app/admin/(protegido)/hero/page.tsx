@@ -29,7 +29,7 @@ export default function HeroPage() {
     setCargando(true);
     const { data, error } = await supabase
       .from("hero_slides")
-      .select("id, url, logo_oscuro, orden")
+      .select("id, url, logo_oscuro, orden, foco_movil_x")
       .order("orden", { ascending: true });
 
     if (error) {
