@@ -23,22 +23,16 @@ export default function HeroSlideRow({
   onEliminar,
   onMover,
 }: HeroSlideRowProps) {
-  const [logoOscuro, setLogoOscuro] = useState(slide.logo_oscuro);
-  const [guardando, setGuardando] = useState(false);
+  const [focoMovilX, setFocoMovilX] = useState(slide.foco_movil_x);
 
-  async function alternarLogoOscuro() {
-    const nuevoValor = !logoOscuro;
-    setLogoOscuro(nuevoValor);
-    setGuardando(true);
-
+  async function guardarFoco(valor: number) {
     const { error } = await supabase
       .from("hero_slides")
-      .update({ logo_oscuro: nuevoValor })
+      .update({ foco_movil_x: valor })
       .eq("id", slide.id);
 
-    setGuardando(false);
     if (error) {
-      setLogoOscuro(!nuevoValor);
+      setFocoMovilX(slide.foco_movil_x);
       alert(`No se pudo actualizar: ${error.message}`);
     }
   }
@@ -57,35 +51,43 @@ export default function HeroSlideRow({
   }
 
   return (
-    <div className="flex items-center gap-6 border-t border-black/8 px-4 py-4 text-sm dark:border-white/[.145]">
-      <div className="relative h-16 w-28 shrink-0 overflow-hidden rounded-md bg-zinc-100 dark:bg-zinc-800">
-        <Image src={slide.url} alt="" fill className="object-cover" />
+    <div className="flex flex-col gap-4 border-t border-black/8 px-4 py-4 text-sm dark:border-white/[.145] sm:flex-row sm:items-center sm:gap-6">
+      <div className="flex items-center gap-4">
+        <div className="relative h-16 w-28 shrink-0 overflow-hidden rounded-md bg-zinc-100 dark:bg-zinc-800">
+          <Image src={slide.url} alt="" fill className="object-cover" />
+        </div>
+        <div className="relative h-24 w-14 shrink-0 overflow-hidden rounded-md bg-zinc-100 ring-1 ring-black/10 dark:bg-zinc-800 dark:ring-white/20">
+          <Image
+            src={slide.url}
+            alt=""
+            fill
+            style={{ objectPosition: `${focoMovilX}% top` }}
+            className="object-cover"
+          />
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          role="switch"
-          aria-checked={logoOscuro}
-          aria-label="Logo oscuro sobre esta imagen"
-          disabled={guardando}
-          onClick={alternarLogoOscuro}
-          className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-wait disabled:opacity-50 ${
-            logoOscuro ? "bg-green-500" : "bg-zinc-300 dark:bg-zinc-700"
-          }`}
-        >
-          <span
-            className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-              logoOscuro ? "translate-x-5" : "translate-x-0"
-            }`}
-          />
-        </button>
-        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-          Logo oscuro
+      <div className="flex flex-1 items-center gap-3">
+        <span className="shrink-0 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+          Foco mobile
+        </span>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={focoMovilX}
+          onChange={(e) => setFocoMovilX(Number(e.target.value))}
+          onMouseUp={(e) => guardarFoco(Number((e.target as HTMLInputElement).value))}
+          onTouchEnd={(e) => guardarFoco(Number((e.target as HTMLInputElement).value))}
+          className="h-2 w-full max-w-xs accent-blue-600"
+          aria-label="Punto focal horizontal en mobile"
+        />
+        <span className="w-9 shrink-0 text-xs text-zinc-500 tabular-nums dark:text-zinc-400">
+          {focoMovilX}%
         </span>
       </div>
 
-      <div className="ml-auto flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
+      <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400 sm:ml-auto">
         <button
           type="button"
           onClick={() => onMover("arriba")}

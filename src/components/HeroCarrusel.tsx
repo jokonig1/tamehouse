@@ -7,9 +7,9 @@ import type { HeroSlide } from "@/lib/heroSlides";
 
 // Fallback si todavia no hay imagenes cargadas desde /admin/hero.
 const SLIDES_POR_DEFECTO = [
-  { url: "/images/fotoinicio3.jpg", logo_oscuro: true },
-  { url: "/images/fotoinicio1.png", logo_oscuro: false },
-  { url: "/images/fotoinicio2.png", logo_oscuro: true },
+  { url: "/images/fotoinicio3.jpg", logo_oscuro: true, foco_movil_x: 50 },
+  { url: "/images/fotoinicio1.png", logo_oscuro: false, foco_movil_x: 50 },
+  { url: "/images/fotoinicio2.png", logo_oscuro: true, foco_movil_x: 50 },
 ];
 
 const INTERVALO_MS = 5000;
@@ -45,7 +45,8 @@ export default function HeroCarrusel({ slides }: HeroCarruselProps) {
           fill
           priority={i === 0}
           sizes="100vw"
-          className={`absolute inset-0 object-cover object-top transition-opacity duration-1000 ${
+          style={{ objectPosition: `${slide.foco_movil_x}% top` }}
+          className={`absolute inset-0 object-cover transition-opacity duration-1000 sm:object-top! ${
             i === indice ? "opacity-100" : "opacity-0"
           }`}
         />
