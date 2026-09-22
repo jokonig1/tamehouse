@@ -59,8 +59,8 @@ export default function ShowList({
               rel="noopener noreferrer"
               className={
                 variant === "dark"
-                  ? "text-sm font-medium text-white hover:opacity-70"
-                  : "text-sm font-medium hover:opacity-70"
+                  ? "shrink-0 rounded-full bg-white px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-80"
+                  : "shrink-0 rounded-full bg-black px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-80 dark:bg-white dark:text-black"
               }
             >
               Entradas
