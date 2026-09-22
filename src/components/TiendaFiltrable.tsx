@@ -59,7 +59,7 @@ export default function TiendaFiltrable({ productos }: { productos: Producto[] }
           className={`flex h-10 shrink-0 items-center gap-1.5 rounded-full px-5 text-sm font-semibold transition-all duration-200 ${pillClass(filtro === "ofertas")}`}
         >
           <IconoOferta />
-          Ofertas
+          ¡Ofertas!
         </button>
 
         {categorias.map((c) => (
