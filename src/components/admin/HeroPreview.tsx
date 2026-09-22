@@ -120,7 +120,7 @@ export default function HeroPreview({ slides, titulo, subtitulo }: HeroPreviewPr
 
       <div
         className={`relative @container overflow-hidden rounded-lg bg-zinc-950 transition-all ${
-          esMobile ? "mx-auto w-full max-w-65 aspect-9/16" : "w-full aspect-video"
+          esMobile ? "mx-auto w-full max-w-65 aspect-3/4" : "w-full aspect-video"
         }`}
       >
         {slideActual && (
@@ -140,11 +140,11 @@ export default function HeroPreview({ slides, titulo, subtitulo }: HeroPreviewPr
         {/* Barra del header real (solo referencia visual, no funcional) */}
         <div
           className={`absolute inset-x-0 top-0 z-10 grid grid-cols-3 items-center text-white ${
-            esMobile ? "h-9 px-3" : "h-[5.5cqw] px-[3%]"
+            esMobile ? "h-12 px-4" : "h-[5.5cqw] px-[3%]"
           }`}
         >
           {esMobile ? (
-            <IconoHamburguesa className="h-4 w-4" />
+            <IconoHamburguesa className="h-5 w-5" />
           ) : (
             <nav className="flex items-center gap-[6%] text-[0.85cqw] font-medium uppercase tracking-widest">
               <span>Tienda</span>
@@ -158,14 +158,14 @@ export default function HeroPreview({ slides, titulo, subtitulo }: HeroPreviewPr
             alt=""
             width={1224}
             height={1285}
-            className={`justify-self-center object-contain ${esMobile ? "h-10 w-auto" : "h-[6.5cqw] w-auto"}`}
+            className={`justify-self-center object-contain ${esMobile ? "h-14 w-auto" : "h-[6.5cqw] w-auto"}`}
           />
 
           <div className={`flex items-center justify-end ${esMobile ? "gap-3" : "gap-[6%]"}`}>
             {esMobile ? (
               <>
-                <IconoBuscar className="h-4 w-4" />
-                <IconoCarrito className="h-4 w-4" />
+                <IconoBuscar className="h-5 w-5" />
+                <IconoCarrito className="h-5 w-5" />
               </>
             ) : (
               <>
