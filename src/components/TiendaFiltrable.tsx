@@ -10,6 +10,15 @@ function pillClass(activo: boolean) {
     : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/20";
 }
 
+function IconoOferta() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <path d="M20.5 12.5 12 21l-9-9L11.5 3.5H19a1.5 1.5 0 0 1 1.5 1.5v7.5Z" />
+      <circle cx="15.5" cy="8.5" r="1.2" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export default function TiendaFiltrable({ productos }: { productos: Producto[] }) {
   const lista = productos.length > 0 ? productos : PRODUCTOS_BOCETO;
 
@@ -44,6 +53,15 @@ export default function TiendaFiltrable({ productos }: { productos: Producto[] }
           Ver todo
         </button>
 
+        <button
+          type="button"
+          onClick={() => setFiltro("ofertas")}
+          className={`flex h-10 shrink-0 items-center gap-1.5 rounded-full px-5 text-sm font-semibold transition-all duration-200 ${pillClass(filtro === "ofertas")}`}
+        >
+          <IconoOferta />
+          Ofertas
+        </button>
+
         {categorias.map((c) => (
           <button
             key={c}
@@ -54,14 +72,6 @@ export default function TiendaFiltrable({ productos }: { productos: Producto[] }
             {c}
           </button>
         ))}
-
-        <button
-          type="button"
-          onClick={() => setFiltro("ofertas")}
-          className={`h-10 shrink-0 rounded-full px-5 text-sm font-semibold transition-all duration-200 ${pillClass(filtro === "ofertas")}`}
-        >
-          Ofertas
-        </button>
 
         <div className="flex shrink-0 items-center gap-2">
           {busquedaAbierta && (
