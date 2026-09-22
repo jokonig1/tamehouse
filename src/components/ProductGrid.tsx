@@ -26,13 +26,13 @@ export default function ProductGrid({
         <Link key={producto.id} href={`/producto/${producto.id}`} className="group">
           <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900">
             {producto.agotado && (
-              <span className="absolute left-2 top-2 z-10 rounded-md bg-red-600 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white">
+              <span className="absolute left-2 top-2 z-10 rounded-md bg-black px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white">
                 Sin stock
               </span>
             )}
             {!producto.agotado && producto.precioOferta !== null && (
-              <span className="absolute left-2 top-2 z-10 rounded-md bg-black px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white dark:bg-white dark:text-black">
-                Oferta
+              <span className="absolute left-2 top-2 z-10 rounded-md bg-red-600 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white">
+                -{Math.round((1 - producto.precioOferta / producto.precio) * 100)}%
               </span>
             )}
             {producto.imagenUrl && (
