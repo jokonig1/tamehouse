@@ -26,12 +26,12 @@ export default function ProductGrid({
         <Link key={producto.id} href={`/producto/${producto.id}`} className="group">
           <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900">
             {producto.agotado && (
-              <span className="absolute left-2 top-2 z-10 rounded-md bg-red-600 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white">
+              <span className="absolute left-2 top-2 z-10 rounded-md bg-black px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white">
                 Sin stock
               </span>
             )}
             {!producto.agotado && producto.precioOferta !== null && (
-              <span className="absolute left-2 top-2 z-10 rounded-md bg-black px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white dark:bg-white dark:text-black">
+              <span className="absolute left-2 top-2 z-10 rounded-md bg-red-600 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white">
                 Oferta
               </span>
             )}
@@ -49,12 +49,15 @@ export default function ProductGrid({
             {producto.nombre}
           </p>
           {producto.precioOferta !== null ? (
-            <p className="flex items-baseline gap-1.5 text-sm">
+            <p className="flex flex-wrap items-baseline gap-1.5 text-sm">
               <span className="font-semibold text-red-600 dark:text-red-400">
                 {formatoPrecio.format(producto.precioOferta)}
               </span>
               <span className="text-zinc-400 line-through dark:text-zinc-500">
                 {formatoPrecio.format(producto.precio)}
+              </span>
+              <span className="rounded bg-red-600 px-1.5 py-0.5 text-xs font-bold text-white">
+                -{Math.round((1 - producto.precioOferta / producto.precio) * 100)}%
               </span>
             </p>
           ) : (
