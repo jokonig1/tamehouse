@@ -154,11 +154,11 @@ export default function HeroPreview({ slides, titulo, subtitulo }: HeroPreviewPr
           )}
 
           <Image
-            src="/images/logolobo1.png"
+            src="/images/logooficial.png"
             alt=""
-            width={64}
-            height={64}
-            className={`justify-self-center object-contain ${esMobile ? "h-6 w-auto" : "h-[3.6cqw] w-auto"}`}
+            width={1224}
+            height={1285}
+            className={`justify-self-center object-contain ${esMobile ? "h-10 w-auto" : "h-[6.5cqw] w-auto"}`}
           />
 
           <div className={`flex items-center justify-end ${esMobile ? "gap-3" : "gap-[6%]"}`}>
