@@ -222,8 +222,8 @@ export default function HeroPage() {
         </h2>
         <p className="text-xs text-zinc-600 dark:text-zinc-400">
           Con una sola imagen se muestra fija; con varias, rotan como carrusel en el orden de
-          la lista. Activa &quot;Logo oscuro&quot; en las imágenes claras para que el logo del
-          header se siga viendo bien encima.
+          la lista. Ajusta el foco mobile de cada una para controlar qué parte de la foto se
+          ve al recortarla en pantallas angostas.
         </p>
 
         {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}

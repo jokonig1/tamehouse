@@ -86,11 +86,11 @@ export default function HeroPreview({ slides, titulo, subtitulo }: HeroPreviewPr
 
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-900 dark:text-zinc-100">
           Previsualización
         </h2>
-        <div className="inline-flex rounded-full border border-black/8 p-1 dark:border-white/[.145]">
+        <div className="inline-flex w-fit rounded-full border border-black/8 p-1 dark:border-white/[.145]">
           <button
             type="button"
             onClick={() => setModo("mobile")}
