@@ -58,11 +58,7 @@ export default function TiendaFiltrable({ productos }: { productos: Producto[] }
         <button
           type="button"
           onClick={() => setFiltro("ofertas")}
-          className={`h-10 shrink-0 rounded-full px-5 text-sm font-semibold transition-all duration-200 ${
-            filtro === "ofertas"
-              ? "bg-red-600 text-white shadow-sm"
-              : "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
-          }`}
+          className={`h-10 shrink-0 rounded-full px-5 text-sm font-semibold transition-all duration-200 ${pillClass(filtro === "ofertas")}`}
         >
           Ofertas
         </button>
