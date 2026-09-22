@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { eliminarImagenHero } from "@/lib/heroImagenes";
@@ -23,25 +23,15 @@ export default function HeroSlideRow({
   onEliminar,
   onMover,
 }: HeroSlideRowProps) {
-  const [logoOscuro, setLogoOscuro] = useState(slide.logo_oscuro);
-  const [guardando, setGuardando] = useState(false);
   const [focoMovilX, setFocoMovilX] = useState(slide.foco_movil_x);
+  const [arrastrando, setArrastrando] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
 
-  async function alternarLogoOscuro() {
-    const nuevoValor = !logoOscuro;
-    setLogoOscuro(nuevoValor);
-    setGuardando(true);
-
-    const { error } = await supabase
-      .from("hero_slides")
-      .update({ logo_oscuro: nuevoValor })
-      .eq("id", slide.id);
-
-    setGuardando(false);
-    if (error) {
-      setLogoOscuro(!nuevoValor);
-      alert(`No se pudo actualizar: ${error.message}`);
-    }
+  function calcularFoco(clientX: number) {
+    const rect = previewRef.current?.getBoundingClientRect();
+    if (!rect) return focoMovilX;
+    const porcentaje = ((clientX - rect.left) / rect.width) * 100;
+    return Math.max(0, Math.min(100, Math.round(porcentaje)));
   }
 
   async function guardarFoco(valor: number) {
@@ -54,6 +44,34 @@ export default function HeroSlideRow({
       setFocoMovilX(slide.foco_movil_x);
       alert(`No se pudo actualizar: ${error.message}`);
     }
+  }
+
+  function iniciarArrastre(e: React.PointerEvent<HTMLDivElement>) {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setArrastrando(true);
+    setFocoMovilX(calcularFoco(e.clientX));
+  }
+
+  function moverArrastre(e: React.PointerEvent<HTMLDivElement>) {
+    if (!arrastrando) return;
+    setFocoMovilX(calcularFoco(e.clientX));
+  }
+
+  function soltarArrastre(e: React.PointerEvent<HTMLDivElement>) {
+    if (!arrastrando) return;
+    setArrastrando(false);
+    guardarFoco(calcularFoco(e.clientX));
+  }
+
+  function ajustarConTeclado(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    const nuevoValor = Math.max(
+      0,
+      Math.min(100, focoMovilX + (e.key === "ArrowLeft" ? -1 : 1))
+    );
+    setFocoMovilX(nuevoValor);
+    guardarFoco(nuevoValor);
   }
 
   async function eliminar() {
@@ -70,67 +88,43 @@ export default function HeroSlideRow({
   }
 
   return (
-    <div className="flex flex-col gap-4 border-t border-black/8 px-4 py-4 text-sm dark:border-white/[.145] sm:flex-row sm:items-center sm:gap-6">
-      <div className="flex items-center gap-3">
-        <div className="relative h-16 w-28 shrink-0 overflow-hidden rounded-md bg-zinc-100 dark:bg-zinc-800">
-          <Image src={slide.url} alt="" fill className="object-cover" />
-        </div>
+    <div className="flex flex-col gap-4 border-t border-black/8 px-4 py-4 text-sm dark:border-white/[.145] sm:flex-row sm:items-start sm:gap-6">
+      <div className="relative h-16 w-28 shrink-0 overflow-hidden rounded-md bg-zinc-100 dark:bg-zinc-800">
+        <Image src={slide.url} alt="" fill className="object-cover" />
+      </div>
+
+      <div className="flex flex-1 flex-col gap-2">
+        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+          Foco mobile · {focoMovilX}%
+        </span>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          Arrastra la línea para elegir qué parte de la foto se ve al recortarla en mobile.
+        </p>
         <div
-          className="relative h-16 w-9 shrink-0 overflow-hidden rounded-md bg-zinc-100 ring-1 ring-black/10 dark:bg-zinc-800 dark:ring-white/20"
-          title="Vista previa del recorte en mobile"
+          ref={previewRef}
+          role="slider"
+          tabIndex={0}
+          aria-label="Punto focal horizontal en mobile"
+          aria-valuenow={focoMovilX}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          onPointerDown={iniciarArrastre}
+          onPointerMove={moverArrastre}
+          onPointerUp={soltarArrastre}
+          onKeyDown={ajustarConTeclado}
+          className="relative h-44 aspect-9/16 cursor-ew-resize touch-none overflow-hidden rounded-md bg-zinc-100 ring-1 ring-black/10 select-none dark:bg-zinc-800 dark:ring-white/20"
         >
           <Image
             src={slide.url}
             alt=""
             fill
             style={{ objectPosition: `${focoMovilX}% top` }}
-            className="object-cover"
+            className="pointer-events-none object-cover"
           />
-        </div>
-      </div>
-
-      <div className="flex flex-1 flex-wrap items-center gap-x-6 gap-y-3">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={logoOscuro}
-            aria-label="Logo oscuro sobre esta imagen"
-            disabled={guardando}
-            onClick={alternarLogoOscuro}
-            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-wait disabled:opacity-50 ${
-              logoOscuro ? "bg-green-500" : "bg-zinc-300 dark:bg-zinc-700"
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                logoOscuro ? "translate-x-5" : "translate-x-0"
-              }`}
-            />
-          </button>
-          <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-            Logo oscuro
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-            Foco mobile
-          </span>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={focoMovilX}
-            onChange={(e) => setFocoMovilX(Number(e.target.value))}
-            onMouseUp={(e) => guardarFoco(Number((e.target as HTMLInputElement).value))}
-            onTouchEnd={(e) => guardarFoco(Number((e.target as HTMLInputElement).value))}
-            className="w-28 accent-blue-600"
-            aria-label="Punto focal horizontal en mobile"
+          <div
+            className="pointer-events-none absolute inset-y-0 w-0.5 -translate-x-1/2 bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.5)]"
+            style={{ left: `${focoMovilX}%` }}
           />
-          <span className="w-9 text-xs text-zinc-500 tabular-nums dark:text-zinc-400">
-            {focoMovilX}%
-          </span>
         </div>
       </div>
 
