@@ -1,4 +1,5 @@
 import Image from "next/image";
+import GaleriaBiografia from "@/components/GaleriaBiografia";
 import { getBiografiaFases, getBiografiaGaleria } from "@/lib/biografia";
 
 type FaseMostrada = {
@@ -122,21 +123,8 @@ export default async function Page() {
             <h2 className="text-center text-4xl font-extrabold tracking-tight uppercase sm:text-5xl">
               Galería
             </h2>
-            <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-              {galeria.map((foto) => (
-                <div
-                  key={foto.id}
-                  className="relative aspect-square overflow-hidden rounded-sm bg-stone-200"
-                >
-                  <Image
-                    src={foto.url}
-                    alt=""
-                    fill
-                    sizes="(min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
-                    className="object-cover"
-                  />
-                </div>
-              ))}
+            <div className="mt-10">
+              <GaleriaBiografia fotos={galeria} />
             </div>
           </div>
         </section>

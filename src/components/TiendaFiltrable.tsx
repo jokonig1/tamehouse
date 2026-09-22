@@ -21,15 +21,16 @@ export default function TiendaFiltrable({ productos }: { productos: Producto[] }
     [lista]
   );
 
-  const [categoria, setCategoria] = useState<string | null>(null);
+  const [filtro, setFiltro] = useState<string | null>(null);
   const [busquedaAbierta, setBusquedaAbierta] = useState(false);
   const [busqueda, setBusqueda] = useState("");
 
   const filtrados = lista.filter((p) => {
-    const coincideCategoria = !categoria || p.categoria === categoria;
+    const coincideFiltro =
+      !filtro || (filtro === "ofertas" ? p.precioOferta !== null : p.categoria === filtro);
     const coincideBusqueda =
       !busqueda || p.nombre.toLowerCase().includes(busqueda.toLowerCase());
-    return coincideCategoria && coincideBusqueda;
+    return coincideFiltro && coincideBusqueda;
   });
 
   return (
@@ -37,8 +38,8 @@ export default function TiendaFiltrable({ productos }: { productos: Producto[] }
       <div className="flex flex-wrap items-center gap-2.5 sm:flex-nowrap sm:overflow-x-auto sm:pb-2">
         <button
           type="button"
-          onClick={() => setCategoria(null)}
-          className={`h-10 shrink-0 rounded-full px-5 text-sm font-semibold transition-all duration-200 ${pillClass(categoria === null)}`}
+          onClick={() => setFiltro(null)}
+          className={`h-10 shrink-0 rounded-full px-5 text-sm font-semibold transition-all duration-200 ${pillClass(filtro === null)}`}
         >
           Ver todo
         </button>
@@ -47,12 +48,20 @@ export default function TiendaFiltrable({ productos }: { productos: Producto[] }
           <button
             key={c}
             type="button"
-            onClick={() => setCategoria(c)}
-            className={`h-10 shrink-0 rounded-full px-5 text-sm font-semibold transition-all duration-200 ${pillClass(categoria === c)}`}
+            onClick={() => setFiltro(c)}
+            className={`h-10 shrink-0 rounded-full px-5 text-sm font-semibold transition-all duration-200 ${pillClass(filtro === c)}`}
           >
             {c}
           </button>
         ))}
+
+        <button
+          type="button"
+          onClick={() => setFiltro("ofertas")}
+          className={`h-10 shrink-0 rounded-full px-5 text-sm font-semibold transition-all duration-200 ${pillClass(filtro === "ofertas")}`}
+        >
+          Ofertas
+        </button>
 
         <div className="flex shrink-0 items-center gap-2">
           {busquedaAbierta && (
