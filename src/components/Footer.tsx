@@ -50,7 +50,7 @@ const REDES: { nombre: "facebook" | "youtube" | "instagram" | "tiktok"; href: st
 
 export default function Footer() {
   return (
-    <footer className="mt-auto bg-[#15172e] text-white/80">
+    <footer className="mt-auto bg-black text-white/80">
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-x-6 gap-y-12 px-6 py-16 sm:grid-cols-4">
         <div className="col-span-2 sm:col-span-1">
           <p className="text-lg font-bold tracking-[0.2em] text-white uppercase">Tamehouse</p>
@@ -60,7 +60,7 @@ export default function Footer() {
             href="mailto:contacto@tamehouse.cl"
             className="mt-3 flex w-fit items-center gap-3 text-sm hover:text-white"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#15172e]">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-black">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-4 w-4">
                 <rect x="3" y="5" width="18" height="14" rx="2" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="m3.5 6 8.5 7 8.5-7" />
@@ -104,7 +104,7 @@ export default function Footer() {
                 key={red.nombre}
                 href={red.href}
                 aria-label={red.nombre}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#15172e] transition-opacity hover:opacity-80"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-black transition-opacity hover:opacity-80"
               >
                 <IconoRedSocial nombre={red.nombre} />
               </a>
