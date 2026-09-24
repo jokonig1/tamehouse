@@ -14,8 +14,9 @@ type OpcionEnvio = { servicio: number; descripcion: string; precio: number };
 // el nombre del servicio -- este texto es fijo, según lo que
 // Chilexpress publica en su guía de servicios (no cambia por pedido).
 const DETALLE_SERVICIO_ENVIO: Record<string, string> = {
-  PRIORITARIO: "Llega hasta 2 días hábiles después del pago, antes de las 11:00 hrs (RM) o 12:00 hrs (regiones).",
-  EXPRESS: "Llega hasta 2 días hábiles después del pago, hasta las 19:00 hrs.",
+  PRIORITARIO:
+    "Hasta 2 días hábiles desde que se despacha tu pedido, antes de las 11:00 hrs (RM) o 12:00 hrs (regiones).",
+  EXPRESS: "Hasta 2 días hábiles desde que se despacha tu pedido, hasta las 19:00 hrs.",
   EXTENDIDO: "Entrega en un plazo mayor a Express, a un costo más bajo.",
   EXTREMO: "Para zonas extremas o de menor cobertura; el plazo puede ser mayor.",
   AMPM: "Entrega prioritaria con ventana horaria acotada (mañana o tarde).",
