@@ -8,7 +8,7 @@ const POLITICAS = [
   { href: "/politicas/devoluciones", label: "Política de devoluciones" },
   { href: "/politicas/envios", label: "Política de envíos" },
   { href: "/politicas/privacidad", label: "Política de privacidad" },
-  { href: "#", label: "Términos del servicio" },
+  { href: "/politicas/terminos", label: "Términos del servicio" },
 ];
 
 function IconoRedSocial({ nombre }: { nombre: "facebook" | "youtube" | "instagram" | "tiktok" }) {
