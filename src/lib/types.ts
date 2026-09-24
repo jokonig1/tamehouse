@@ -26,6 +26,7 @@ export interface CodigoDescuento {
   tope_maximo: number | null;
   usos_maximos: number | null;
   usos_actuales: number;
+  usuarios_maximos: number | null;
   vigente_hasta: string | null;
   activo: boolean;
   created_at: string;

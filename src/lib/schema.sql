@@ -1105,3 +1105,231 @@ alter table productos
 alter table hero_slides
   add column foco_movil_x smallint not null default 50
     check (foco_movil_x between 0 and 100);
+
+-- ============================================
+-- TOPE DE CLIENTES DISTINTOS POR CÓDIGO DE DESCUENTO
+-- ============================================
+
+-- Límite de clientes distintos que pueden usar un código ("los
+-- primeros N"). Se cuenta por cliente_id único en pedidos, no por
+-- cantidad de usos: un cliente que ya lo usó antes puede seguir
+-- usándolo (sujeto igual a usos_maximos), pero un cliente nuevo ya
+-- no puede empezar a usarlo una vez alcanzado el tope. null = sin
+-- límite de clientes.
+alter table codigos_descuento
+  add column usuarios_maximos integer;
+
+create or replace function public.validar_codigo_descuento(
+  p_codigo text,
+  p_subtotal integer,
+  p_tiene_oferta boolean
+)
+returns table(valido boolean, descuento integer, mensaje text)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_codigo record;
+  v_descuento integer;
+begin
+  select * into v_codigo
+  from codigos_descuento
+  where codigo = upper(trim(p_codigo))
+    and activo = true;
+
+  if not found then
+    return query select false, 0, 'El código no existe o ya no está activo.';
+    return;
+  end if;
+
+  if v_codigo.vigente_hasta is not null and v_codigo.vigente_hasta < now() then
+    return query select false, 0, 'El código ya venció.';
+    return;
+  end if;
+
+  if v_codigo.usos_maximos is not null and v_codigo.usos_actuales >= v_codigo.usos_maximos then
+    return query select false, 0, 'El código alcanzó su límite de usos.';
+    return;
+  end if;
+
+  if v_codigo.usuarios_maximos is not null
+     and not exists (
+       select 1 from pedidos
+       where codigo_descuento = v_codigo.codigo and cliente_id = auth.uid()
+     )
+     and (
+       select count(distinct cliente_id) from pedidos where codigo_descuento = v_codigo.codigo
+     ) >= v_codigo.usuarios_maximos
+  then
+    return query select false, 0, 'Este código ya alcanzó el límite de clientes que pueden usarlo.';
+    return;
+  end if;
+
+  if v_codigo.monto_minimo is not null and p_subtotal < v_codigo.monto_minimo then
+    return query select false, 0, format('Este código requiere una compra mínima de $%s.', v_codigo.monto_minimo);
+    return;
+  end if;
+
+  if p_tiene_oferta and not v_codigo.permite_con_oferta then
+    return query select false, 0, 'Este código no se puede combinar con productos en oferta.';
+    return;
+  end if;
+
+  v_descuento := case
+    when v_codigo.tipo = 'porcentaje' then round(p_subtotal * v_codigo.valor / 100.0)::integer
+    else least(v_codigo.valor, p_subtotal)
+  end;
+
+  if v_codigo.tope_maximo is not null then
+    v_descuento := least(v_descuento, v_codigo.tope_maximo);
+  end if;
+
+  return query select true, v_descuento, 'Código aplicado.';
+end;
+$$;
+
+create or replace function public.crear_pedido(
+  p_subtotal integer,
+  p_costo_envio integer,
+  p_direccion text,
+  p_comuna text,
+  p_comuna_code text,
+  p_calle text,
+  p_numero text,
+  p_depto text,
+  p_destinatario_nombre text,
+  p_destinatario_telefono text,
+  p_destinatario_email text,
+  p_servicio_type_code integer,
+  p_retiro_oficina_code integer,
+  p_retiro_oficina_nombre text,
+  p_items jsonb,
+  p_codigo_descuento text default null
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_pedido_id uuid;
+  v_item jsonb;
+  v_variante_id uuid;
+  v_cantidad integer;
+  v_precio_unitario integer;
+  v_nombre_producto text;
+  v_talla text;
+  v_codigo record;
+  v_hay_oferta boolean := false;
+  v_descuento integer := 0;
+  v_codigo_normalizado text;
+  v_total integer;
+begin
+  if auth.uid() is null then
+    raise exception 'Debes iniciar sesión para comprar.';
+  end if;
+
+  select exists (
+    select 1
+    from jsonb_array_elements(p_items) it
+    join variantes va on va.id = (it ->> 'varianteId')::uuid
+    join productos p on p.id = va.producto_id
+    where p.precio_oferta is not null
+      and (p.oferta_hasta is null or p.oferta_hasta > now())
+  ) into v_hay_oferta;
+
+  if p_codigo_descuento is not null and trim(p_codigo_descuento) <> '' then
+    v_codigo_normalizado := upper(trim(p_codigo_descuento));
+
+    select * into v_codigo
+    from codigos_descuento
+    where codigo = v_codigo_normalizado
+      and activo = true
+    for update;
+
+    if not found then
+      raise exception 'El código de descuento no existe o ya no está activo.';
+    end if;
+
+    if v_codigo.vigente_hasta is not null and v_codigo.vigente_hasta < now() then
+      raise exception 'El código de descuento ya venció.';
+    end if;
+
+    if v_codigo.usos_maximos is not null and v_codigo.usos_actuales >= v_codigo.usos_maximos then
+      raise exception 'El código de descuento alcanzó su límite de usos.';
+    end if;
+
+    if v_codigo.usuarios_maximos is not null
+       and not exists (
+         select 1 from pedidos
+         where codigo_descuento = v_codigo.codigo and cliente_id = auth.uid()
+       )
+       and (
+         select count(distinct cliente_id) from pedidos where codigo_descuento = v_codigo.codigo
+       ) >= v_codigo.usuarios_maximos
+    then
+      raise exception 'Este código de descuento alcanzó el límite de clientes que pueden usarlo.';
+    end if;
+
+    if v_codigo.monto_minimo is not null and p_subtotal < v_codigo.monto_minimo then
+      raise exception 'El código requiere una compra mínima de %.', v_codigo.monto_minimo;
+    end if;
+
+    if v_hay_oferta and not v_codigo.permite_con_oferta then
+      raise exception 'Este código no se puede combinar con productos en oferta.';
+    end if;
+
+    v_descuento := case
+      when v_codigo.tipo = 'porcentaje' then round(p_subtotal * v_codigo.valor / 100.0)::integer
+      else least(v_codigo.valor, p_subtotal)
+    end;
+
+    if v_codigo.tope_maximo is not null then
+      v_descuento := least(v_descuento, v_codigo.tope_maximo);
+    end if;
+
+    update codigos_descuento set usos_actuales = usos_actuales + 1 where id = v_codigo.id;
+  end if;
+
+  v_total := greatest(0, p_subtotal - v_descuento) + p_costo_envio;
+
+  insert into pedidos (
+    cliente_id, estado, total, direccion, comuna, comuna_code, calle, numero, depto,
+    destinatario_nombre, destinatario_telefono, destinatario_email,
+    servicio_type_code, retiro_oficina_code, retiro_oficina_nombre,
+    codigo_descuento, descuento_aplicado
+  ) values (
+    auth.uid(), 'pagado', v_total, p_direccion, p_comuna, p_comuna_code, p_calle, p_numero, p_depto,
+    p_destinatario_nombre, p_destinatario_telefono, p_destinatario_email,
+    p_servicio_type_code, p_retiro_oficina_code, p_retiro_oficina_nombre,
+    case when v_descuento > 0 then v_codigo_normalizado else null end, v_descuento
+  )
+  returning id into v_pedido_id;
+
+  for v_item in select * from jsonb_array_elements(p_items)
+  loop
+    v_variante_id := (v_item ->> 'varianteId')::uuid;
+    v_cantidad := (v_item ->> 'cantidad')::integer;
+    v_precio_unitario := (v_item ->> 'precioUnitario')::integer;
+
+    update variantes
+    set stock = stock - v_cantidad
+    where id = v_variante_id and stock >= v_cantidad;
+
+    if not found then
+      select p.nombre, va.talla into v_nombre_producto, v_talla
+      from variantes va join productos p on p.id = va.producto_id
+      where va.id = v_variante_id;
+
+      raise exception 'Sin stock suficiente de % (talla %).',
+        coalesce(v_nombre_producto, 'producto'), coalesce(v_talla, '-');
+    end if;
+
+    insert into pedido_items (pedido_id, variante_id, cantidad, precio_unitario)
+    values (v_pedido_id, v_variante_id, v_cantidad, v_precio_unitario);
+  end loop;
+
+  return v_pedido_id;
+end;
+$$;
