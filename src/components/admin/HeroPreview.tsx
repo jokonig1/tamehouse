@@ -149,7 +149,6 @@ export default function HeroPreview({ slides, titulo, subtitulo }: HeroPreviewPr
             <nav className="flex items-center gap-[6%] text-[0.85cqw] font-medium uppercase tracking-widest">
               <span>Tienda</span>
               <span>Música</span>
-              <span>Biografía</span>
             </nav>
           )}
 
