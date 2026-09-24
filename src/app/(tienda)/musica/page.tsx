@@ -9,21 +9,25 @@ export default async function Page() {
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-black text-white">
-      <div className="mx-auto w-full max-w-3xl px-6 py-4">
-        <h1 className="text-3xl font-extrabold uppercase tracking-tight sm:text-4xl">
-          Música
-        </h1>
+      <div className="mx-auto w-full max-w-6xl px-6 py-4">
+        <div className="mx-auto max-w-3xl">
+          <h1 className="text-3xl font-extrabold uppercase tracking-tight sm:text-4xl">
+            Música
+          </h1>
+        </div>
 
         <div className="mt-5">
-          <h2 className="text-xs font-medium uppercase tracking-widest text-white/70">
-            Escuchar en Spotify
-          </h2>
+          <div className="mx-auto max-w-3xl">
+            <h2 className="text-xs font-medium uppercase tracking-widest text-white/70">
+              Escuchar en Spotify
+            </h2>
+          </div>
           <div className="mt-2">
             <EmbedBox url={spotifyUrl} tipo="spotify" titulo="Reproductor de Spotify" />
           </div>
         </div>
 
-        <div className="mt-6">
+        <div className="mx-auto mt-6 max-w-3xl">
           <h2 className="text-xs font-medium uppercase tracking-widest text-white/70">
             Videos
           </h2>
