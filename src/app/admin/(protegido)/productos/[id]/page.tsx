@@ -6,12 +6,13 @@ import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import CategoriaSelect from "@/components/admin/CategoriaSelect";
 import ImagenesEditor from "@/components/admin/ImagenesEditor";
+import MedidasPorTalla from "@/components/admin/MedidasPorTalla";
 import PrecioInput from "@/components/admin/PrecioInput";
 import TallaGrid from "@/components/admin/TallaGrid";
 import {
   campoClaseRedondeado,
   etiquetaClaseFuerte,
-  sinFlechasClase,
+  limpiarMedidas,
   tarjetaClase,
 } from "@/components/admin/ProductoForm";
 import { eliminarImagenProducto, subirImagenProducto } from "@/lib/imagenes";
@@ -19,7 +20,7 @@ import type { FilaTalla, Producto, ProductoImagen, Variante } from "@/lib/types"
 
 type ModoStock = "unico" | "talla";
 
-const FILA_INICIAL: FilaTalla = { id: null, talla: "", stock: "0" };
+const FILA_INICIAL: FilaTalla = { id: null, talla: "", stock: "0", medidas: [] };
 
 export default function EditarProductoPage() {
   const { id } = useParams<{ id: string }>();
@@ -46,11 +47,6 @@ export default function EditarProductoPage() {
   const [imagenesAEliminar, setImagenesAEliminar] = useState<ProductoImagen[]>([]);
   const [archivosNuevos, setArchivosNuevos] = useState<File[]>([]);
 
-  const [altoCm, setAltoCm] = useState("");
-  const [anchoCm, setAnchoCm] = useState("");
-  const [largoCm, setLargoCm] = useState("");
-  const [pesoKg, setPesoKg] = useState("");
-
   const [precioOferta, setPrecioOferta] = useState("");
   const [ofertaHasta, setOfertaHasta] = useState("");
 
@@ -65,13 +61,13 @@ export default function EditarProductoPage() {
       supabase
         .from("productos")
         .select(
-          "id, nombre, descripcion, precio, categoria, activo, alto_cm, ancho_cm, largo_cm, peso_kg, precio_oferta, oferta_hasta, created_at"
+          "id, nombre, descripcion, precio, categoria, activo, precio_oferta, oferta_hasta, created_at"
         )
         .eq("id", id)
         .single(),
       supabase
         .from("variantes")
-        .select("id, producto_id, talla, color, stock, created_at")
+        .select("id, producto_id, talla, color, stock, medidas, created_at")
         .eq("producto_id", id)
         .order("talla", { ascending: true }),
       supabase
@@ -109,10 +105,6 @@ export default function EditarProductoPage() {
     setPrecio(String(p.precio));
     setCategoria(p.categoria ?? "");
     setActivo(p.activo);
-    setAltoCm(p.alto_cm !== null ? String(p.alto_cm) : "");
-    setAnchoCm(p.ancho_cm !== null ? String(p.ancho_cm) : "");
-    setLargoCm(p.largo_cm !== null ? String(p.largo_cm) : "");
-    setPesoKg(p.peso_kg !== null ? String(p.peso_kg) : "");
     setPrecioOferta(p.precio_oferta !== null ? String(p.precio_oferta) : "");
     setOfertaHasta(p.oferta_hasta ? p.oferta_hasta.slice(0, 10) : "");
 
@@ -123,7 +115,14 @@ export default function EditarProductoPage() {
 
     if (usaTalla) {
       setModoStock("talla");
-      setFilas(variantesData.map((v) => ({ id: v.id, talla: v.talla ?? "", stock: String(v.stock) })));
+      setFilas(
+        variantesData.map((v) => ({
+          id: v.id,
+          talla: v.talla ?? "",
+          stock: String(v.stock),
+          medidas: v.medidas ?? [],
+        }))
+      );
       setVarianteUnicaId(null);
     } else {
       setModoStock("unico");
@@ -147,7 +146,7 @@ export default function EditarProductoPage() {
   }
 
   function agregarTalla() {
-    setFilas((prev) => [...prev, { id: null, talla: "", stock: "0" }]);
+    setFilas((prev) => [...prev, { id: null, talla: "", stock: "0", medidas: [] }]);
   }
 
   function eliminarFila(index: number) {
@@ -223,10 +222,6 @@ export default function EditarProductoPage() {
         precio: precioNumero,
         categoria: categoria.trim() || null,
         activo,
-        alto_cm: altoCm ? Number(altoCm) : null,
-        ancho_cm: anchoCm ? Number(anchoCm) : null,
-        largo_cm: largoCm ? Number(largoCm) : null,
-        peso_kg: pesoKg ? Number(pesoKg) : null,
         precio_oferta: precioOfertaNumero,
         oferta_hasta: ofertaHasta ? new Date(ofertaHasta).toISOString() : null,
         // Se guarda con el precio final directo (no % ni $ de descuento),
@@ -245,7 +240,9 @@ export default function EditarProductoPage() {
     }
 
     const filasFinal: FilaTalla[] =
-      modoStock === "unico" ? [{ id: varianteUnicaId, talla: "", stock: stockUnico }] : filas;
+      modoStock === "unico"
+        ? [{ id: varianteUnicaId, talla: "", stock: stockUnico, medidas: [] }]
+        : filas;
 
     const idsFinal = filasFinal.filter((f) => f.id !== null).map((f) => f.id as string);
     const idsAEliminar = idsIniciales.filter((i) => !idsFinal.includes(i));
@@ -266,6 +263,7 @@ export default function EditarProductoPage() {
         talla: f.talla.trim() || null,
         color: null,
         stock: Number(f.stock),
+        medidas: limpiarMedidas(f.medidas),
       }));
 
     if (nuevas.length) {
@@ -281,7 +279,11 @@ export default function EditarProductoPage() {
     for (const f of existentes) {
       const { error: errorUpdate } = await supabase
         .from("variantes")
-        .update({ talla: f.talla.trim() || null, stock: Number(f.stock) })
+        .update({
+          talla: f.talla.trim() || null,
+          stock: Number(f.stock),
+          medidas: limpiarMedidas(f.medidas),
+        })
         .eq("id", f.id as string);
 
       if (errorUpdate) {
@@ -459,70 +461,19 @@ export default function EditarProductoPage() {
                 className={`w-32 ${campoClaseRedondeado}`}
               />
             ) : (
-              <TallaGrid
-                filas={filas}
-                onActualizarFila={actualizarFila}
-                onAgregarTalla={agregarTalla}
-                onEliminarFila={eliminarFila}
-              />
+              <>
+                <TallaGrid
+                  filas={filas}
+                  onActualizarFila={actualizarFila}
+                  onAgregarTalla={agregarTalla}
+                  onEliminarFila={eliminarFila}
+                />
+                <div className="mt-4">
+                  <MedidasPorTalla filas={filas} onActualizarFila={actualizarFila} />
+                </div>
+              </>
             )}
           </div>
-
-          <fieldset className="rounded-xl border border-zinc-200 p-4 dark:border-white/[.145]">
-            <legend className="px-1 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-              Datos de envío (uso interno, no se muestran al público)
-            </legend>
-            <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className={etiquetaClaseFuerte}>Alto (cm)</label>
-                <input
-                  type="number"
-                  min={0}
-                  step="0.1"
-                  placeholder="0.0"
-                  value={altoCm}
-                  onChange={(e) => setAltoCm(e.target.value)}
-                  className={`${campoClaseRedondeado} ${sinFlechasClase}`}
-                />
-              </div>
-              <div>
-                <label className={etiquetaClaseFuerte}>Ancho (cm)</label>
-                <input
-                  type="number"
-                  min={0}
-                  step="0.1"
-                  placeholder="0.0"
-                  value={anchoCm}
-                  onChange={(e) => setAnchoCm(e.target.value)}
-                  className={`${campoClaseRedondeado} ${sinFlechasClase}`}
-                />
-              </div>
-              <div>
-                <label className={etiquetaClaseFuerte}>Largo (cm)</label>
-                <input
-                  type="number"
-                  min={0}
-                  step="0.1"
-                  placeholder="0.0"
-                  value={largoCm}
-                  onChange={(e) => setLargoCm(e.target.value)}
-                  className={`${campoClaseRedondeado} ${sinFlechasClase}`}
-                />
-              </div>
-              <div>
-                <label className={etiquetaClaseFuerte}>Peso (kg)</label>
-                <input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  placeholder="0.00"
-                  value={pesoKg}
-                  onChange={(e) => setPesoKg(e.target.value)}
-                  className={`${campoClaseRedondeado} ${sinFlechasClase}`}
-                />
-              </div>
-            </div>
-          </fieldset>
 
           <fieldset className="rounded-xl border border-zinc-200 p-4 dark:border-white/[.145]">
             <legend className="px-1 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
@@ -566,7 +517,9 @@ export default function EditarProductoPage() {
             onEliminarExistente={eliminarImagenExistente}
             onQuitarNuevo={quitarArchivoNuevo}
           />
+        </div>
 
+        <div className="space-y-3 lg:col-span-2">
           <button
             type="submit"
             disabled={guardando}

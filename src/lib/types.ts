@@ -32,12 +32,18 @@ export interface CodigoDescuento {
   created_at: string;
 }
 
+export interface MedidaItem {
+  etiqueta: string;
+  valor: string;
+}
+
 export interface Variante {
   id: string;
   producto_id: string;
   talla: string | null;
   color: string | null;
   stock: number;
+  medidas: MedidaItem[];
   created_at: string;
 }
 
@@ -60,6 +66,7 @@ export interface FilaTalla {
   id: string | null;
   talla: string;
   stock: string;
+  medidas: MedidaItem[];
 }
 
 export interface ProductoImagen {

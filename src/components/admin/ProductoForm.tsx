@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import CategoriaSelect from "@/components/admin/CategoriaSelect";
 import PrecioInput from "@/components/admin/PrecioInput";
+import type { MedidaItem } from "@/lib/types";
 
 export interface ProductoFormValues {
   nombre: string;
@@ -35,6 +36,14 @@ export const campoClaseRedondeado =
   "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-blue-600 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-blue-400";
 export const etiquetaClaseFuerte =
   "mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300";
+
+// Saca las filas de medidas a medio llenar (sin etiqueta) antes de
+// guardar, y recorta espacios sobrantes en las que sí quedan.
+export function limpiarMedidas(medidas: MedidaItem[]): MedidaItem[] {
+  return medidas
+    .filter((m) => m.etiqueta.trim() !== "")
+    .map((m) => ({ etiqueta: m.etiqueta.trim(), valor: m.valor.trim() }));
+}
 
 export default function ProductoForm({
   valoresIniciales,

@@ -6,12 +6,13 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import CategoriaSelect from "@/components/admin/CategoriaSelect";
 import ImagenesEditor from "@/components/admin/ImagenesEditor";
+import MedidasPorTalla from "@/components/admin/MedidasPorTalla";
 import PrecioInput from "@/components/admin/PrecioInput";
 import TallaGrid from "@/components/admin/TallaGrid";
 import {
   campoClaseRedondeado,
   etiquetaClaseFuerte,
-  sinFlechasClase,
+  limpiarMedidas,
   tarjetaClase,
 } from "@/components/admin/ProductoForm";
 import { subirImagenProducto } from "@/lib/imagenes";
@@ -19,7 +20,7 @@ import type { FilaTalla } from "@/lib/types";
 
 type ModoStock = "unico" | "talla";
 
-const FILA_INICIAL: FilaTalla = { id: null, talla: "", stock: "0" };
+const FILA_INICIAL: FilaTalla = { id: null, talla: "", stock: "0", medidas: [] };
 
 export default function NuevoProductoPage() {
   const router = useRouter();
@@ -36,14 +37,6 @@ export default function NuevoProductoPage() {
 
   const [archivosNuevos, setArchivosNuevos] = useState<File[]>([]);
 
-  const [altoCm, setAltoCm] = useState("");
-  const [anchoCm, setAnchoCm] = useState("");
-  const [largoCm, setLargoCm] = useState("");
-  const [pesoKg, setPesoKg] = useState("");
-
-  const [precioOferta, setPrecioOferta] = useState("");
-  const [ofertaHasta, setOfertaHasta] = useState("");
-
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +45,7 @@ export default function NuevoProductoPage() {
   }
 
   function agregarTalla() {
-    setFilas((prev) => [...prev, { id: null, talla: "", stock: "0" }]);
+    setFilas((prev) => [...prev, { id: null, talla: "", stock: "0", medidas: [] }]);
   }
 
   function eliminarFila(index: number) {
@@ -85,16 +78,6 @@ export default function NuevoProductoPage() {
       return;
     }
 
-    const precioOfertaNumero = precioOferta ? Number(precioOferta) : null;
-    if (precioOferta && (Number.isNaN(precioOfertaNumero) || precioOfertaNumero! <= 0)) {
-      setError("El precio de oferta debe ser un número mayor a 0.");
-      return;
-    }
-    if (precioOfertaNumero !== null && precioOfertaNumero >= precioNumero) {
-      setError("El precio de oferta debe ser menor al precio normal.");
-      return;
-    }
-
     if (modoStock === "unico") {
       const stockNumero = Number(stockUnico);
       if (stockUnico.trim() === "" || Number.isNaN(stockNumero) || stockNumero < 0) {
@@ -121,12 +104,6 @@ export default function NuevoProductoPage() {
         precio: precioNumero,
         categoria: categoria.trim() || null,
         activo,
-        alto_cm: altoCm ? Number(altoCm) : null,
-        ancho_cm: anchoCm ? Number(anchoCm) : null,
-        largo_cm: largoCm ? Number(largoCm) : null,
-        peso_kg: pesoKg ? Number(pesoKg) : null,
-        precio_oferta: precioOfertaNumero,
-        oferta_hasta: ofertaHasta ? new Date(ofertaHasta).toISOString() : null,
       })
       .select("id")
       .single();
@@ -139,12 +116,13 @@ export default function NuevoProductoPage() {
 
     const nuevasVariantes =
       modoStock === "unico"
-        ? [{ producto_id: producto.id, talla: null, color: null, stock: Number(stockUnico) }]
+        ? [{ producto_id: producto.id, talla: null, color: null, stock: Number(stockUnico), medidas: [] }]
         : filas.map((f) => ({
             producto_id: producto.id,
             talla: f.talla.trim() || null,
             color: null,
             stock: Number(f.stock),
+            medidas: limpiarMedidas(f.medidas),
           }));
 
     const { error: errorVariantes } = await supabase.from("variantes").insert(nuevasVariantes);
@@ -299,99 +277,19 @@ export default function NuevoProductoPage() {
                 className={`w-32 ${campoClaseRedondeado}`}
               />
             ) : (
-              <TallaGrid
-                filas={filas}
-                onActualizarFila={actualizarFila}
-                onAgregarTalla={agregarTalla}
-                onEliminarFila={eliminarFila}
-              />
+              <>
+                <TallaGrid
+                  filas={filas}
+                  onActualizarFila={actualizarFila}
+                  onAgregarTalla={agregarTalla}
+                  onEliminarFila={eliminarFila}
+                />
+                <div className="mt-4">
+                  <MedidasPorTalla filas={filas} onActualizarFila={actualizarFila} />
+                </div>
+              </>
             )}
           </div>
-
-          <fieldset className="rounded-xl border border-zinc-200 p-4 dark:border-white/[.145]">
-            <legend className="px-1 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-              Datos de envío (uso interno, no se muestran al público)
-            </legend>
-            <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className={etiquetaClaseFuerte}>Alto (cm)</label>
-                <input
-                  type="number"
-                  min={0}
-                  step="0.1"
-                  placeholder="0.0"
-                  value={altoCm}
-                  onChange={(e) => setAltoCm(e.target.value)}
-                  className={`${campoClaseRedondeado} ${sinFlechasClase}`}
-                />
-              </div>
-              <div>
-                <label className={etiquetaClaseFuerte}>Ancho (cm)</label>
-                <input
-                  type="number"
-                  min={0}
-                  step="0.1"
-                  placeholder="0.0"
-                  value={anchoCm}
-                  onChange={(e) => setAnchoCm(e.target.value)}
-                  className={`${campoClaseRedondeado} ${sinFlechasClase}`}
-                />
-              </div>
-              <div>
-                <label className={etiquetaClaseFuerte}>Largo (cm)</label>
-                <input
-                  type="number"
-                  min={0}
-                  step="0.1"
-                  placeholder="0.0"
-                  value={largoCm}
-                  onChange={(e) => setLargoCm(e.target.value)}
-                  className={`${campoClaseRedondeado} ${sinFlechasClase}`}
-                />
-              </div>
-              <div>
-                <label className={etiquetaClaseFuerte}>Peso (kg)</label>
-                <input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  placeholder="0.00"
-                  value={pesoKg}
-                  onChange={(e) => setPesoKg(e.target.value)}
-                  className={`${campoClaseRedondeado} ${sinFlechasClase}`}
-                />
-              </div>
-            </div>
-          </fieldset>
-
-          <fieldset className="rounded-xl border border-zinc-200 p-4 dark:border-white/[.145]">
-            <legend className="px-1 text-xs font-medium uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-              Oferta (opcional)
-            </legend>
-            <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className={etiquetaClaseFuerte}>Precio de oferta (CLP)</label>
-                <PrecioInput
-                  value={precioOferta}
-                  onChange={setPrecioOferta}
-                  className={campoClaseRedondeado}
-                />
-              </div>
-              <div>
-                <label className={etiquetaClaseFuerte}>Vigente hasta (opcional)</label>
-                <input
-                  type="date"
-                  value={ofertaHasta}
-                  onChange={(e) => setOfertaHasta(e.target.value)}
-                  className={campoClaseRedondeado}
-                />
-              </div>
-            </div>
-            <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-              Vacío el precio de oferta = sin oferta. Vacía la fecha = la oferta dura hasta que la
-              saques a mano.
-            </p>
-          </fieldset>
         </div>
 
         <div className={`${tarjetaClase} h-fit space-y-4`}>
@@ -406,7 +304,9 @@ export default function NuevoProductoPage() {
             onEliminarExistente={() => {}}
             onQuitarNuevo={quitarArchivoNuevo}
           />
+        </div>
 
+        <div className="lg:col-span-2">
           <button
             type="submit"
             disabled={guardando}
@@ -414,6 +314,9 @@ export default function NuevoProductoPage() {
           >
             {guardando ? "Creando..." : "Crear producto"}
           </button>
+          <p className="mt-2 text-center text-xs text-zinc-500 dark:text-zinc-400">
+            Los datos de envío y la oferta se agregan después, editando el producto ya creado.
+          </p>
         </div>
       </form>
     </div>

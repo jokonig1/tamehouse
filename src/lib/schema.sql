@@ -1373,3 +1373,11 @@ alter table shows
 -- (formulario de musica) junto al link principal.
 alter table configuracion_musica
   add column youtube_url_2 text;
+
+-- Medidas de la prenda por talla (ancho, largo, manga, etc.), para
+-- que el front arme una guía de tallas. Lista libre de pares
+-- etiqueta/valor -- no todas las prendas necesitan las mismas
+-- medidas (una polera no mide lo mismo que un gorro), así que en vez
+-- de columnas fijas queda como jsonb: [{"etiqueta":"Ancho","valor":"50 cm"}, ...].
+alter table variantes
+  add column medidas jsonb not null default '[]'::jsonb;
