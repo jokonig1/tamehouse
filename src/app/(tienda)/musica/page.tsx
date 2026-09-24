@@ -7,6 +7,7 @@ export default async function Page() {
   const [shows, configuracion] = await Promise.all([getProximosShows(), getConfiguracionMusica()]);
   const spotifyUrl = configuracion.spotify_url;
   const videoUrl = configuracion.youtube_url;
+  const videoUrl2 = configuracion.youtube_url_2;
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-black text-white">
@@ -34,6 +35,17 @@ export default async function Page() {
                 <EmbedBox url={videoUrl} tipo="video" titulo="Último video oficial" />
               </div>
             </div>
+
+            {videoUrl2 && (
+              <div>
+                <h2 className="text-xs font-medium uppercase tracking-widest text-white/70">
+                  Otro video
+                </h2>
+                <div className="mt-3">
+                  <EmbedBox url={videoUrl2} tipo="video" titulo="Otro video" />
+                </div>
+              </div>
+            )}
           </div>
 
           <div>

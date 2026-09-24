@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 export type ConfiguracionMusica = {
   spotify_url: string | null;
   youtube_url: string | null;
+  youtube_url_2: string | null;
 };
 
 function aSpotifyEmbed(url: string): string | null {
@@ -44,12 +45,13 @@ function aYoutubeEmbed(url: string): string | null {
 export async function getConfiguracionMusica(): Promise<ConfiguracionMusica> {
   const { data } = await supabase
     .from("configuracion_musica")
-    .select("spotify_url, youtube_url")
+    .select("spotify_url, youtube_url, youtube_url_2")
     .eq("id", 1)
     .single();
 
   return {
     spotify_url: data?.spotify_url ? aSpotifyEmbed(data.spotify_url) : null,
     youtube_url: data?.youtube_url ? aYoutubeEmbed(data.youtube_url) : null,
+    youtube_url_2: data?.youtube_url_2 ? aYoutubeEmbed(data.youtube_url_2) : null,
   };
 }

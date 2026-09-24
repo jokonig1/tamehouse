@@ -9,6 +9,7 @@ import type { ConfiguracionMusica } from "@/lib/musica";
 export default function MusicaPage() {
   const [spotifyUrl, setSpotifyUrl] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [youtubeUrl2, setYoutubeUrl2] = useState("");
   const [cargandoEnlaces, setCargandoEnlaces] = useState(true);
   const [errorEnlaces, setErrorEnlaces] = useState<string | null>(null);
   const [guardandoEnlaces, setGuardandoEnlaces] = useState(false);
@@ -18,7 +19,7 @@ export default function MusicaPage() {
     setCargandoEnlaces(true);
     const { data, error } = await supabase
       .from("configuracion_musica")
-      .select("spotify_url, youtube_url")
+      .select("spotify_url, youtube_url, youtube_url_2")
       .eq("id", 1)
       .single();
 
@@ -31,6 +32,7 @@ export default function MusicaPage() {
     const config = data as ConfiguracionMusica;
     setSpotifyUrl(config.spotify_url ?? "");
     setYoutubeUrl(config.youtube_url ?? "");
+    setYoutubeUrl2(config.youtube_url_2 ?? "");
     setCargandoEnlaces(false);
   }, []);
 
@@ -52,6 +54,10 @@ export default function MusicaPage() {
       setErrorEnlaces("El link de YouTube debe empezar con http:// o https://");
       return;
     }
+    if (youtubeUrl2.trim() && !/^https?:\/\//i.test(youtubeUrl2.trim())) {
+      setErrorEnlaces("El segundo link de YouTube debe empezar con http:// o https://");
+      return;
+    }
 
     setGuardandoEnlaces(true);
     const { error: errorUpdate } = await supabase
@@ -59,6 +65,7 @@ export default function MusicaPage() {
       .update({
         spotify_url: spotifyUrl.trim() || null,
         youtube_url: youtubeUrl.trim() || null,
+        youtube_url_2: youtubeUrl2.trim() || null,
       })
       .eq("id", 1);
 
@@ -90,6 +97,7 @@ export default function MusicaPage() {
         </h2>
         <p className="text-xs text-zinc-600 dark:text-zinc-400">
           Se muestran en la página pública de música (Escuchar en Spotify / Último video oficial).
+          El segundo link de YouTube es opcional y solo aparece si lo cargas.
         </p>
 
         {errorEnlaces && <p className="text-sm text-red-600 dark:text-red-400">{errorEnlaces}</p>}
@@ -115,6 +123,17 @@ export default function MusicaPage() {
               type="text"
               value={youtubeUrl}
               onChange={(e) => setYoutubeUrl(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=..."
+              disabled={cargandoEnlaces}
+              className={campoClaseRedondeado}
+            />
+          </div>
+          <div>
+            <label className={etiquetaClaseFuerte}>Otro link de YouTube (opcional)</label>
+            <input
+              type="text"
+              value={youtubeUrl2}
+              onChange={(e) => setYoutubeUrl2(e.target.value)}
               placeholder="https://www.youtube.com/watch?v=..."
               disabled={cargandoEnlaces}
               className={campoClaseRedondeado}

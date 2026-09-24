@@ -1367,3 +1367,8 @@ alter table shows
 -- fecha a timestamp ni tocar el resto de la lógica de orden/formato.
 alter table shows
   add column hora text;
+
+-- Segundo link de YouTube opcional (además del "video oficial"
+-- principal) para la página de música.
+alter table configuracion_musica
+  add column youtube_url_2 text;
