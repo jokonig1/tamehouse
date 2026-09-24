@@ -105,20 +105,21 @@ export default function MusicaPage() {
           <p className="text-sm text-green-600 dark:text-green-400">Guardado correctamente.</p>
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className={etiquetaClaseFuerte}>Link de Spotify</label>
-            <input
-              type="text"
-              value={spotifyUrl}
-              onChange={(e) => setSpotifyUrl(e.target.value)}
-              placeholder="https://open.spotify.com/..."
-              disabled={cargandoEnlaces}
-              className={campoClaseRedondeado}
-            />
-          </div>
-          <div>
-            <label className={etiquetaClaseFuerte}>Link de YouTube</label>
+        <div>
+          <label className={etiquetaClaseFuerte}>Link de Spotify</label>
+          <input
+            type="text"
+            value={spotifyUrl}
+            onChange={(e) => setSpotifyUrl(e.target.value)}
+            placeholder="https://open.spotify.com/..."
+            disabled={cargandoEnlaces}
+            className={campoClaseRedondeado}
+          />
+        </div>
+
+        <div>
+          <label className={etiquetaClaseFuerte}>Links de YouTube</label>
+          <div className="mt-1 space-y-3">
             <input
               type="text"
               value={youtubeUrl}
@@ -127,14 +128,11 @@ export default function MusicaPage() {
               disabled={cargandoEnlaces}
               className={campoClaseRedondeado}
             />
-          </div>
-          <div>
-            <label className={etiquetaClaseFuerte}>Otro link de YouTube (opcional)</label>
             <input
               type="text"
               value={youtubeUrl2}
               onChange={(e) => setYoutubeUrl2(e.target.value)}
-              placeholder="https://www.youtube.com/watch?v=..."
+              placeholder="Otro link (opcional)"
               disabled={cargandoEnlaces}
               className={campoClaseRedondeado}
             />
