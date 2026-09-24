@@ -9,7 +9,7 @@ export default async function Page() {
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-black text-white">
-      <div className="mx-auto w-full max-w-4xl px-6 py-6">
+      <div className="mx-auto w-full max-w-6xl px-6 py-6">
         <h1 className="text-3xl font-extrabold uppercase tracking-tight sm:hidden">
           Música
         </h1>
