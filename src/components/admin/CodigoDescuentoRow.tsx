@@ -64,7 +64,9 @@ export default function CodigoDescuentoRow({
         </span>
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500 dark:text-zinc-400">
           <span>
-            {codigo.usos_actuales} / {codigo.usos_maximos ?? "∞"} usos · {vigenciaTexto}
+            {codigo.usos_actuales} / {codigo.usos_maximos ?? "∞"} usos
+            {codigo.usuarios_maximos !== null && ` · máx ${codigo.usuarios_maximos} clientes`} ·{" "}
+            {vigenciaTexto}
           </span>
           <button
             type="button"
@@ -93,6 +95,11 @@ export default function CodigoDescuentoRow({
         </span>
         <span className="text-zinc-600 dark:text-zinc-400">
           {codigo.usos_actuales} / {codigo.usos_maximos ?? "∞"}
+          {codigo.usuarios_maximos !== null && (
+            <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+              máx {codigo.usuarios_maximos} clientes
+            </span>
+          )}
         </span>
         <span className="text-zinc-600 dark:text-zinc-400">{vigenciaTexto}</span>
         <span className="text-zinc-600 dark:text-zinc-400">

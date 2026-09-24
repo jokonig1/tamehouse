@@ -22,6 +22,7 @@ export default function DescuentosPage() {
   const [montoMinimo, setMontoMinimo] = useState("");
   const [topeMaximo, setTopeMaximo] = useState("");
   const [usosMaximos, setUsosMaximos] = useState("");
+  const [usuariosMaximos, setUsuariosMaximos] = useState("");
   const [vigenteHasta, setVigenteHasta] = useState("");
   const [errorForm, setErrorForm] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
@@ -31,7 +32,7 @@ export default function DescuentosPage() {
     const { data, error } = await supabase
       .from("codigos_descuento")
       .select(
-        "id, codigo, tipo, valor, permite_con_oferta, monto_minimo, tope_maximo, usos_maximos, usos_actuales, vigente_hasta, activo, created_at"
+        "id, codigo, tipo, valor, permite_con_oferta, monto_minimo, tope_maximo, usos_maximos, usos_actuales, usuarios_maximos, vigente_hasta, activo, created_at"
       )
       .order("created_at", { ascending: false });
 
@@ -58,6 +59,7 @@ export default function DescuentosPage() {
     setMontoMinimo("");
     setTopeMaximo("");
     setUsosMaximos("");
+    setUsuariosMaximos("");
     setVigenteHasta("");
   }
 
@@ -89,6 +91,7 @@ export default function DescuentosPage() {
       monto_minimo: montoMinimo ? Number(montoMinimo) : null,
       tope_maximo: topeMaximo ? Number(topeMaximo) : null,
       usos_maximos: usosMaximos ? Number(usosMaximos) : null,
+      usuarios_maximos: usuariosMaximos ? Number(usuariosMaximos) : null,
       vigente_hasta: vigenteHasta ? new Date(vigenteHasta).toISOString() : null,
     });
 
@@ -191,6 +194,18 @@ export default function DescuentosPage() {
               prefijo={null}
               className={campoClaseRedondeado}
             />
+          </div>
+          <div>
+            <label className={etiquetaClaseFuerte}>Clientes máximos (opcional)</label>
+            <PrecioInput
+              value={usuariosMaximos}
+              onChange={setUsuariosMaximos}
+              prefijo={null}
+              className={campoClaseRedondeado}
+            />
+            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              Ej: los primeros 10 clientes. Uno que ya lo usó puede seguir usándolo.
+            </p>
           </div>
           <div>
             <label className={etiquetaClaseFuerte}>Vigente hasta (opcional)</label>
