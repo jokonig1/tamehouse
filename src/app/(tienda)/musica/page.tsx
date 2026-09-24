@@ -14,8 +14,10 @@ export default async function Page() {
           <h1 className="text-3xl font-extrabold uppercase tracking-tight sm:hidden">
             Música
           </h1>
-          <h1 className="hidden shrink-0 rotate-180 text-6xl font-extrabold uppercase tracking-tight [writing-mode:vertical-rl] sm:flex sm:items-center">
-            Música
+          <h1 className="hidden shrink-0 flex-col items-center text-4xl leading-[0.95] font-extrabold uppercase tracking-tight sm:flex">
+            {"MÚSICA".split("").map((letra, i) => (
+              <span key={i}>{letra}</span>
+            ))}
           </h1>
 
           <div className="min-w-0 flex-1">
