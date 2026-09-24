@@ -17,6 +17,7 @@ function partesFecha(fecha: string) {
 
 export default function ShowCard({ show }: { show: Show }) {
   const { dia, mes, anio } = partesFecha(show.fecha);
+  const diaConCero = dia.padStart(2, "0");
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-950">
@@ -24,7 +25,7 @@ export default function ShowCard({ show }: { show: Show }) {
         aria-hidden
         className="pointer-events-none absolute -right-4 top-1/2 hidden -translate-y-1/2 select-none text-[13rem] leading-none font-black text-white/10 sm:block"
       >
-        {dia}
+        {diaConCero}
       </span>
 
       <div className="relative grid grid-cols-1 gap-8 p-6 sm:grid-cols-[220px_1fr] sm:p-10">
