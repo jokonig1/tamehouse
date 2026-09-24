@@ -1361,3 +1361,9 @@ $$;
 -- romper los shows ya cargados.
 alter table shows
   add column titulo text not null default 'Aerstame';
+
+-- Hora del show (opcional, formato libre tipo "20:00"). Separada de
+-- fecha (que sigue siendo solo la fecha) para no tener que migrar
+-- fecha a timestamp ni tocar el resto de la lógica de orden/formato.
+alter table shows
+  add column hora text;

@@ -58,6 +58,12 @@ export default function ShowCard({ show }: { show: Show }) {
               <dt className="font-semibold">Día:</dt>
               <dd className="text-black/70">{formatoFecha.format(new Date(show.fecha))}</dd>
             </div>
+            {show.hora && (
+              <div className="flex gap-1.5">
+                <dt className="font-semibold">Hora:</dt>
+                <dd className="text-black/70">{show.hora} hrs</dd>
+              </div>
+            )}
           </dl>
 
           {show.link_entradas && (

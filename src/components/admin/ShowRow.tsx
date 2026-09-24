@@ -24,6 +24,7 @@ export default function ShowRow({ show, onEliminar, onActualizado }: ShowRowProp
   const [editando, setEditando] = useState(false);
   const [titulo, setTitulo] = useState(show.titulo);
   const [fecha, setFecha] = useState(show.fecha);
+  const [hora, setHora] = useState(show.hora ?? "");
   const [ciudad, setCiudad] = useState(show.ciudad);
   const [lugar, setLugar] = useState(show.lugar ?? "");
   const [linkEntradas, setLinkEntradas] = useState(show.link_entradas ?? "");
@@ -35,6 +36,7 @@ export default function ShowRow({ show, onEliminar, onActualizado }: ShowRowProp
   function cancelar() {
     setTitulo(show.titulo);
     setFecha(show.fecha);
+    setHora(show.hora ?? "");
     setCiudad(show.ciudad);
     setLugar(show.lugar ?? "");
     setLinkEntradas(show.link_entradas ?? "");
@@ -93,6 +95,7 @@ export default function ShowRow({ show, onEliminar, onActualizado }: ShowRowProp
     const valores = {
       titulo: titulo.trim(),
       fecha,
+      hora: hora || null,
       ciudad: ciudad.trim(),
       lugar: lugar.trim() || null,
       link_entradas: linkEntradas.trim() || null,
@@ -187,6 +190,15 @@ export default function ShowRow({ show, onEliminar, onActualizado }: ShowRowProp
               />
             </div>
             <div>
+              <label className={etiquetaClaseFuerte}>Hora (opcional)</label>
+              <input
+                type="time"
+                value={hora}
+                onChange={(e) => setHora(e.target.value)}
+                className={campoClaseRedondeado}
+              />
+            </div>
+            <div>
               <label className={etiquetaClaseFuerte}>Ciudad</label>
               <input
                 type="text"
@@ -246,7 +258,10 @@ export default function ShowRow({ show, onEliminar, onActualizado }: ShowRowProp
         <MiniAfiche url={show.imagen_url} />
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <div className="flex items-center justify-between gap-2">
-            <span className="font-medium">{formatoFecha(show.fecha)} · {show.ciudad}</span>
+            <span className="font-medium">
+              {formatoFecha(show.fecha)}
+              {show.hora && ` ${show.hora}`} · {show.ciudad}
+            </span>
             <AccionesShow onEditar={() => setEditando(true)} onEliminar={eliminar} />
           </div>
           <span className="text-xs text-zinc-500 dark:text-zinc-400">{show.titulo}</span>
@@ -269,7 +284,10 @@ export default function ShowRow({ show, onEliminar, onActualizado }: ShowRowProp
       {/* Fila en columnas (sm y más) */}
       <div className="hidden grid-cols-[4rem_1fr_1fr_1fr_1fr_5rem] items-center gap-6 sm:grid">
         <MiniAfiche url={show.imagen_url} />
-        <span className="font-medium">{formatoFecha(show.fecha)}</span>
+        <span className="font-medium">
+          {formatoFecha(show.fecha)}
+          {show.hora && <span className="block text-xs text-zinc-500 dark:text-zinc-400">{show.hora} hrs</span>}
+        </span>
         <span>
           {show.ciudad}
           <span className="block text-xs text-zinc-500 dark:text-zinc-400">{show.titulo}</span>

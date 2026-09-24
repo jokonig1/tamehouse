@@ -16,6 +16,7 @@ export default function ShowsPage() {
 
   const [titulo, setTitulo] = useState("Aerstame");
   const [fecha, setFecha] = useState("");
+  const [hora, setHora] = useState("");
   const [ciudad, setCiudad] = useState("");
   const [lugar, setLugar] = useState("");
   const [linkEntradas, setLinkEntradas] = useState("");
@@ -28,7 +29,7 @@ export default function ShowsPage() {
     setCargando(true);
     const { data, error } = await supabase
       .from("shows")
-      .select("id, fecha, ciudad, lugar, link_entradas, imagen_url, titulo")
+      .select("id, fecha, hora, ciudad, lugar, link_entradas, imagen_url, titulo")
       .order("fecha", { ascending: true });
 
     if (error) {
@@ -96,6 +97,7 @@ export default function ShowsPage() {
     const { error: errorInsert } = await supabase.from("shows").insert({
       titulo: titulo.trim(),
       fecha,
+      hora: hora || null,
       ciudad: ciudad.trim(),
       lugar: lugar.trim() || null,
       link_entradas: linkEntradas.trim() || null,
@@ -110,6 +112,7 @@ export default function ShowsPage() {
 
     setTitulo("Aerstame");
     setFecha("");
+    setHora("");
     setCiudad("");
     setLugar("");
     setLinkEntradas("");
@@ -207,6 +210,15 @@ export default function ShowsPage() {
                 type="date"
                 value={fecha}
                 onChange={(e) => setFecha(e.target.value)}
+                className={campoClaseRedondeado}
+              />
+            </div>
+            <div>
+              <label className={etiquetaClaseFuerte}>Hora (opcional)</label>
+              <input
+                type="time"
+                value={hora}
+                onChange={(e) => setHora(e.target.value)}
                 className={campoClaseRedondeado}
               />
             </div>
