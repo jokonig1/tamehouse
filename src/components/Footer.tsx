@@ -7,7 +7,7 @@ const NAVEGACION = [
 const POLITICAS = [
   { href: "/politicas/devoluciones", label: "Política de devoluciones" },
   { href: "/politicas/envios", label: "Política de envíos" },
-  { href: "#", label: "Política de privacidad" },
+  { href: "/politicas/privacidad", label: "Política de privacidad" },
   { href: "#", label: "Términos del servicio" },
 ];
 
