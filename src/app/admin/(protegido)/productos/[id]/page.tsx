@@ -11,6 +11,7 @@ import TallaGrid from "@/components/admin/TallaGrid";
 import {
   campoClaseRedondeado,
   etiquetaClaseFuerte,
+  limpiarMedidas,
   sinFlechasClase,
   tarjetaClase,
 } from "@/components/admin/ProductoForm";
@@ -19,7 +20,7 @@ import type { FilaTalla, Producto, ProductoImagen, Variante } from "@/lib/types"
 
 type ModoStock = "unico" | "talla";
 
-const FILA_INICIAL: FilaTalla = { id: null, talla: "", stock: "0" };
+const FILA_INICIAL: FilaTalla = { id: null, talla: "", stock: "0", medidas: [] };
 
 export default function EditarProductoPage() {
   const { id } = useParams<{ id: string }>();
@@ -71,7 +72,7 @@ export default function EditarProductoPage() {
         .single(),
       supabase
         .from("variantes")
-        .select("id, producto_id, talla, color, stock, created_at")
+        .select("id, producto_id, talla, color, stock, medidas, created_at")
         .eq("producto_id", id)
         .order("talla", { ascending: true }),
       supabase
@@ -123,7 +124,14 @@ export default function EditarProductoPage() {
 
     if (usaTalla) {
       setModoStock("talla");
-      setFilas(variantesData.map((v) => ({ id: v.id, talla: v.talla ?? "", stock: String(v.stock) })));
+      setFilas(
+        variantesData.map((v) => ({
+          id: v.id,
+          talla: v.talla ?? "",
+          stock: String(v.stock),
+          medidas: v.medidas ?? [],
+        }))
+      );
       setVarianteUnicaId(null);
     } else {
       setModoStock("unico");
@@ -147,7 +155,7 @@ export default function EditarProductoPage() {
   }
 
   function agregarTalla() {
-    setFilas((prev) => [...prev, { id: null, talla: "", stock: "0" }]);
+    setFilas((prev) => [...prev, { id: null, talla: "", stock: "0", medidas: [] }]);
   }
 
   function eliminarFila(index: number) {
@@ -245,7 +253,9 @@ export default function EditarProductoPage() {
     }
 
     const filasFinal: FilaTalla[] =
-      modoStock === "unico" ? [{ id: varianteUnicaId, talla: "", stock: stockUnico }] : filas;
+      modoStock === "unico"
+        ? [{ id: varianteUnicaId, talla: "", stock: stockUnico, medidas: [] }]
+        : filas;
 
     const idsFinal = filasFinal.filter((f) => f.id !== null).map((f) => f.id as string);
     const idsAEliminar = idsIniciales.filter((i) => !idsFinal.includes(i));
@@ -266,6 +276,7 @@ export default function EditarProductoPage() {
         talla: f.talla.trim() || null,
         color: null,
         stock: Number(f.stock),
+        medidas: limpiarMedidas(f.medidas),
       }));
 
     if (nuevas.length) {
@@ -281,7 +292,11 @@ export default function EditarProductoPage() {
     for (const f of existentes) {
       const { error: errorUpdate } = await supabase
         .from("variantes")
-        .update({ talla: f.talla.trim() || null, stock: Number(f.stock) })
+        .update({
+          talla: f.talla.trim() || null,
+          stock: Number(f.stock),
+          medidas: limpiarMedidas(f.medidas),
+        })
         .eq("id", f.id as string);
 
       if (errorUpdate) {

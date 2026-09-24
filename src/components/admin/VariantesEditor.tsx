@@ -4,12 +4,18 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import PrecioInput from "@/components/admin/PrecioInput";
 import TallaGrid from "@/components/admin/TallaGrid";
+import { limpiarMedidas } from "@/components/admin/ProductoForm";
 import type { FilaTalla, Variante } from "@/lib/types";
 
-const FILA_VACIA: FilaTalla = { id: null, talla: "", stock: "0" };
+const FILA_VACIA: FilaTalla = { id: null, talla: "", stock: "0", medidas: [] };
 
 function aFilas(variantes: Variante[]): FilaTalla[] {
-  return variantes.map((v) => ({ id: v.id, talla: v.talla ?? "", stock: String(v.stock) }));
+  return variantes.map((v) => ({
+    id: v.id,
+    talla: v.talla ?? "",
+    stock: String(v.stock),
+    medidas: v.medidas ?? [],
+  }));
 }
 
 type TipoOferta = "porcentaje" | "monto_fijo";
@@ -67,7 +73,7 @@ export default function VariantesEditor({
     setCargando(true);
     const { data, error } = await supabase
       .from("variantes")
-      .select("id, producto_id, talla, color, stock, created_at")
+      .select("id, producto_id, talla, color, stock, medidas, created_at")
       .eq("producto_id", productoId)
       .order("talla", { ascending: true });
 
@@ -95,7 +101,7 @@ export default function VariantesEditor({
   }
 
   function agregarTalla() {
-    setFilas((prev) => [...prev, { id: null, talla: "", stock: "0" }]);
+    setFilas((prev) => [...prev, { id: null, talla: "", stock: "0", medidas: [] }]);
   }
 
   async function eliminarFila(index: number) {
@@ -209,6 +215,7 @@ export default function VariantesEditor({
         talla: f.talla.trim() || null,
         color: null,
         stock: Number(f.stock),
+        medidas: limpiarMedidas(f.medidas),
       }));
 
     if (nuevas.length) {
@@ -225,7 +232,11 @@ export default function VariantesEditor({
     for (const f of existentes) {
       const { error: errorUpdate } = await supabase
         .from("variantes")
-        .update({ talla: f.talla.trim() || null, stock: Number(f.stock) })
+        .update({
+          talla: f.talla.trim() || null,
+          stock: Number(f.stock),
+          medidas: limpiarMedidas(f.medidas),
+        })
         .eq("id", f.id as string);
 
       if (errorUpdate) {

@@ -11,6 +11,7 @@ import TallaGrid from "@/components/admin/TallaGrid";
 import {
   campoClaseRedondeado,
   etiquetaClaseFuerte,
+  limpiarMedidas,
   sinFlechasClase,
   tarjetaClase,
 } from "@/components/admin/ProductoForm";
@@ -19,7 +20,7 @@ import type { FilaTalla } from "@/lib/types";
 
 type ModoStock = "unico" | "talla";
 
-const FILA_INICIAL: FilaTalla = { id: null, talla: "", stock: "0" };
+const FILA_INICIAL: FilaTalla = { id: null, talla: "", stock: "0", medidas: [] };
 
 export default function NuevoProductoPage() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function NuevoProductoPage() {
   }
 
   function agregarTalla() {
-    setFilas((prev) => [...prev, { id: null, talla: "", stock: "0" }]);
+    setFilas((prev) => [...prev, { id: null, talla: "", stock: "0", medidas: [] }]);
   }
 
   function eliminarFila(index: number) {
@@ -139,12 +140,13 @@ export default function NuevoProductoPage() {
 
     const nuevasVariantes =
       modoStock === "unico"
-        ? [{ producto_id: producto.id, talla: null, color: null, stock: Number(stockUnico) }]
+        ? [{ producto_id: producto.id, talla: null, color: null, stock: Number(stockUnico), medidas: [] }]
         : filas.map((f) => ({
             producto_id: producto.id,
             talla: f.talla.trim() || null,
             color: null,
             stock: Number(f.stock),
+            medidas: limpiarMedidas(f.medidas),
           }));
 
     const { error: errorVariantes } = await supabase.from("variantes").insert(nuevasVariantes);

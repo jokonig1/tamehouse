@@ -71,7 +71,7 @@ export async function getProducto(id: string): Promise<ProductoDetalle | null> {
 export async function getVariantes(productoId: string): Promise<Variante[]> {
   const { data } = await supabase
     .from("variantes")
-    .select("id, producto_id, talla, color, stock, created_at")
+    .select("id, producto_id, talla, color, stock, medidas, created_at")
     .eq("producto_id", productoId);
 
   return data ?? [];
