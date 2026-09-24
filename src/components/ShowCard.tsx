@@ -22,7 +22,7 @@ export default function ShowCard({ show }: { show: Show }) {
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-950">
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-4 top-1/2 hidden -translate-y-1/2 select-none text-[13rem] leading-none font-black text-red-600/10 sm:block"
+        className="pointer-events-none absolute -right-4 top-1/2 hidden -translate-y-1/2 select-none text-[13rem] leading-none font-black text-white/10 sm:block"
       >
         {dia}
       </span>
@@ -82,7 +82,7 @@ export default function ShowCard({ show }: { show: Show }) {
 
           <div className="mt-5 flex items-end gap-4">
             <div className="flex items-end gap-3">
-              <span className="text-6xl leading-none font-black text-red-500">{dia}</span>
+              <span className="text-6xl leading-none font-black text-white">{dia}</span>
               <div className="flex flex-col pb-1 text-sm leading-tight font-bold uppercase">
                 <span className="text-white">{mes}</span>
                 <span className="text-white/50">{anio}</span>
@@ -105,7 +105,7 @@ export default function ShowCard({ show }: { show: Show }) {
               href={show.link_entradas}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-flex w-fit items-center gap-2 rounded-full bg-red-600 px-6 py-3 text-sm font-bold tracking-wide text-white uppercase transition-opacity hover:opacity-90"
+              className="mt-6 inline-flex w-fit items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold tracking-wide text-black uppercase transition-opacity hover:opacity-90"
             >
               Comprar entradas
               <svg

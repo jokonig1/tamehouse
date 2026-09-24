@@ -13,7 +13,7 @@ export default async function Page() {
         <h1 className="mt-2 text-4xl font-extrabold uppercase tracking-tight sm:text-6xl">
           Shows
         </h1>
-        <div className="mt-3 h-1 w-24 rounded-full bg-red-600" />
+        <div className="mt-3 h-1 w-24 rounded-full bg-white" />
       </div>
 
       {shows.length === 0 ? (
