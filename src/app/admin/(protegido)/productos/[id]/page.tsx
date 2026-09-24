@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import CategoriaSelect from "@/components/admin/CategoriaSelect";
 import ImagenesEditor from "@/components/admin/ImagenesEditor";
+import MedidasPorTalla from "@/components/admin/MedidasPorTalla";
 import PrecioInput from "@/components/admin/PrecioInput";
 import TallaGrid from "@/components/admin/TallaGrid";
 import {
@@ -474,12 +475,17 @@ export default function EditarProductoPage() {
                 className={`w-32 ${campoClaseRedondeado}`}
               />
             ) : (
-              <TallaGrid
-                filas={filas}
-                onActualizarFila={actualizarFila}
-                onAgregarTalla={agregarTalla}
-                onEliminarFila={eliminarFila}
-              />
+              <>
+                <TallaGrid
+                  filas={filas}
+                  onActualizarFila={actualizarFila}
+                  onAgregarTalla={agregarTalla}
+                  onEliminarFila={eliminarFila}
+                />
+                <div className="mt-4">
+                  <MedidasPorTalla filas={filas} onActualizarFila={actualizarFila} />
+                </div>
+              </>
             )}
           </div>
 

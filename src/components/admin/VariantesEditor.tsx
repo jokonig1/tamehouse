@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import MedidasPorTalla from "@/components/admin/MedidasPorTalla";
 import PrecioInput from "@/components/admin/PrecioInput";
 import TallaGrid from "@/components/admin/TallaGrid";
 import { limpiarMedidas } from "@/components/admin/ProductoForm";
@@ -357,6 +358,8 @@ export default function VariantesEditor({
           )}
         </div>
       </div>
+
+      {!modoSimple && <MedidasPorTalla filas={filas} onActualizarFila={actualizarFila} />}
 
       <div className="flex gap-3">
         <button
