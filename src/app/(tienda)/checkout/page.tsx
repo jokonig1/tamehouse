@@ -9,6 +9,24 @@ import { supabase } from "@/lib/supabase";
 type Region = { regionId: string; regionName: string };
 type Comuna = { countyCode: string; countyName: string };
 type OpcionEnvio = { servicio: number; descripcion: string; precio: number };
+
+// Chilexpress no incluye el plazo de entrega en la cotización, solo
+// el nombre del servicio -- este texto es fijo, según lo que
+// Chilexpress publica en su guía de servicios (no cambia por pedido).
+const DETALLE_SERVICIO_ENVIO: Record<string, string> = {
+  PRIORITARIO: "Llega hasta 2 días hábiles después del pago, antes de las 11:00 hrs (RM) o 12:00 hrs (regiones).",
+  EXPRESS: "Llega hasta 2 días hábiles después del pago, hasta las 19:00 hrs.",
+  EXTENDIDO: "Entrega en un plazo mayor a Express, a un costo más bajo.",
+  EXTREMO: "Para zonas extremas o de menor cobertura; el plazo puede ser mayor.",
+  AMPM: "Entrega prioritaria con ventana horaria acotada (mañana o tarde).",
+};
+
+function detalleServicioEnvio(descripcion: string) {
+  const clave = Object.keys(DETALLE_SERVICIO_ENVIO).find((k) =>
+    descripcion.toUpperCase().includes(k)
+  );
+  return clave ? DETALLE_SERVICIO_ENVIO[clave] : null;
+}
 type Oficina = {
   officeCode: number;
   officeName: string;
@@ -581,21 +599,28 @@ export default function Page() {
                 {opcionesEnvio.map((opcion) => (
                   <label
                     key={opcion.servicio}
-                    className={`flex cursor-pointer items-center justify-between rounded-md border p-3 text-sm ${
+                    className={`flex cursor-pointer items-start justify-between gap-3 rounded-md border p-3 text-sm ${
                       servicioSeleccionado === opcion.servicio ? "border-black" : "border-black/15"
                     }`}
                   >
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-start gap-2">
                       <input
                         type="radio"
                         name="envio"
                         checked={servicioSeleccionado === opcion.servicio}
                         onChange={() => setServicioSeleccionado(opcion.servicio)}
-                        className="h-4 w-4"
+                        className="mt-0.5 h-4 w-4 shrink-0"
                       />
-                      {opcion.descripcion}
+                      <span className="flex flex-col">
+                        {opcion.descripcion}
+                        {detalleServicioEnvio(opcion.descripcion) && (
+                          <span className="mt-0.5 text-xs font-normal text-black/50">
+                            {detalleServicioEnvio(opcion.descripcion)}
+                          </span>
+                        )}
+                      </span>
                     </span>
-                    <span className="font-medium">{formatoPrecio.format(opcion.precio)}</span>
+                    <span className="shrink-0 font-medium">{formatoPrecio.format(opcion.precio)}</span>
                   </label>
                 ))}
               </div>
