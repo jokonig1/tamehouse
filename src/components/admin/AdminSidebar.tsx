@@ -63,15 +63,6 @@ function IconoPortada() {
   );
 }
 
-function IconoBiografia() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-      <circle cx="12" cy="7" r="3.2" />
-      <path d="M5 20c0-3.6 3.1-6.5 7-6.5s7 2.9 7 6.5" />
-    </svg>
-  );
-}
-
 const enlaces: { href: string; label: string; icono: ReactNode }[] = [
   { href: "/admin/dashboard", label: "Dashboard", icono: <IconoDashboard /> },
   { href: "/admin/pedidos", label: "Pedidos", icono: <IconoPedidos /> },
@@ -79,7 +70,6 @@ const enlaces: { href: string; label: string; icono: ReactNode }[] = [
   { href: "/admin/descuentos", label: "Descuentos", icono: <IconoDescuentos /> },
   { href: "/admin/musica", label: "Música", icono: <IconoMusica /> },
   { href: "/admin/hero", label: "Portada", icono: <IconoPortada /> },
-  { href: "/admin/biografia", label: "Biografía", icono: <IconoBiografia /> },
 ];
 
 interface AdminSidebarProps {
