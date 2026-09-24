@@ -27,7 +27,7 @@ export default async function Page() {
           <h2 className="text-xs font-medium uppercase tracking-widest text-white/70">
             Videos
           </h2>
-          <div className="mt-3 flex flex-col gap-6">
+          <div className="mt-3 grid grid-cols-2 gap-4">
             <EmbedBox url={videoUrl} tipo="video" titulo="Video oficial" />
             <EmbedBox url={videoUrl2} tipo="video" titulo="Video oficial" />
           </div>
