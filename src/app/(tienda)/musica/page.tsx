@@ -10,11 +10,11 @@ export default async function Page() {
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-black text-white">
       <div className="mx-auto w-full max-w-6xl px-6 py-4">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-stretch">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-stretch sm:gap-20">
           <h1 className="text-3xl font-extrabold uppercase tracking-tight sm:hidden">
             Música
           </h1>
-          <h1 className="hidden shrink-0 flex-col items-center text-4xl leading-[0.95] font-extrabold uppercase tracking-tight sm:flex">
+          <h1 className="hidden shrink-0 flex-col items-center text-7xl leading-[0.95] font-extrabold uppercase tracking-tight sm:flex">
             {"MÚSICA".split("").map((letra, i) => (
               <span key={i}>{letra}</span>
             ))}
