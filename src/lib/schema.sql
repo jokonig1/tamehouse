@@ -1356,8 +1356,20 @@ begin
 end;
 $$;
 
+-- Título del show (antes venía fijo como "Aerstame" en el frontend).
+-- Se guarda editable por show, con "Aerstame" como default para no
+-- romper los shows ya cargados.
+alter table shows
+  add column titulo text not null default 'Aerstame';
+
+-- Hora del show (opcional, formato libre tipo "20:00"). Separada de
+-- fecha (que sigue siendo solo la fecha) para no tener que migrar
+-- fecha a timestamp ni tocar el resto de la lógica de orden/formato.
+alter table shows
+  add column hora text;
+
 -- Segundo video de YouTube para la pagina de musica (ahora se
--- muestran 2 videos en vez de 1). Falta agregar el input en el
--- panel admin (formulario de musica) para poder cargarlo.
+-- muestran 2 videos en vez de 1), editable desde el panel admin
+-- (formulario de musica) junto al link principal.
 alter table configuracion_musica
   add column youtube_url_2 text;

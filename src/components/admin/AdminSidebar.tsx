@@ -53,6 +53,15 @@ function IconoMusica() {
   );
 }
 
+function IconoShows() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8Z" />
+      <path d="M10 6v12" strokeDasharray="1.5 2" />
+    </svg>
+  );
+}
+
 function IconoPortada() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -69,6 +78,7 @@ const enlaces: { href: string; label: string; icono: ReactNode }[] = [
   { href: "/admin/productos", label: "Productos", icono: <IconoProductos /> },
   { href: "/admin/descuentos", label: "Descuentos", icono: <IconoDescuentos /> },
   { href: "/admin/musica", label: "Música", icono: <IconoMusica /> },
+  { href: "/admin/shows", label: "Shows", icono: <IconoShows /> },
   { href: "/admin/hero", label: "Portada", icono: <IconoPortada /> },
 ];
 
