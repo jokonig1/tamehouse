@@ -40,7 +40,7 @@ export default function ShowCard({ show }: { show: Show }) {
 
         <div>
           <h2 className="text-3xl font-extrabold tracking-tight uppercase sm:text-4xl">
-            {show.titulo} <span className="mx-1 text-black/30">|</span> {show.ciudad}
+            {show.titulo}
           </h2>
 
           <dl className="mt-6 flex flex-col gap-2 text-sm">
