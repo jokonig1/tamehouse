@@ -48,10 +48,6 @@ interface ItemDetallado {
   productoNombre: string;
   talla: string | null;
   color: string | null;
-  pesoKg: number | null;
-  altoCm: number | null;
-  anchoCm: number | null;
-  largoCm: number | null;
 }
 
 interface VarianteEmbebida {
@@ -59,12 +55,15 @@ interface VarianteEmbebida {
   color: string | null;
   productos: {
     nombre: string;
-    peso_kg: number | null;
-    alto_cm: number | null;
-    ancho_cm: number | null;
-    largo_cm: number | null;
   } | null;
 }
+
+// Paquete declarado para cotizar y generar el envío en Chilexpress.
+// No se arma a partir de las medidas de cada producto (variaba según
+// cuántos productos distintos tuviera el pedido) -- queda fijo en el
+// tamaño más chico, que es el que la clienta usa siempre sin
+// problemas al declarar sus envíos.
+const PAQUETE_FIJO = { pesoKg: 1, altoCm: 10, anchoCm: 10, largoCm: 10 };
 
 interface PedidoItemConsulta {
   id: string;
@@ -118,9 +117,7 @@ export default function PedidoRow({ pedido }: PedidoRowProps) {
     setCargandoItems(true);
     const { data, error } = await supabase
       .from("pedido_items")
-      .select(
-        "id, cantidad, precio_unitario, variantes(talla, color, productos(nombre, peso_kg, alto_cm, ancho_cm, largo_cm))"
-      )
+      .select("id, cantidad, precio_unitario, variantes(talla, color, productos(nombre))")
       .eq("pedido_id", pedido.id);
 
     if (error) {
@@ -138,10 +135,6 @@ export default function PedidoRow({ pedido }: PedidoRowProps) {
         productoNombre: item.variantes?.productos?.nombre ?? "Producto eliminado",
         talla: item.variantes?.talla ?? null,
         color: item.variantes?.color ?? null,
-        pesoKg: item.variantes?.productos?.peso_kg ?? null,
-        altoCm: item.variantes?.productos?.alto_cm ?? null,
-        anchoCm: item.variantes?.productos?.ancho_cm ?? null,
-        largoCm: item.variantes?.productos?.largo_cm ?? null,
       }))
     );
     setCargandoItems(false);
@@ -203,12 +196,8 @@ export default function PedidoRow({ pedido }: PedidoRowProps) {
     }
   }
 
-  // Genera el envío real en Chilexpress para este pedido. El peso y
-  // las dimensiones del paquete no se guardan en el pedido -- se
-  // calculan sumando el peso de cada producto y tomando la dimensión
-  // más grande entre los items (aproximación razonable para una sola
-  // caja; si a un producto le falta el dato se usa un mínimo de
-  // respaldo en vez de bloquear la generación).
+  // Genera el envío real en Chilexpress para este pedido, con el
+  // paquete declarado en PAQUETE_FIJO (ver comentario ahí arriba).
   async function generarEnvio() {
     if (
       !pedido.comuna_code ||
@@ -231,11 +220,6 @@ export default function PedidoRow({ pedido }: PedidoRowProps) {
     setErrorGenerarEnvio(null);
 
     try {
-      const pesoKg = items.reduce((suma, item) => suma + (item.pesoKg ?? 0.5) * item.cantidad, 0);
-      const altoCm = Math.max(1, ...items.map((i) => i.altoCm ?? 1));
-      const anchoCm = Math.max(1, ...items.map((i) => i.anchoCm ?? 1));
-      const largoCm = Math.max(1, ...items.map((i) => i.largoCm ?? 1));
-
       const res = await fetch("/api/chilexpress/envio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -253,10 +237,7 @@ export default function PedidoRow({ pedido }: PedidoRowProps) {
             email: pedido.destinatario_email,
           },
           paquete: {
-            pesoKg,
-            altoCm,
-            anchoCm,
-            largoCm,
+            ...PAQUETE_FIJO,
             valorDeclarado: pedido.total,
             servicioTypeCode: pedido.servicio_type_code,
           },
