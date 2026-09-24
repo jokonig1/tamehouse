@@ -10,19 +10,22 @@ export default async function Page() {
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-black text-white">
       <div className="mx-auto w-full max-w-6xl px-6 py-4">
-        <div className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-extrabold uppercase tracking-tight sm:text-4xl">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-stretch">
+          <h1 className="text-3xl font-extrabold uppercase tracking-tight sm:hidden">
             Música
           </h1>
-        </div>
+          <h1 className="hidden shrink-0 rotate-180 text-6xl font-extrabold uppercase tracking-tight [writing-mode:vertical-rl] sm:flex sm:items-center">
+            Música
+          </h1>
 
-        <div className="mt-5">
-          <EmbedBox url={spotifyUrl} tipo="spotify" titulo="Reproductor de Spotify" />
-        </div>
+          <div className="min-w-0 flex-1">
+            <EmbedBox url={spotifyUrl} tipo="spotify" titulo="Reproductor de Spotify" />
 
-        <div className="mt-6 grid grid-cols-2 gap-4">
-          <EmbedBox url={videoUrl} tipo="video" titulo="Video oficial" />
-          <EmbedBox url={videoUrl2} tipo="video" titulo="Video oficial" />
+            <div className="mt-6 grid grid-cols-2 gap-4">
+              <EmbedBox url={videoUrl} tipo="video" titulo="Video oficial" />
+              <EmbedBox url={videoUrl2} tipo="video" titulo="Video oficial" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
