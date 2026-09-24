@@ -20,7 +20,7 @@ export default function EmbedBox({
       <iframe
         src={url}
         title={titulo}
-        className="h-[380px] w-full rounded-lg"
+        className="mx-auto h-[560px] w-full max-w-sm rounded-lg"
         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
       />
     );
