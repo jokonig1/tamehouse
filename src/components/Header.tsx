@@ -10,6 +10,7 @@ import { useHero } from "@/lib/hero";
 const NAV_LINKS = [
   { href: "/", label: "Tienda" },
   { href: "/musica", label: "Música" },
+  { href: "/shows", label: "Shows" },
 ];
 
 const LIMITE_NOMBRE = 14;
