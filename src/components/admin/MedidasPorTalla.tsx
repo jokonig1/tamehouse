@@ -1,6 +1,6 @@
 "use client";
 
-import type { FilaTalla, MedidaItem } from "@/lib/types";
+import type { FilaTalla } from "@/lib/types";
 
 interface MedidasPorTallaProps {
   filas: FilaTalla[];
@@ -8,26 +8,50 @@ interface MedidasPorTallaProps {
 }
 
 export default function MedidasPorTalla({ filas, onActualizarFila }: MedidasPorTallaProps) {
-  const hayTallas = filas.some((f) => f.talla.trim() !== "");
+  const columnas = filas
+    .map((fila, index) => ({ fila, index }))
+    .filter((c) => c.fila.talla.trim() !== "");
 
-  function actualizarMedida(index: number, medidaIndex: number, cambios: Partial<MedidaItem>) {
-    const medidas = filas[index].medidas.map((m, i) => (i === medidaIndex ? { ...m, ...cambios } : m));
-    onActualizarFila(index, { medidas });
+  const numFilas = Math.max(0, ...columnas.map((c) => c.fila.medidas.length));
+  const etiquetasFila: string[] = [];
+  for (let i = 0; i < numFilas; i++) {
+    const conEtiqueta = columnas.find((c) => c.fila.medidas[i]?.etiqueta.trim());
+    etiquetasFila.push(conEtiqueta?.fila.medidas[i]?.etiqueta ?? "");
   }
 
-  function agregarMedida(index: number) {
-    onActualizarFila(index, {
-      medidas: [...filas[index].medidas, { etiqueta: "", valor: "" }],
+  function actualizarCelda(columnaIndex: number, filaIndex: number, valor: string) {
+    const medidas = [...filas[columnaIndex].medidas];
+    while (medidas.length <= filaIndex) {
+      medidas.push({ etiqueta: etiquetasFila[medidas.length] ?? "", valor: "" });
+    }
+    medidas[filaIndex] = { ...medidas[filaIndex], valor };
+    onActualizarFila(columnaIndex, { medidas });
+  }
+
+  function renombrarFila(filaIndex: number, etiqueta: string) {
+    columnas.forEach(({ fila, index }) => {
+      const medidas = [...fila.medidas];
+      while (medidas.length <= filaIndex) {
+        medidas.push({ etiqueta: "", valor: "" });
+      }
+      medidas[filaIndex] = { ...medidas[filaIndex], etiqueta };
+      onActualizarFila(index, { medidas });
     });
   }
 
-  function eliminarMedida(index: number, medidaIndex: number) {
-    onActualizarFila(index, {
-      medidas: filas[index].medidas.filter((_, i) => i !== medidaIndex),
+  function agregarFila() {
+    columnas.forEach(({ fila, index }) => {
+      onActualizarFila(index, { medidas: [...fila.medidas, { etiqueta: "", valor: "" }] });
     });
   }
 
-  if (!hayTallas) {
+  function eliminarFila(filaIndex: number) {
+    columnas.forEach(({ fila, index }) => {
+      onActualizarFila(index, { medidas: fila.medidas.filter((_, i) => i !== filaIndex) });
+    });
+  }
+
+  if (columnas.length === 0) {
     return (
       <p className="text-xs text-zinc-500 dark:text-zinc-400">
         Agrega al menos una talla arriba para poder cargarle medidas.
@@ -41,58 +65,72 @@ export default function MedidasPorTalla({ filas, onActualizarFila }: MedidasPorT
         Medidas por talla (opcional)
       </h3>
       <p className="mb-3 text-xs text-zinc-500 dark:text-zinc-400">
-        Ej: Ancho / 50 cm, Largo / 70 cm. Se usan para armar la guía de tallas en la tienda.
+        Las columnas son las tallas que ya creaste arriba. Agrega filas para cada medida (Pecho,
+        Largo, Manga, etc.) -- se usan para armar la guía de tallas en la tienda.
       </p>
 
-      <div className="flex flex-wrap gap-4">
-        {filas.map((fila, index) => {
-          if (!fila.talla.trim()) return null;
-          return (
-            <div
-              key={fila.id ?? `nueva-${index}`}
-              className="w-56 border border-zinc-200 p-3 dark:border-zinc-800"
-            >
-              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-700 dark:text-zinc-300">
-                {fila.talla}
-              </p>
-
-              <div className="flex flex-col gap-1.5">
-                {fila.medidas.map((medida, medidaIndex) => (
-                  <div key={medidaIndex} className="flex items-center gap-1.5">
-                    <input
-                      value={medida.etiqueta}
-                      onChange={(e) => actualizarMedida(index, medidaIndex, { etiqueta: e.target.value })}
-                      placeholder="Ancho"
-                      className="w-20 border border-zinc-300 bg-transparent px-1.5 py-1 text-xs outline-none focus:border-black dark:border-zinc-700 dark:focus:border-white"
-                    />
-                    <input
-                      value={medida.valor}
-                      onChange={(e) => actualizarMedida(index, medidaIndex, { valor: e.target.value })}
-                      placeholder="50 cm"
-                      className="w-20 border border-zinc-300 bg-transparent px-1.5 py-1 text-xs outline-none focus:border-black dark:border-zinc-700 dark:focus:border-white"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => eliminarMedida(index, medidaIndex)}
-                      aria-label="Eliminar medida"
-                      className="text-zinc-400 hover:text-red-600 dark:hover:text-red-400"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => agregarMedida(index)}
-                  className="mt-1 text-left text-[10px] font-medium uppercase tracking-widest text-zinc-500 hover:text-black dark:text-zinc-400 dark:hover:text-white"
+      <div className="overflow-x-auto">
+        <table className="border-collapse text-sm">
+          <thead>
+            <tr>
+              <th className="w-28 border border-zinc-200 bg-zinc-50 p-1.5 text-left text-xs font-medium uppercase tracking-widest text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+                Medida
+              </th>
+              {columnas.map(({ fila }) => (
+                <th
+                  key={fila.id ?? fila.talla}
+                  className="w-24 border border-zinc-200 bg-zinc-50 p-1.5 text-center text-xs font-semibold uppercase tracking-widest text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
                 >
-                  + agregar medida
-                </button>
-              </div>
-            </div>
-          );
-        })}
+                  {fila.talla}
+                </th>
+              ))}
+              <th className="w-8 border border-zinc-200 dark:border-zinc-800" />
+            </tr>
+          </thead>
+          <tbody>
+            {etiquetasFila.map((etiqueta, filaIndex) => (
+              <tr key={filaIndex}>
+                <td className="border border-zinc-200 p-1 dark:border-zinc-800">
+                  <input
+                    value={etiqueta}
+                    onChange={(e) => renombrarFila(filaIndex, e.target.value)}
+                    placeholder="Pecho"
+                    className="w-full bg-transparent px-1 py-1 text-xs font-medium outline-none"
+                  />
+                </td>
+                {columnas.map(({ fila, index }) => (
+                  <td key={fila.id ?? fila.talla} className="border border-zinc-200 p-1 dark:border-zinc-800">
+                    <input
+                      value={fila.medidas[filaIndex]?.valor ?? ""}
+                      onChange={(e) => actualizarCelda(index, filaIndex, e.target.value)}
+                      placeholder="50 cm"
+                      className="w-full bg-transparent px-1 py-1 text-center text-xs outline-none"
+                    />
+                  </td>
+                ))}
+                <td className="border border-zinc-200 p-1 text-center dark:border-zinc-800">
+                  <button
+                    type="button"
+                    onClick={() => eliminarFila(filaIndex)}
+                    aria-label="Eliminar medida"
+                    className="text-zinc-400 hover:text-red-600 dark:hover:text-red-400"
+                  >
+                    ×
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+
+      <button
+        type="button"
+        onClick={agregarFila}
+        className="mt-2 text-[10px] font-medium uppercase tracking-widest text-zinc-500 hover:text-black dark:text-zinc-400 dark:hover:text-white"
+      >
+        + agregar medida
+      </button>
     </div>
   );
 }
