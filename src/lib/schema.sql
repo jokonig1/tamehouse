@@ -1355,3 +1355,9 @@ begin
   return v_pedido_id;
 end;
 $$;
+
+-- Segundo video de YouTube para la pagina de musica (ahora se
+-- muestran 2 videos en vez de 1). Falta agregar el input en el
+-- panel admin (formulario de musica) para poder cargarlo.
+alter table configuracion_musica
+  add column youtube_url_2 text;
