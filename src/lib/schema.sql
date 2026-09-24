@@ -1105,3 +1105,25 @@ alter table productos
 alter table hero_slides
   add column foco_movil_x smallint not null default 50
     check (foco_movil_x between 0 and 100);
+
+-- Afiche/imagen por show (opcional). El archivo vive en Supabase
+-- Storage, bucket "shows". Falta agregar el input de subida en el
+-- panel admin (formulario de shows) para poder cargar esta imagen.
+alter table shows
+  add column imagen_url text;
+
+insert into storage.buckets (id, name, public)
+values ('shows', 'shows', true)
+on conflict (id) do nothing;
+
+create policy "Imagenes de shows visibles para todos (storage)"
+on storage.objects for select
+using (bucket_id = 'shows');
+
+create policy "Admins suben imagenes de shows (storage)"
+on storage.objects for insert
+with check (bucket_id = 'shows' and public.is_admin());
+
+create policy "Admins eliminan imagenes de shows (storage)"
+on storage.objects for delete
+using (bucket_id = 'shows' and public.is_admin());

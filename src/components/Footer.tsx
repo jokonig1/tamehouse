@@ -1,6 +1,7 @@
 const NAVEGACION = [
   { href: "/", label: "Tienda" },
   { href: "/musica", label: "Música" },
+  { href: "/shows", label: "Shows" },
 ];
 
 const POLITICAS = [
