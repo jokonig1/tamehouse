@@ -17,21 +17,11 @@ export default async function Page() {
         </div>
 
         <div className="mt-5">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="text-xs font-medium uppercase tracking-widest text-white/70">
-              Escuchar en Spotify
-            </h2>
-          </div>
-          <div className="mt-2">
-            <EmbedBox url={spotifyUrl} tipo="spotify" titulo="Reproductor de Spotify" />
-          </div>
+          <EmbedBox url={spotifyUrl} tipo="spotify" titulo="Reproductor de Spotify" />
         </div>
 
         <div className="mx-auto mt-6 max-w-3xl">
-          <h2 className="text-xs font-medium uppercase tracking-widest text-white/70">
-            Videos
-          </h2>
-          <div className="mt-2 grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <EmbedBox url={videoUrl} tipo="video" titulo="Video oficial" />
             <EmbedBox url={videoUrl2} tipo="video" titulo="Video oficial" />
           </div>
