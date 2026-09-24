@@ -28,7 +28,7 @@ export default function ShowCard({ show }: { show: Show }) {
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center gap-4 border border-black/10 p-6 text-center">
               <p className="text-2xl leading-none font-extrabold tracking-tight uppercase">
-                Aerstame
+                {show.titulo}
               </p>
               <div className="h-px w-10 bg-black/20" />
               <p className="text-sm font-medium tracking-widest uppercase text-black/60">
@@ -40,7 +40,7 @@ export default function ShowCard({ show }: { show: Show }) {
 
         <div>
           <h2 className="text-3xl font-extrabold tracking-tight uppercase sm:text-4xl">
-            Aerstame <span className="mx-1 text-black/30">|</span> {show.ciudad}
+            {show.titulo} <span className="mx-1 text-black/30">|</span> {show.ciudad}
           </h2>
 
           <dl className="mt-6 flex flex-col gap-2 text-sm">

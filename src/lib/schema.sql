@@ -1355,3 +1355,9 @@ begin
   return v_pedido_id;
 end;
 $$;
+
+-- Título del show (antes venía fijo como "Aerstame" en el frontend).
+-- Se guarda editable por show, con "Aerstame" como default para no
+-- romper los shows ya cargados.
+alter table shows
+  add column titulo text not null default 'Aerstame';

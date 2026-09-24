@@ -22,6 +22,7 @@ function formatoFecha(fechaIso: string) {
 
 export default function ShowRow({ show, onEliminar, onActualizado }: ShowRowProps) {
   const [editando, setEditando] = useState(false);
+  const [titulo, setTitulo] = useState(show.titulo);
   const [fecha, setFecha] = useState(show.fecha);
   const [ciudad, setCiudad] = useState(show.ciudad);
   const [lugar, setLugar] = useState(show.lugar ?? "");
@@ -32,6 +33,7 @@ export default function ShowRow({ show, onEliminar, onActualizado }: ShowRowProp
   const [error, setError] = useState<string | null>(null);
 
   function cancelar() {
+    setTitulo(show.titulo);
     setFecha(show.fecha);
     setCiudad(show.ciudad);
     setLugar(show.lugar ?? "");
@@ -69,6 +71,10 @@ export default function ShowRow({ show, onEliminar, onActualizado }: ShowRowProp
   async function guardar() {
     setError(null);
 
+    if (!titulo.trim()) {
+      setError("El título es obligatorio.");
+      return;
+    }
     if (!fecha) {
       setError("La fecha es obligatoria.");
       return;
@@ -85,6 +91,7 @@ export default function ShowRow({ show, onEliminar, onActualizado }: ShowRowProp
     setGuardando(true);
 
     const valores = {
+      titulo: titulo.trim(),
       fecha,
       ciudad: ciudad.trim(),
       lugar: lugar.trim() || null,
@@ -162,6 +169,15 @@ export default function ShowRow({ show, onEliminar, onActualizado }: ShowRowProp
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
+              <label className={etiquetaClaseFuerte}>Título</label>
+              <input
+                type="text"
+                value={titulo}
+                onChange={(e) => setTitulo(e.target.value)}
+                className={campoClaseRedondeado}
+              />
+            </div>
+            <div>
               <label className={etiquetaClaseFuerte}>Fecha</label>
               <input
                 type="date"
@@ -233,6 +249,7 @@ export default function ShowRow({ show, onEliminar, onActualizado }: ShowRowProp
             <span className="font-medium">{formatoFecha(show.fecha)} · {show.ciudad}</span>
             <AccionesShow onEditar={() => setEditando(true)} onEliminar={eliminar} />
           </div>
+          <span className="text-xs text-zinc-500 dark:text-zinc-400">{show.titulo}</span>
           <span className="text-zinc-600 dark:text-zinc-400">{show.lugar ?? "-"}</span>
           {show.link_entradas ? (
             <a
@@ -253,7 +270,10 @@ export default function ShowRow({ show, onEliminar, onActualizado }: ShowRowProp
       <div className="hidden grid-cols-[4rem_1fr_1fr_1fr_1fr_5rem] items-center gap-6 sm:grid">
         <MiniAfiche url={show.imagen_url} />
         <span className="font-medium">{formatoFecha(show.fecha)}</span>
-        <span>{show.ciudad}</span>
+        <span>
+          {show.ciudad}
+          <span className="block text-xs text-zinc-500 dark:text-zinc-400">{show.titulo}</span>
+        </span>
         <span className="text-zinc-600 dark:text-zinc-400">{show.lugar ?? "-"}</span>
         {show.link_entradas ? (
           <a

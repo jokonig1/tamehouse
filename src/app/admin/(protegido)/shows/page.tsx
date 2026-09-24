@@ -14,6 +14,7 @@ export default function ShowsPage() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [titulo, setTitulo] = useState("Aerstame");
   const [fecha, setFecha] = useState("");
   const [ciudad, setCiudad] = useState("");
   const [lugar, setLugar] = useState("");
@@ -27,7 +28,7 @@ export default function ShowsPage() {
     setCargando(true);
     const { data, error } = await supabase
       .from("shows")
-      .select("id, fecha, ciudad, lugar, link_entradas, imagen_url")
+      .select("id, fecha, ciudad, lugar, link_entradas, imagen_url, titulo")
       .order("fecha", { ascending: true });
 
     if (error) {
@@ -74,6 +75,10 @@ export default function ShowsPage() {
     e.preventDefault();
     setErrorForm(null);
 
+    if (!titulo.trim()) {
+      setErrorForm("El título es obligatorio.");
+      return;
+    }
     if (!fecha) {
       setErrorForm("La fecha es obligatoria.");
       return;
@@ -89,6 +94,7 @@ export default function ShowsPage() {
 
     setGuardando(true);
     const { error: errorInsert } = await supabase.from("shows").insert({
+      titulo: titulo.trim(),
       fecha,
       ciudad: ciudad.trim(),
       lugar: lugar.trim() || null,
@@ -102,6 +108,7 @@ export default function ShowsPage() {
       return;
     }
 
+    setTitulo("Aerstame");
     setFecha("");
     setCiudad("");
     setLugar("");
@@ -184,6 +191,16 @@ export default function ShowsPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className={etiquetaClaseFuerte}>Título</label>
+              <input
+                type="text"
+                value={titulo}
+                onChange={(e) => setTitulo(e.target.value)}
+                placeholder="Aerstame"
+                className={campoClaseRedondeado}
+              />
+            </div>
             <div>
               <label className={etiquetaClaseFuerte}>Fecha</label>
               <input
