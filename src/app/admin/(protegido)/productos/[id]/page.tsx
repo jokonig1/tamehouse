@@ -517,7 +517,9 @@ export default function EditarProductoPage() {
             onEliminarExistente={eliminarImagenExistente}
             onQuitarNuevo={quitarArchivoNuevo}
           />
+        </div>
 
+        <div className="space-y-3 lg:col-span-2">
           <button
             type="submit"
             disabled={guardando}

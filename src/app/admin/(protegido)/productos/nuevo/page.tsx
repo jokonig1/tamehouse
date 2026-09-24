@@ -304,7 +304,9 @@ export default function NuevoProductoPage() {
             onEliminarExistente={() => {}}
             onQuitarNuevo={quitarArchivoNuevo}
           />
+        </div>
 
+        <div className="lg:col-span-2">
           <button
             type="submit"
             disabled={guardando}
@@ -312,7 +314,7 @@ export default function NuevoProductoPage() {
           >
             {guardando ? "Creando..." : "Crear producto"}
           </button>
-          <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="mt-2 text-center text-xs text-zinc-500 dark:text-zinc-400">
             Los datos de envío y la oferta se agregan después, editando el producto ya creado.
           </p>
         </div>
