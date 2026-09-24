@@ -10,9 +10,10 @@ export default async function Page() {
         <span className="text-xs font-medium tracking-[0.3em] text-white/50 uppercase">
           Próximas fechas
         </span>
-        <h1 className="mt-2 text-4xl font-extrabold uppercase tracking-tight sm:text-5xl">
+        <h1 className="mt-2 text-4xl font-extrabold uppercase tracking-tight sm:text-6xl">
           Shows
         </h1>
+        <div className="mt-3 h-1 w-24 rounded-full bg-red-600" />
       </div>
 
       {shows.length === 0 ? (
