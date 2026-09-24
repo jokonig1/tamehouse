@@ -171,11 +171,17 @@ export async function cotizarEnvio(
     throw new Error(datos.statusDescription || "No se pudo cotizar el envío.");
   }
 
-  return (datos.data?.courierServiceOptions ?? []).map((opcion) => ({
-    servicio: opcion.serviceTypeCode,
-    descripcion: opcion.serviceDescription,
-    precio: Number(opcion.serviceValue),
-  }));
+  return (datos.data?.courierServiceOptions ?? [])
+    // El Cotizador también devuelve servicios de logística de
+    // devolución (LDEV = paquete que vuelve a nosotros, no que le
+    // llega al cliente) -- no son una opción de entrega real, así
+    // que no deben aparecer para elegir en el checkout.
+    .filter((opcion) => !/LDEV|DEVOLUCION/i.test(opcion.serviceDescription))
+    .map((opcion) => ({
+      servicio: opcion.serviceTypeCode,
+      descripcion: opcion.serviceDescription,
+      precio: Number(opcion.serviceValue),
+    }));
 }
 
 interface OfficeApi {
