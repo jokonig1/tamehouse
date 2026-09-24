@@ -9,24 +9,17 @@ export default async function Page() {
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-black text-white">
-      <div className="w-full px-6 py-4 xl:pl-10">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-stretch">
-          <h1 className="text-3xl font-extrabold uppercase tracking-tight sm:hidden">
-            Música
-          </h1>
-          <h1 className="hidden shrink-0 flex-col items-center gap-3 text-7xl font-extrabold uppercase tracking-tight sm:flex">
-            {"MÚSICA".split("").map((letra, i) => (
-              <span key={i}>{letra}</span>
-            ))}
-          </h1>
+      <div className="mx-auto w-full max-w-4xl px-6 py-6">
+        <h1 className="text-3xl font-extrabold uppercase tracking-tight sm:hidden">
+          Música
+        </h1>
 
-          <div className="min-w-0 max-w-4xl flex-1">
-            <EmbedBox url={spotifyUrl} tipo="spotify" titulo="Reproductor de Spotify" />
+        <div className="mt-5 sm:mt-0">
+          <EmbedBox url={spotifyUrl} tipo="spotify" titulo="Reproductor de Spotify" />
 
-            <div className="mt-6 grid grid-cols-2 gap-4">
-              <EmbedBox url={videoUrl} tipo="video" titulo="Video oficial" />
-              <EmbedBox url={videoUrl2} tipo="video" titulo="Video oficial" />
-            </div>
+          <div className="mt-6 grid grid-cols-2 gap-4">
+            <EmbedBox url={videoUrl} tipo="video" titulo="Video oficial" />
+            <EmbedBox url={videoUrl2} tipo="video" titulo="Video oficial" />
           </div>
         </div>
       </div>
