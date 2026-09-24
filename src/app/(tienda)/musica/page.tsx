@@ -20,11 +20,9 @@ export default async function Page() {
           <EmbedBox url={spotifyUrl} tipo="spotify" titulo="Reproductor de Spotify" />
         </div>
 
-        <div className="mx-auto mt-6 max-w-3xl">
-          <div className="grid grid-cols-2 gap-4">
-            <EmbedBox url={videoUrl} tipo="video" titulo="Video oficial" />
-            <EmbedBox url={videoUrl2} tipo="video" titulo="Video oficial" />
-          </div>
+        <div className="mt-6 grid grid-cols-2 gap-4">
+          <EmbedBox url={videoUrl} tipo="video" titulo="Video oficial" />
+          <EmbedBox url={videoUrl2} tipo="video" titulo="Video oficial" />
         </div>
       </div>
     </div>
