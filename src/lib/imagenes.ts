@@ -35,7 +35,10 @@ export async function subirImagenProducto(
 export async function eliminarImagenProducto(imagen: ProductoImagen): Promise<{ error?: string }> {
   const ruta = rutaDesdeUrl(imagen.url);
   if (ruta) {
-    await supabase.storage.from(BUCKET).remove([ruta]);
+    // Las fotos cargadas con scripts/cargar-catalogo.mjs tienen una
+    // miniatura al lado (mismo nombre, "-thumb" en vez de "-full").
+    const rutas = ruta.endsWith("-full.webp") ? [ruta, ruta.replace(/-full\.webp$/, "-thumb.webp")] : [ruta];
+    await supabase.storage.from(BUCKET).remove(rutas);
   }
 
   const { error } = await supabase.from("producto_imagenes").delete().eq("id", imagen.id);
