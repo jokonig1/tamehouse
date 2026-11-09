@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { comprimirImagen, opcionesSubida, TAMANO_HERO, type ImagenComprimida } from "@/lib/comprimirImagen";
 
 const BUCKET = "hero";
 
@@ -9,10 +10,18 @@ function rutaDesdeUrl(url: string): string | null {
 }
 
 export async function subirImagenHero(archivo: File): Promise<{ url?: string; error?: string }> {
-  const extension = archivo.name.split(".").pop() ?? "jpg";
-  const ruta = `${crypto.randomUUID()}.${extension}`;
+  let imagen: ImagenComprimida;
+  try {
+    imagen = await comprimirImagen(archivo, TAMANO_HERO);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "No se pudo procesar la imagen." };
+  }
 
-  const { error: errorSubida } = await supabase.storage.from(BUCKET).upload(ruta, archivo);
+  const ruta = `${crypto.randomUUID()}.${imagen.extension}`;
+
+  const { error: errorSubida } = await supabase.storage
+    .from(BUCKET)
+    .upload(ruta, imagen.blob, opcionesSubida(imagen));
   if (errorSubida) return { error: errorSubida.message };
 
   const {
