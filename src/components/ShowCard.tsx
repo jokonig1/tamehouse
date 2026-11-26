@@ -6,6 +6,7 @@ function partesFecha(fecha: string) {
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: "UTC",
   }).formatToParts(new Date(fecha));
 
   const dia = partes.find((p) => p.type === "day")?.value ?? "";
